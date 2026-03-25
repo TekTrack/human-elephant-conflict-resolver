@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Live Drone Feed</title>
+</head>
+<body style="text-align: center; background-color: #222; color: white;">
+
+    <h2>🐘 Live Elephant Cam</h2>
+    
+    <img id="droneFeed" src="http://localhost:8080/stream/latest" width="800" style="border: 5px solid gray;">
+
+    <script>
+        // Auto-refresh the image every 3 seconds
+        setInterval(() => {
+            let img = document.getElementById("droneFeed");
+            // The time query prevents the browser from caching the old image!
+            img.src = "http://localhost:8080/stream/latest?t=" + new Date().getTime(); 
+        }, 3000); 
+    </script>
+
+</body>
+</html>
