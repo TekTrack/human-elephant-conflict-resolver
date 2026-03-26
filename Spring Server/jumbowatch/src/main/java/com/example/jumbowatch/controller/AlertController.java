@@ -24,7 +24,8 @@ public class AlertController {
             @RequestParam("time") String time,
             @RequestParam("latitude") String lat,
             @RequestParam("longitude") String lon,
-            @RequestParam("photo") MultipartFile photo
+            @RequestParam("photo") MultipartFile photo,
+            @RequestParam("source") String source
         ) {
 
         try {
@@ -41,10 +42,15 @@ public class AlertController {
             Files.copy(photo.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
 
             // 4. Save data to supabase
-            Sighting newSighting = new Sighting(Integer.parseInt(count), time, Double.parseDouble(lat), Double.parseDouble(lon), filename);
+            Sighting newSighting = new Sighting(Integer.parseInt(count), time, Double.parseDouble(lat), Double.parseDouble(lon), filename, source);
         
             long now = System.currentTimeMillis();
             if (now - lastSaveTime > COOLDOWN_MS) {
+                if ("DRONE".equals(newSighting.getSource())) {
+                    newSighting.setVerified(true);
+                } else {
+                    newSighting.setVerified(false); // Users wait for admin
+                }
                 sightingRepo.save(newSighting);
                 lastSaveTime = now;
                 System.out.println("✅ Saved directly to Supabase!");

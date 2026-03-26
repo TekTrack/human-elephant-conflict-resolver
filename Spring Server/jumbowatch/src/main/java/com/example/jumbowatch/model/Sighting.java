@@ -15,16 +15,18 @@ public class Sighting {
     private double longitude;
     private String photoFilename;
     private boolean verified = false;
+    private String source; 
 
     // The Constructor
     public Sighting() {}
 
-    public Sighting(int count, String time, double lat, double lon, String photo) {
+    public Sighting(int count, String time, double lat, double lon, String photo, String source) {
         this.elephantCount = count;
         this.time = time;
         this.latitude = lat;
         this.longitude = lon;
         this.photoFilename = photo;
+        this.source = source;
     }
 
     // Getters and Setters
@@ -33,11 +35,12 @@ public class Sighting {
     public double getLatitude() { return latitude; }
     public double getLongitude() { return longitude; }
     public String getPhotoFilename() { return photoFilename; }
-    public boolean isVerified() { return verified; }                       
+    public boolean isVerified() { return verified; }
+    public String getSource() { return source; }
 
     // Keep your old methods like verifySighting() here...
-    public void verifySighting() {
-        this.verified = true;
+    public void setVerified(boolean verified) {
+        this.verified = verified;
     }
 
     // Add this to print the object easily in the terminal
