@@ -1,5 +1,6 @@
 package com.example.jumbowatch.admin;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import com.example.jumbowatch.model.Sighting;
@@ -9,11 +10,12 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/admin/sightings")
-public class AdminController {
+public class ConfirmationController {
 
+    @Autowired
     private SightingRepository sightingRepo;
 
-    public AdminController(SightingRepository sightingRepo) {
+    public ConfirmationController(SightingRepository sightingRepo) {
         this.sightingRepo = sightingRepo;
     }
 
@@ -30,3 +32,18 @@ public class AdminController {
         return "❌ Sighting not found!";
     }
 }
+
+// // JavaScript running on the Admin Web Portal
+// function verifySighting(sightingId) {
+//     fetch(`http://localhost:8080/api/admin/sightings/${sightingId}/verify`, {
+//         method: 'PUT',
+//         headers: {
+//             'Content-Type': 'application/json'
+//         }
+//     })
+//     .then(response => response.text())
+//     .then(data => {
+//         alert("Success: " + data); // Shows "Sighting 1 verified!"
+//     })
+//     .catch(error => console.error('Error:', error));
+// }

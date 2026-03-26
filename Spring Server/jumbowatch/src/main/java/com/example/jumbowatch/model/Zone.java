@@ -1,6 +1,15 @@
 package com.example.jumbowatch.model;
 
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+
+@Entity
 public class Zone {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
     private String name;
     private double minLat, maxLat, minLon, maxLon;
 
@@ -18,7 +27,10 @@ public class Zone {
                sighting.getLongitude() >= minLon && sighting.getLongitude() <= maxLon;
     }
 
-    public String getName() {
-        return name;
-    }
+    public Long getId() { return id; }
+    public String getName() { return name; }
+    public double getMinLat() { return minLat; }
+    public double getMaxLat() { return maxLat; }
+    public double getMinLon() { return minLon; }
+    public double getMaxLon() { return maxLon; }
 }
