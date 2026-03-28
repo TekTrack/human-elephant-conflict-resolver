@@ -7,10 +7,12 @@ import java.util.Comparator;
 import java.util.Optional;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
+@CrossOrigin(origins = "*")
 public class LiveFeedController {
 
     @GetMapping(value = "/stream/latest", produces = MediaType.IMAGE_JPEG_VALUE)

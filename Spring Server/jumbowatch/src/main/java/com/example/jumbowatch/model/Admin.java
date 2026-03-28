@@ -9,10 +9,15 @@ public class Admin {
     @Id
     private String username;
     private String password;
+    private String email;
 
-    public Admin(String username, String password) {
+    public Admin() {
+        // Default constructor for JPA
+    }
+    public Admin(String username, String password, String email) {
         this.username = username;
         this.password = password;
+        this.email = email;
     }
 
     public String getUsername() {
@@ -21,6 +26,9 @@ public class Admin {
 
     public String getPassword() {
         return password;
+    }
+    public String getEmail() {
+        return email;
     }
 
 }

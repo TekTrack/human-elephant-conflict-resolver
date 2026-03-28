@@ -1,5 +1,6 @@
 package com.example.jumbowatch.model;
 
+
 public class User {
 
     private String email;

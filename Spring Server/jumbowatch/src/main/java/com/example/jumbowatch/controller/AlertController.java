@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
+import com.example.jumbowatch.admin.AdminNotification;
 import com.example.jumbowatch.model.Sighting;
 import com.example.jumbowatch.repository.SightingRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,9 +42,12 @@ public class AlertController {
             // 3. Save using Files.copy (Bulletproof method 🛡️)
             Files.copy(photo.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
 
-            // 4. Save data to supabase
+            
             Sighting newSighting = new Sighting(Integer.parseInt(count), time, Double.parseDouble(lat), Double.parseDouble(lon), filename, source);
-        
+            AdminNotification.message="New sighting detected!";
+            AdminNotification.type="DroneAlert";
+
+            // 4. Save data to supabase (with cooldown to prevent spamming). Also admin notifications are sent immediately, while user reports wait for verification.
             long now = System.currentTimeMillis();
             if (now - lastSaveTime > COOLDOWN_MS) {
                 if ("DRONE".equals(newSighting.getSource())) {
@@ -52,6 +56,7 @@ public class AlertController {
                     newSighting.setVerified(false); // Users wait for admin
                 }
                 sightingRepo.save(newSighting);
+
                 lastSaveTime = now;
                 System.out.println("✅ Saved directly to Supabase!");
             }

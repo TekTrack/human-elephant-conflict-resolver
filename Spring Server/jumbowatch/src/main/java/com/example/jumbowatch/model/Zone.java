@@ -13,6 +13,9 @@ public class Zone {
     private String name;
     private double minLat, maxLat, minLon, maxLon;
 
+    public Zone() {
+        // Default constructor for JPA
+    }
     public Zone(String name, double minLat, double maxLat, double minLon, double maxLon) {
         this.name = name;
         this.minLat = minLat;
