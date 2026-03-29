@@ -10,10 +10,12 @@ import org.springframework.web.bind.annotation.PostMapping;                     
 import org.springframework.web.bind.annotation.RequestBody;                         //            //
 import org.springframework.web.bind.annotation.RequestMapping;                      //A////////////D 
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.DeleteMapping;
 
 import com.example.jumbowatch.model.Zone;
 import com.example.jumbowatch.model.ZoneCorners;
 import com.example.jumbowatch.repository.ZoneRepository;
+import com.example.jumbowatch.model.Sighting;
 
 @RestController
 @RequestMapping("/api/admin/zones")
@@ -54,6 +56,43 @@ public class ZoneController {
     public Zone notcreatedZoneSaving(@RequestBody Zone zone) {
         return zoneRepo.save(zone);
     }
+
+    // 🧹 Delete all zones (for testing purposes)
+    @DeleteMapping
+    public void deleteAllZones() {
+        zoneRepo.deleteAll();
+    }
+
+    // Future: Add PUT endpoint to update zones if needed
+    // @PutMapping("/{id}")
+    // public Zone updateZone(@PathVariable Long id, @RequestBody Zone zone) {
+    //     zone.setId(id);
+    //     return zoneRepo.save(zone);
+    // }
+    //Zone Blooming If the Drone is Inthe Zone, then the Zone Blooms (turns red on the map) and Admin gets an immediate notification. This is handled in the AlertController when a new sighting is saved. The containsSighting method in the Zone class checks if the sighting falls within any defined zones, and if so, updates the AdminNotification accordingly.
+    //return true id the Drone i s inte Zone
+    //Hear we pass the ZoneCorners to the web app to draw the rectangle on the map and also pass the message to AdminNotification to update the notification for the admin.
+    private ZoneCorners isDroneInZone(Sighting sighting) {
+        List<Zone> zones = zoneRepo.findAll();
+        for (Zone zone : zones) {
+            if (zone.containsSighting(sighting)) {
+                AdminNotification.message = "Drone detected in " + zone.getName() + "!";
+                AdminNotification.type = "ZoneAlert";
+                return getZoneByName(zone.getName()); // Return the zone details for the web app to highlight it
+            }
+        }
+        return null; // No zone contains the sighting
+    }
+
+    // Consider zone name and then pass the zoneCoordinates to the web app to draw the rectangle on the map.
+    private ZoneCorners getZoneByName(String zoneName) {
+        Zone zone = zoneRepo.findByName(zoneName);
+        if (zone != null) {
+            return zoneCreation(zone);
+        }
+        return null; // Zone not found
+    }
+
 }
 // function loadZones() {
 //     fetch('http://localhost:8080/api/admin/zones')
