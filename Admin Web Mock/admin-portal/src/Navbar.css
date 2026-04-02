@@ -1,0 +1,19 @@
+.navbar {
+  background-color: #333;
+  color: white;
+  padding: 1rem;
+}
+
+.navbar-content a{
+    font-size: 1rem;
+  display: inline-block;
+  margin-right: 2rem;
+  color: white;
+}
+.navbar-content a:hover {
+  text-decoration: underline;
+}
+
+.navbar-content {
+  display: inline-block;
+}
