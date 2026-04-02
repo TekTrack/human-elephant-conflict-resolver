@@ -24,6 +24,8 @@ public class AdminNotification extends NotificationController {
         }
         response.put("message", message);
         response.put("type", type);
+        message = null; // Clear after sending
+        type = null;
         return response;
     }
 }

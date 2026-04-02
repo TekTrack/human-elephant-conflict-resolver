@@ -28,8 +28,7 @@ export default function NotificationHandler() {
             setNotification([data.message,data.type]);
           }
         }
-      } catch (err) {
-        console.error("Error fetching:", err);
+      } catch (nullErr) {
       }
     };
 

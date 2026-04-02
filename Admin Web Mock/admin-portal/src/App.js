@@ -11,10 +11,8 @@ export default function App() {
   const [password, setPassword] = useState('');
   
   // Dashboard states
-  const [zones, setZones] = useState([]);
   const [sightingId, setSightingId] = useState('');
   const [newAdmin, setNewAdmin] = useState({ username: '', password: '' });
-  const [newZone, setNewZone] = useState({ name: '', minLat: '', maxLat: '', minLon: '', maxLon: '' });
 
   const BASE_URL = 'http://localhost:8080/api/admin';
 
@@ -29,7 +27,6 @@ export default function App() {
       });
       if (res.ok) {
         setIsLoggedIn(true);
-        fetchZones(); // Load zones automatically on login
       } else {
         alert('❌ Invalid credentials');
       }
@@ -79,32 +76,7 @@ export default function App() {
     }
   };
 
-  // 🗺️ Zone Logic
-  const fetchZones = async () => {
-    try {
-      const res = await fetch(`${BASE_URL}/zones`);
-      const data = await res.json();
-      setZones(data);
-    } catch (err) {
-      console.error(err);
-    }
-  };
 
-
-  const handleSaveZone = async () => {
-    try {
-      const res = await fetch(`${BASE_URL}/zones`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(newZone)
-      });
-      const data = await res.json();
-      alert(`✅ Zone saved: ${data.name}`);
-      fetchZones(); // Refresh the list
-    } catch (err) {
-      console.error(err);
-    }
-  };
 
 // 🛠️ For development: auto-login (remove in production)
   useEffect(() => {
@@ -132,10 +104,10 @@ export default function App() {
     <div style={{ padding: '2rem' }}>
 
       <h1>Dashboard 🎛️</h1>
-      <NotificationHandler />
+      <NotificationHandler  />
 
       <hr />
-        <Navbar />
+        <Navbar BASE_URL={BASE_URL} />
     
       <hr/>
 

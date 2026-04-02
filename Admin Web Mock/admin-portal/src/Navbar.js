@@ -5,7 +5,7 @@ import Drones from './Pages/Drones';
 import Zones from './Pages/Zones';
 import './Navbar.css'; // Optional: add your own styling here
 
-export default function Navbar() {
+export default function Navbar({ BASE_URL }) {
     return (
         <div>
             <BrowserRouter>
@@ -28,7 +28,7 @@ export default function Navbar() {
             </nav>
             <Routes>
                 <Route path="/drones" element={<Drones />} />
-                <Route path="/zones" element={<Zones />} />
+                <Route path="/zones" element={<Zones BASE_URL={BASE_URL} />} />
                 <Route path="/sightings" element={<div><h2>👀 Sightings</h2><p>Here you can view and manage all elephant sightings.</p></div>} />
                 <Route path="/users" element={<div><h2>👥 Users</h2><p>Here you can view and manage all users in the system.</p></div>} />
                 {/* Future: Add routes for sightings and users */}  
