@@ -14,7 +14,7 @@ export default function NotificationHandler() {
   };
 
 
-  const [notification, setNotification] = useState([]);
+  const [notification, setNotification] = useState(null);
   const BASE_URL = 'http://localhost:8080/api/admin';
 
   useEffect(() => {

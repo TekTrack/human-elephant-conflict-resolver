@@ -1,36 +1,47 @@
-import React, { useState, useEffect } from 'react';
-import '../App.css'; // Optional: add your own styling here
-import NotificationHandler from '../NotificationHandler';
-import Navbar from '../Navbar'; 
-import Drones from './Drones';
+import React from 'react';
+import { MapContainer, TileLayer, Rectangle, Popup } from 'react-leaflet';
+import 'leaflet/dist/leaflet.css'; // Don't forget this!
 
+export default function Zones({ BASE_URL, zones, fetchZones }) {
+  // Rough center of Sri Lanka 🇱🇰
+  const mapCenter = [7.8731, 80.7718]; 
 
-export default function Zones({BASE_URL,zones,fetchZones,setZones,handleSaveZone}) {
-    const [newZone, setNewZone] = useState({ name: '', minLat: '', maxLat: '', minLon: '', maxLon: '' });
-    
+  return (
+    <div style={{ padding: '20px' }}>
+      <h3>Active Danger Zones 🗺️</h3>
+      <button onClick={fetchZones}>Refresh Map</button>
 
-    return (
-        
-        <div>
-            <hr />
+      {/* The Interactive Map */}
+      <MapContainer 
+        center={mapCenter} 
+        zoom={7} 
+        style={{ height: '500px', width: '100%', marginTop: '10px', borderRadius: '8px' }}
+      >
+        {/* OpenStreetMap Base Layer */}
+        <TileLayer
+          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+          attribution='&copy; OpenStreetMap'
+        />
 
-            <h3>3. Create Zone 🗺️</h3>
-            <input placeholder="Zone Name" onChange={e => setNewZone({...newZone, name: e.target.value})} />
-            <input placeholder="Min Lat" onChange={e => setNewZone({...newZone, minLat: parseFloat(e.target.value)})} />
-            <input placeholder="Max Lat" onChange={e => setNewZone({...newZone, maxLat: parseFloat(e.target.value)})} />
-            <input placeholder="Min Lon" onChange={e => setNewZone({...newZone, minLon: parseFloat(e.target.value)})} />
-            <input placeholder="Max Lon" onChange={e => setNewZone({...newZone, maxLon: parseFloat(e.target.value)})} />
-            <button onClick={handleSaveZone}>Save Zone</button>
+        {/* Loop through your zones and draw Rectangles 🟥 */}
+        {zones?.map((z, index) => {
+          // Leaflet needs [[minLat, minLon], [maxLat, maxLon]]
+          const bounds = [
+            [z.minLat, z.minLon], 
+            [z.maxLat, z.maxLon]
+          ];
 
-            <hr />
-
-            <h3>4. Active Zones 📍</h3>
-            <button onClick={fetchZones}>Refresh Zones</button>
-            <ul>
-                {zones?.map((z, index) => (
-                <li key={index}>{z.name} - Lat: {z.minLat} to {z.maxLat} | Lon: {z.minLon} to {z.maxLon}</li>
-                ))}
-            </ul>       
-        </div>
-    );
+          return (
+            <Rectangle key={index} bounds={bounds} pathOptions={{ color: 'red', weight: 2 }}>
+              {/* This pops up when you click the red box! 🖱️ */}
+              <Popup>
+                <strong>{z.name}</strong> <br/>
+                🚨 Active Danger Zone
+              </Popup>
+            </Rectangle>
+          );
+        })}
+      </MapContainer>
+    </div>
+  );
 }
