@@ -7,13 +7,6 @@ import reportWebVitals from './reportWebVitals';
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   <React.StrictMode>
-
-    <div style={{ textAlign: 'center', margin: '20px' }}>
-      <h1>🐘 Human-Elephant Conflict Admin Portal 🐘</h1>
-      <p>Manage sightings, zones, and admins with ease!</p>
-    </div>
-
-    
     <App />
   </React.StrictMode>
 );

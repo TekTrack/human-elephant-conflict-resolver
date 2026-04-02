@@ -2,6 +2,8 @@
 import React, { useState, useEffect } from 'react';
 import './App.css'; // Optional: add your own styling here
 import NotificationHandler from './NotificationHandler';
+import Navbar from './Navbar'; 
+import Drones from './Pages/Drones';
 
 export default function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -128,44 +130,18 @@ export default function App() {
 
   return (
     <div style={{ padding: '2rem' }}>
+
       <h1>Dashboard 🎛️</h1>
       <NotificationHandler />
 
       <hr />
+        <Navbar />
+    
+      <hr/>
+
       <button onClick={() => setIsLoggedIn(false)}>Logout</button>
 
       <hr />
-      
-      <h3>1. Create New Admin 👤</h3>
-      <input placeholder="New Username" onChange={e => setNewAdmin({...newAdmin, username: e.target.value})} />
-      <input type="password" placeholder="New Password" onChange={e => setNewAdmin({...newAdmin, password: e.target.value})} />
-      <button onClick={handleCreateAdmin}>Create</button>
-
-      <hr />
-
-      <h3>2. Verify Sighting ✅</h3>
-      <input placeholder="Sighting ID (e.g., 1)" onChange={e => setSightingId(e.target.value)} />
-      <button onClick={handleVerify}>Verify</button>
-
-      <hr />
-
-      <h3>3. Create Zone 🗺️</h3>
-      <input placeholder="Zone Name" onChange={e => setNewZone({...newZone, name: e.target.value})} />
-      <input placeholder="Min Lat" onChange={e => setNewZone({...newZone, minLat: parseFloat(e.target.value)})} />
-      <input placeholder="Max Lat" onChange={e => setNewZone({...newZone, maxLat: parseFloat(e.target.value)})} />
-      <input placeholder="Min Lon" onChange={e => setNewZone({...newZone, minLon: parseFloat(e.target.value)})} />
-      <input placeholder="Max Lon" onChange={e => setNewZone({...newZone, maxLon: parseFloat(e.target.value)})} />
-      <button onClick={handleSaveZone}>Save Zone</button>
-
-      <hr />
-
-      <h3>4. Active Zones 📍</h3>
-      <button onClick={fetchZones}>Refresh Zones</button>
-      <ul>
-        {zones.map((z, index) => (
-          <li key={index}>{z.name} - Lat: {z.minLat} to {z.maxLat} | Lon: {z.minLon} to {z.maxLon}</li>
-        ))}
-      </ul>
     </div>
   );
 }
