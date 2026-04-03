@@ -58,21 +58,6 @@ export default function App() {
     }
   };
 
-  // async function checkNotifications() {
-  //     try {
-  //         const response = await fetch('http://localhost:8080/api/admin/notifications');
-  //         const data = await response.json();
-
-  //         // Displaying the alert
-  //         if (data.message) {
-  //             alert(`[${data.type}] Notification: ${data.message}`);
-  //         }
-  //     } catch (error) {
-  //         console.error('Error fetching notification:', error);
-  //     }
-  // };
-  // checkNotifications(); // Call it once on load
-
   // ✅ Verify Sighting
   const handleVerify = async () => {
     try {
