@@ -13,7 +13,7 @@ L.Icon.Default.mergeOptions({
   shadowUrl: require('leaflet/dist/images/marker-shadow.png')
 });
 
-export default function Zones({ BASE_URL,mapTrigger}) {
+export default function Zones({ BASE_URL, mapTrigger }) {
   // State for the new zone we are creating
   const [newZone, setNewZone] = useState({ name: '', id: '', minLat: '', maxLat: '', minLon: '', maxLon: '' });
   const [zones, setZones] = useState([]); // State to hold existing zones from the database
@@ -49,7 +49,7 @@ export default function Zones({ BASE_URL,mapTrigger}) {
     useEffect(() => {
         fetchZones(); // Load zones when the component mounts
         fetchSightings(filter);
-    }, [filter,zones]);
+    }, [filter,mapTrigger]);
 
 
   // 💾 Save function (same as before)
