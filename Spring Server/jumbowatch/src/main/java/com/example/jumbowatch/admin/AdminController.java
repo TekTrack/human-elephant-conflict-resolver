@@ -6,6 +6,7 @@ import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -25,6 +26,8 @@ public class AdminController {
     private AdminRepository adminRepository;
     @Autowired
     private JwtUtil jwtUtil;
+    @Autowired
+    private BCryptPasswordEncoder passwordEncoder;
 
     //Admin Registration Endpoint
     @PostMapping("/newadmin")
@@ -44,6 +47,9 @@ public class AdminController {
                 errorResponse.put("message", "Admin with this email already exists");
                 return new ResponseEntity<>(errorResponse, HttpStatus.CONFLICT);
             }
+
+            String hashedPassword = passwordEncoder.encode(admin.getPassword());
+            admin.setPassword(hashedPassword);
 
             Admin savedAdmin = adminRepository.save(admin);
 
@@ -74,7 +80,7 @@ public class AdminController {
             Admin admin = adminRepository.findById(username)
                     .orElseThrow(() -> new RuntimeException("Admin not found"));
 
-            if (admin.getPassword().equals(password)) {
+            if (passwordEncoder.matches(password, admin.getPassword())) {
 
                 String token = jwtUtil.generateToken(username);
 
