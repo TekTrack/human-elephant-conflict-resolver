@@ -328,7 +328,7 @@ export function GeofencingPage() {
 
   const inputClass = `w-full px-3 py-2 rounded-lg text-sm border outline-none transition-colors ${
       isDark
-          ? "bg-[rgba(255,255,255,0.05)] border-[rgba(255,255,255,0.1)] text-white placeholder:text-[rgba(255,255,255,0.3)] focus:border-blue-500"
+          ? "bg-neutral-700 border-[rgba(255,255,255,0.1)] text-white placeholder:text-[rgba(255,255,255,0.3)] focus:border-blue-500"
           : "bg-gray-50 border-gray-200 text-gray-900 placeholder:text-gray-400 focus:border-blue-500"
   }`;
 
@@ -374,7 +374,7 @@ export function GeofencingPage() {
         </div>
 
         {/* Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {[
             {
               icon: <MapPin className="w-5 h-5 text-blue-600" />,
@@ -384,24 +384,17 @@ export function GeofencingPage() {
               color: "",
             },
             {
-              icon: <Shield className="w-5 h-5 text-green-600" />,
+              icon: <MapPin className="w-5 h-5 text-green-600" />,
               bg: "bg-green-100",
-              label: "Active",
+              label: "New User Sightings",
               value: geofences.filter((g) => g.status === "Active").length,
               color: "text-green-500",
             },
             {
-              icon: <Shield className="w-5 h-5 text-red-600" />,
+              icon: <MapPin className="w-5 h-5 text-red-600" />,
               bg: "bg-red-100",
-              label: "High Security",
+              label: "New Drone Sightings",
               value: geofences.filter((g) => g.type === "High Security").length,
-              color: "",
-            },
-            {
-              icon: <MapPin className="w-5 h-5 text-yellow-600" />,
-              bg: "bg-yellow-100",
-              label: "Total Alerts",
-              value: geofences.reduce((acc, g) => acc + g.alerts, 0),
               color: "",
             },
           ].map((stat) => (
@@ -478,10 +471,10 @@ export function GeofencingPage() {
           </div>
 
           {/* Map */}
-          <div style={{ height: "540px", width: "100%" }}>
+          <div style={{ height: "940px", width: "100%" }}>
             <Map
                 ref={mapRef}
-                initialViewState={{ longitude: -74.006, latitude: 40.7128, zoom: 13 }}
+                initialViewState={{ longitude: 80.7718, latitude: 7.8731, zoom: 8 }}
                 mapStyle={isDark ? MAP_STYLE : MAP_STYLE_LIGHT}
                 style={{ width: "100%", height: "100%" }}
                 interactiveLayerIds={["zones-fill"]}
@@ -568,7 +561,7 @@ export function GeofencingPage() {
                       closeOnClick={false}
                       style={{ zIndex: 10 }}
                   >
-                    <div style={{ minWidth: 180, fontFamily: "sans-serif", fontSize: 13 }}>
+                    <div style={{ minWidth: 180, fontFamily: "sans-serif", fontSize: 13, color: "black" }}>
                       <strong style={{ fontSize: 14 }}>{popupInfo.geofence.name}</strong>
                       <div style={{ marginTop: 6, lineHeight: 1.7 }}>
                         <div>
@@ -676,7 +669,7 @@ export function GeofencingPage() {
                   </span>
                     </div>
                     <div className="flex items-center gap-6 text-sm">
-                  <span className={isDark ? "text-[rgba(255,255,255,0.6)]" : "text-gray-600"}>
+                  <span className={isDark ? "text-black-900" : "text-gray-900"}>
                     📍 {geofence.coordinates}
                   </span>
                       <span className={isDark ? "text-[rgba(255,255,255,0.6)]" : "text-gray-600"}>
@@ -765,7 +758,7 @@ export function GeofencingPage() {
                   <div>
                     <label className={labelClass}>Zone Type</label>
                     <select
-                        className={inputClass}
+                        className={inputClass }
                         value={newZone.type}
                         onChange={(e) =>
                             setNewZone({ ...newZone, type: e.target.value as GeofenceType })
