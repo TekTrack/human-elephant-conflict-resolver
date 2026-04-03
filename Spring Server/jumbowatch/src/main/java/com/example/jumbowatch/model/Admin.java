@@ -14,6 +14,7 @@ public class Admin {
     public Admin() {
         // Default constructor for JPA
     }
+
     public Admin(String username, String password, String email) {
         this.username = username;
         this.password = password;
@@ -27,8 +28,13 @@ public class Admin {
     public String getPassword() {
         return password;
     }
+
     public String getEmail() {
         return email;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
     }
 
 }

@@ -3,7 +3,10 @@ import React, { useState, useEffect } from 'react';
 import './App.css'; // Optional: add your own styling here
 import NotificationHandler from './NotificationHandler';
 import Navbar from './Navbar'; 
-import Drones from './Pages/Drones';
+import Auth from './Auth';
+
+const { login, fetchSecureData, logout } = Auth;
+
 
 export default function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -55,25 +58,16 @@ export default function App() {
     }
   };
 
-  // async function checkNotifications() {
-  //     try {
-  //         const response = await fetch('http://localhost:8080/api/admin/notifications');
-  //         const data = await response.json();
-
-  //         // Displaying the alert
-  //         if (data.message) {
-  //             alert(`[${data.type}] Notification: ${data.message}`);
-  //         }
-  //     } catch (error) {
-  //         console.error('Error fetching notification:', error);
-  //     }
-  // };
-  // checkNotifications(); // Call it once on load
-
   // ✅ Verify Sighting
   const handleVerify = async () => {
     try {
-      const res = await fetch(`${BASE_URL}/sightings/${sightingId}/verify`, { method: 'PUT' });
+      const res = await fetch(`${BASE_URL}/sightings/${sightingId}/verify`,
+         { method: 'PUT', 
+          headers: { 
+            'Content-Type': 'application/json'
+          ,'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+           }
+         });
       const text = await res.text();
       alert(text);
     } catch (err) {
@@ -82,28 +76,19 @@ export default function App() {
   };
 
 
-
-// 🛠️ For development: auto-login (remove in production)
-  useEffect(() => {
-    setUsername('admin');
-    setPassword('password');
-    setIsLoggedIn(true);
-  }, []);
-
-
-  // 🖥️ UI Render
-  // if (!isLoggedIn) {
-  //   return (
-  //     <div style={{ padding: '2rem' }}>
-  //       <h2>Admin Login 🔐</h2>
-  //       <form onSubmit={handleLogin}>
-  //         <input placeholder="Username" onChange={(e) => setUsername(e.target.value)} required />
-  //         <input type="password" placeholder="Password" onChange={(e) => setPassword(e.target.value)} required />
-  //         <button type="submit">Login</button>
-  //       </form>
-  //     </div>
-  //   );
-  // }
+  //🖥️ UI Render
+  if (!isLoggedIn) {
+    return (
+      <div style={{ padding: '2rem' }}>
+        <h2>Admin Login 🔐</h2>
+        <form onSubmit={handleLogin}>
+          <input placeholder="Username" onChange={(e) => setUsername(e.target.value)} required />
+          <input type="password" placeholder="Password" onChange={(e) => setPassword(e.target.value)} required />
+          <button type="submit" onClick={() => login(username, password)}>Login</button>
+        </form>
+      </div>
+    );
+  }
 
   return (
     <div style={{ padding: '2rem' }}>
@@ -116,7 +101,7 @@ export default function App() {
     
       <hr/>
 
-      <button onClick={() => setIsLoggedIn(false)}>Logout</button>
+      <button onClick={() => { setIsLoggedIn(false); logout(); }}>Logout</button>
 
       <hr />
     </div>

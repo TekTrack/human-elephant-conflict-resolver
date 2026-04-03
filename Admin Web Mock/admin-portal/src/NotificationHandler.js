@@ -23,7 +23,15 @@ const [mapTrigger, setMapTrigger] = useState(0);
   useEffect(() => {
     const fetchNotification = async () => {
       try {
-        const res = await fetch(`${BASE_URL}/notifications`);
+        const res = await fetch(`${BASE_URL}/notifications`,
+          {
+            method: 'GET',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+            }
+          }
+        );
         if (res.ok) {
           const data = await res.json();
           // 🛠️ THE FIX: This forces the single JSON object into an array!

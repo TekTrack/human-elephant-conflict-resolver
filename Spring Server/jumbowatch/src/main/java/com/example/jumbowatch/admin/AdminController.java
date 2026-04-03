@@ -1,28 +1,3 @@
-// package com.example.jumbowatch.admin;
-// import org.springframework.beans.factory.annotation.Autowired;
-// import org.springframework.web.bind.annotation.PostMapping;
-// import org.springframework.web.bind.annotation.RequestBody;
-// import org.springframework.web.bind.annotation.RequestMapping;
-// import org.springframework.web.bind.annotation.RestController;
-// import com.example.jumbowatch.model.Adimin;
-// import com.example.jumbowatch.repository.AdminRepository;
-// @RestController
-// @RequestMapping("/api/admin/newadmin")
-// public class AdminController {
-//     @Autowired
-//     private AdminRepository adminRepo;
-//     public AdminController(AdminRepository adminRepo) {
-//         this.adminRepo = adminRepo;
-//     }
-//     @PostMapping
-//     public String addAdmin(@RequestBody Adimin newAdmin) {
-//         if (adminRepo.existsById(newAdmin.getUsername())) {
-//             return "❌ Admin with username '" + newAdmin.getUsername() + "' already exists!";
-//         }
-//         adminRepo.save(newAdmin);
-//         return "✅ New admin '" + newAdmin.getUsername() + "' added successfully!";
-//     }
-// }
 package com.example.jumbowatch.admin;
 
 import java.util.HashMap;
@@ -31,6 +6,7 @@ import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -38,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.jumbowatch.model.Admin;
+import com.example.jumbowatch.model.JwtUtil;
 import com.example.jumbowatch.repository.AdminRepository;
 
 @RestController
@@ -47,11 +24,32 @@ public class AdminController {
 
     @Autowired
     private AdminRepository adminRepository;
-//Admin Registration Endpoint
+    @Autowired
+    private JwtUtil jwtUtil;
+    @Autowired
+    private BCryptPasswordEncoder passwordEncoder;
 
+    //Admin Registration Endpoint
     @PostMapping("/newadmin")
     public ResponseEntity<Object> createAdmin(@RequestBody Admin admin) {
         try {
+
+            //Check if admin with the same username already exists
+            if (adminRepository.existsById(admin.getUsername())) {
+                Map<String, Object> errorResponse = new HashMap<>();
+                errorResponse.put("message", "Admin with this username already exists");
+                return new ResponseEntity<>(errorResponse, HttpStatus.CONFLICT);
+            }
+
+            //Check if admin with the same email already exists
+            if (adminRepository.existsByEmail(admin.getEmail())) {
+                Map<String, Object> errorResponse = new HashMap<>();
+                errorResponse.put("message", "Admin with this email already exists");
+                return new ResponseEntity<>(errorResponse, HttpStatus.CONFLICT);
+            }
+
+            String hashedPassword = passwordEncoder.encode(admin.getPassword());
+            admin.setPassword(hashedPassword);
 
             Admin savedAdmin = adminRepository.save(admin);
 
@@ -82,10 +80,14 @@ public class AdminController {
             Admin admin = adminRepository.findById(username)
                     .orElseThrow(() -> new RuntimeException("Admin not found"));
 
-            if (admin.getPassword().equals(password)) {
+            if (passwordEncoder.matches(password, admin.getPassword())) {
+
+                String token = jwtUtil.generateToken(username);
+
                 Map<String, Object> response = new HashMap<>();
                 response.put("message", "Login successful!");
                 response.put("status", HttpStatus.OK.value());
+                response.put("token", token);
                 response.put("data", admin);
                 return new ResponseEntity<>(response, HttpStatus.OK);
             } else {
