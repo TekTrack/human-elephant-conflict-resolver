@@ -1,6 +1,7 @@
 package com.example.jumbowatch.model; // Adjust if needed
 
 import jakarta.persistence.*;
+import java.time.LocalDateTime;
 
 @Entity
 public class Sighting {
@@ -10,7 +11,7 @@ public class Sighting {
     private Long id;
 
     private int elephantCount;
-    private String time;
+    private LocalDateTime timestamp;
     private double latitude;
     private double longitude;
     private String photoFilename;
@@ -20,9 +21,9 @@ public class Sighting {
     // The Constructor
     public Sighting() {}
 
-    public Sighting(int count, String time, double lat, double lon, String photo, String source) {
+    public Sighting(int count, LocalDateTime timestamp, double lat, double lon, String photo, String source) {
         this.elephantCount = count;
-        this.time = time;
+        this.timestamp = timestamp;
         this.latitude = lat;
         this.longitude = lon;
         this.photoFilename = photo;
@@ -31,7 +32,7 @@ public class Sighting {
 
     // Getters and Setters
     public int getElephantCount() { return elephantCount; }
-    public String getTime() { return time; } 
+    public LocalDateTime getTimestamp() { return timestamp; }       
     public double getLatitude() { return latitude; }
     public double getLongitude() { return longitude; }
     public String getPhotoFilename() { return photoFilename; }
@@ -46,6 +47,6 @@ public class Sighting {
     // Add this to print the object easily in the terminal
     @Override
     public String toString() {
-        return "Sighting [Count=" + elephantCount + ", Time=" + time + ", Lat=" + latitude + ", Lon=" + longitude + ", Photo=" + photoFilename + "]";
+        return "Sighting [Count=" + elephantCount + ", Time=" + timestamp + ", Lat=" + latitude + ", Lon=" + longitude + ", Photo=" + photoFilename + "]";
     }
 }

@@ -6,18 +6,41 @@ import java.nio.file.*;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.List;
 
 import com.example.jumbowatch.admin.AdminNotification;
 import com.example.jumbowatch.model.Sighting;
+import com.example.jumbowatch.model.Zone;
 import com.example.jumbowatch.repository.SightingRepository;
+import com.example.jumbowatch.repository.ZoneRepository;
+
 import org.springframework.beans.factory.annotation.Autowired;
 
 @RestController
-public class AlertController {
+@CrossOrigin(origins = "*") // Allows the web app to connect to this controller
+public class SightingController {
     private long lastSaveTime = 0;
     private final long COOLDOWN_MS = 60000; // 60 seconds
     @Autowired
     private SightingRepository sightingRepo;
+    @Autowired
+    private ZoneRepository zoneRepo;
+
+    @GetMapping("/api/admin/sightings/filter")
+    public List<Sighting> getFilteredSightings(@RequestParam(defaultValue = "all") String timeframe) {
+        LocalDateTime cutoff = LocalDateTime.now();
+        
+        switch(timeframe.toLowerCase()) {
+            case "hour": cutoff = cutoff.minusHours(1); break;
+            case "day": cutoff = cutoff.minusDays(1); break;
+            case "week": cutoff = cutoff.minusWeeks(1); break;
+            case "month": cutoff = cutoff.minusMonths(1); break;
+            case "year": cutoff = cutoff.minusYears(1); break;
+            default: return sightingRepo.findAll(); // All time
+        }
+        
+        return sightingRepo.findByTimestampAfter(cutoff);
+    }
 
     @PostMapping("/alert")
     public String receiveAlert(
@@ -35,7 +58,8 @@ public class AlertController {
             Files.createDirectories(saveFolder);
 
             // 2. Format time for filename
-            String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss"));
+            LocalDateTime nowTime = LocalDateTime.now();
+            String timestamp = nowTime.format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss"));
             String filename = "alert_" + timestamp + ".jpg";
             Path filePath = saveFolder.resolve(filename);
 
@@ -43,7 +67,7 @@ public class AlertController {
             Files.copy(photo.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
 
             
-            Sighting newSighting = new Sighting(Integer.parseInt(count), time, Double.parseDouble(lat), Double.parseDouble(lon), filename, source);
+            Sighting newSighting = new Sighting(Integer.parseInt(count), nowTime, Double.parseDouble(lat), Double.parseDouble(lon), filename, source);
             AdminNotification.message="New sighting detected!";
             AdminNotification.type="DroneAlert";
 
@@ -58,6 +82,18 @@ public class AlertController {
                 sightingRepo.save(newSighting);
 
                 lastSaveTime = now;
+                
+                // Inside your save sighting method:
+                Zone breachedZone = zoneRepo.findAll().stream()
+                    .filter(z -> z.containsSighting(newSighting))
+                    .findFirst().orElse(null);
+
+                if (breachedZone != null) {
+                    breachedZone.setLastSightingDate(LocalDateTime.now());
+                    zoneRepo.save(breachedZone);
+                }
+
+
                 System.out.println("✅ Saved directly to Supabase!");
             }
 

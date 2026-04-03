@@ -13,7 +13,6 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.DeleteMapping;
 
 import com.example.jumbowatch.model.Zone;
-import com.example.jumbowatch.model.ZoneCorners;
 import com.example.jumbowatch.repository.ZoneRepository;
 import com.example.jumbowatch.model.Sighting;
 
@@ -30,28 +29,10 @@ public class ZoneController {
     public List<Zone> getAllZones() {
 
         List<Zone> zones = zoneRepo.findAll();
-        // List<ZoneCorners> zoneCornersList = new ArrayList<>();
-
-        // for (Zone zone : zones) {
-        //     zoneCornersList.add(zoneCreation(zone));
-        // }
-
-        // return zoneCornersList;
-
         return zones;
     }
 
-    // private ZoneCorners zoneCreation(Zone zone) {
-
-    //     double[] a = {zone.getMinLat(), zone.getMinLon()}; // A
-    //     double[] b = {zone.getMinLat(), zone.getMaxLon()}; // B
-    //     double[] c = {zone.getMaxLat(), zone.getMaxLon()}; // C
-    //     double[] d = {zone.getMaxLat(), zone.getMinLon()}; // D
-
-    //     ZoneCorners zoneCorners = new ZoneCorners(zone.getName(), a, b, c, d);
-    //     return zoneCorners;
-    // }
-
+  
     // ✏️ Save a newly drawn zone from the web portal
     @PostMapping
     public Zone notcreatedZoneSaving(@RequestBody Zone zone) {
@@ -74,27 +55,6 @@ public class ZoneController {
     //return true id the Drone i s inte Zone
     //Hear we pass the ZoneCorners to the web app to draw the rectangle on the map and also pass the message to AdminNotification to update the notification for the admin.
     
-    
-    // private ZoneCorners isDroneInZone(Sighting sighting) {
-    //     List<Zone> zones = zoneRepo.findAll();
-    //     for (Zone zone : zones) {
-    //         if (zone.containsSighting(sighting)) {
-    //             AdminNotification.message = "Drone detected in " + zone.getName() + "!";
-    //             AdminNotification.type = "ZoneAlert";
-    //             return getZoneByName(zone.getName()); // Return the zone details for the web app to highlight it
-    //         }
-    //     }
-    //     return null; // No zone contains the sighting
-    // }
-
-    // Consider zone name and then pass the zoneCoordinates to the web app to draw the rectangle on the map.
-    // private ZoneCorners getZoneByName(String zoneName) {
-    //     Zone zone = zoneRepo.findByName(zoneName);
-    //     if (zone != null) {
-    //         return zoneCreation(zone);
-    //     }
-    //     return null; // Zone not found
-    // }
 
 }
 
