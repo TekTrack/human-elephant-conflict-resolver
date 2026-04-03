@@ -16,6 +16,11 @@ export default function App() {
 
   const BASE_URL = 'http://localhost:8080/api/admin';
 
+  const [mapTrigger, setMapTrigger] = useState(0);
+
+  // The callback function
+  const handleNewAlert = () => setMapTrigger(prev => prev + 1);
+
   // 🔐 Login Flow
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -104,10 +109,10 @@ export default function App() {
     <div style={{ padding: '2rem' }}>
 
       <h1>Dashboard 🎛️</h1>
-      <NotificationHandler  />
+      <NotificationHandler onNewAlert={handleNewAlert} />
 
       <hr />
-        <Navbar BASE_URL={BASE_URL} />
+        <Navbar BASE_URL={BASE_URL} mapTrigger={mapTrigger} />
     
       <hr/>
 

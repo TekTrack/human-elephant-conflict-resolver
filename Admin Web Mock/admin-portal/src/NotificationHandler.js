@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from 'react';
 
-export default function NotificationHandler() {
+export default function NotificationHandler({onNewAlert}) {
+
+const [mapTrigger, setMapTrigger] = useState(0);
+
   const popupStyle = {
     position: 'fixed',
     top: '20px',
@@ -26,6 +29,7 @@ export default function NotificationHandler() {
           // 🛠️ THE FIX: This forces the single JSON object into an array!
           if(data.message) {
             setNotification([data.message,data.type]);
+            onNewAlert(); // Notify parent component of new alert
           }
         }
       } catch (nullErr) {
@@ -48,6 +52,7 @@ export default function NotificationHandler() {
       <br/>
       <button onClick={() => console.log(notification)}>View</button>
     </div>
+
   );
 
   

@@ -1,5 +1,7 @@
 package com.example.jumbowatch.model;
 
+import java.time.LocalDateTime;
+
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -12,6 +14,7 @@ public class Zone {
     private Long id;
     private String name;
     private double minLat, maxLat, minLon, maxLon;
+    private LocalDateTime lastSightingDate = null;
 
     public Zone() {
         // Default constructor for JPA
@@ -31,6 +34,8 @@ public class Zone {
     }
 
     public Long getId() { return id; }
+    public LocalDateTime getLastSightingDate() { return lastSightingDate; }
+    public void setLastSightingDate(LocalDateTime date) { this.lastSightingDate = date; }
     public String getName() { return name; }
     public double getMinLat() { return minLat; }
     public double getMaxLat() { return maxLat; }
