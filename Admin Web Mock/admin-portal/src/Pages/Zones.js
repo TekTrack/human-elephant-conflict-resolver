@@ -30,7 +30,14 @@ export default function Zones({ BASE_URL, mapTrigger }) {
   };
 
   const fetchSightings = async (timeframe) => {
-    const res = await fetch(`${BASE_URL}/sightings/filter?timeframe=${timeframe}`);
+    const token = localStorage.getItem('authToken'); // Grab the saved token
+    const res = await fetch(`${BASE_URL}/sightings/filter?timeframe=${timeframe}`,{
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      }
+    });
     const data = await res.json();
     setSightings(data);
   };
@@ -38,7 +45,14 @@ export default function Zones({ BASE_URL, mapTrigger }) {
 
   const fetchZones = async () => {
       try {
-        const res = await fetch(`${BASE_URL}/zones`);
+        const token = localStorage.getItem('authToken'); // Grab the saved token
+        const res = await fetch(`${BASE_URL}/zones`,{
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          }
+        });
         const data = await res.json();
         setZones(data);
       } catch (err) {
@@ -55,9 +69,12 @@ export default function Zones({ BASE_URL, mapTrigger }) {
   // 💾 Save function (same as before)
   const handleSaveZone = async () => {
     try {
+      const token = localStorage.getItem('authToken'); // Grab the saved token
       const res = await fetch(`${BASE_URL}/zones`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json' 
+        ,'Authorization': `Bearer ${token}`
+        },
         body: JSON.stringify(newZone)
       });
       const data = await res.json();
