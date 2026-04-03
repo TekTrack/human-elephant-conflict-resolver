@@ -1,4 +1,4 @@
-import { useTheme } from "../context/ThemeContext";
+import { useTheme } from "../context/ThemeContext.tsx";
 import { AlertTriangle, CheckCircle, XCircle, Clock } from "lucide-react";
 
 export function SightingAlertsPage() {

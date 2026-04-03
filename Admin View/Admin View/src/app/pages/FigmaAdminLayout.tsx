@@ -1,18 +1,18 @@
 import { Outlet, Link, useLocation } from 'react-router';
-import { Sun, Moon,LayoutDashboard, Settings, Bell, Map, AlertTriangle, Activity, Users} from "lucide-react";
-import { useTheme } from "../context/ThemeContext";
+import { Sun, Moon,LayoutDashboard,  Bell, Map, AlertTriangle, Activity, Users} from "lucide-react";
+import { useTheme } from "../context/ThemeContext.tsx";
 import { useState } from "react";
-import svgPaths from "../../imports/svg-jvw402qc7a";
-
+import { Button} from "../components/Button.tsx";
 
 
 const menuItems = [
   { label: "Overview", path: "/", icon: <LayoutDashboard size={20} /> },
+  { label: "Geofencing", path: "/geofencing", icon: <Map size={20} /> },
   { label: "Sighting Alerts", path: "/sighting-alerts", icon: <AlertTriangle size={20} /> },
   { label: "Live Monitor", path: "/live-monitor", icon: <Activity size={20} /> },
   { label: "Alert Map", path: "/alert-map", icon: <Bell size={20} /> },
   { label: "User Directory", path: "/user-directory", icon: <Users size={20} /> },
-  { label: "Geofencing", path: "/geofencing", icon: <Map size={20} /> },
+
 ];
 
 export function FigmaAdminLayout() {
