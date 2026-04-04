@@ -13,6 +13,7 @@ import com.example.jumbowatch.model.Sighting;
 import com.example.jumbowatch.model.Zone;
 import com.example.jumbowatch.repository.SightingRepository;
 import com.example.jumbowatch.repository.ZoneRepository;
+import com.example.jumbowatch.service.NotificationService;
 
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -42,6 +43,9 @@ public class SightingController {
         return sightingRepo.findByTimestampAfter(cutoff);
     }
 
+     @Autowired
+    private NotificationService nfs;
+
     @PostMapping("/alert")
     public String receiveAlert(
             @RequestParam("count") String count,
@@ -68,18 +72,27 @@ public class SightingController {
 
             
             Sighting newSighting = new Sighting(Integer.parseInt(count), nowTime, Double.parseDouble(lat), Double.parseDouble(lon), filename, source);
-            AdminNotification.message="New sighting detected!";
-            AdminNotification.type="DroneAlert";
 
             // 4. Save data to supabase (with cooldown to prevent spamming). Also admin notifications are sent immediately, while user reports wait for verification.
             long now = System.currentTimeMillis();
             if (now - lastSaveTime > COOLDOWN_MS) {
-                if ("DRONE".equals(newSighting.getSource())) {
-                    newSighting.setVerified(true);
-                } else {
-                    newSighting.setVerified(false); // Users wait for admin
-                }
                 sightingRepo.save(newSighting);
+
+                if ("DRONE".equals(newSighting.getSource())) {
+                    nfs.setNotification(
+                        "New drone alert! Count: " + newSighting.getElephantCount(),
+                        "DroneAlert",
+                        newSighting.getId()// sightingId is 0 for drone alerts
+                    );
+                    
+                } else {
+                    nfs.setNotification(
+                        "New user report! Count: " + newSighting.getElephantCount(),
+                        "UserReport",
+                        newSighting.getId() // sightingId is >0 for user reports
+                    );
+                }
+
 
                 lastSaveTime = now;
                 

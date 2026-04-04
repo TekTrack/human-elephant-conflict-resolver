@@ -33,17 +33,3 @@ public class ConfirmationController {
     }
 }
 
-// // JavaScript running on the Admin Web Portal
-// function verifySighting(sightingId) {
-//     fetch(`http://localhost:8080/api/admin/sightings/${sightingId}/verify`, {
-//         method: 'PUT',
-//         headers: {
-//             'Content-Type': 'application/json'
-//         }
-//     })
-//     .then(response => response.text())
-//     .then(data => {
-//         alert("Success: " + data); // Shows "Sighting 1 verified!"
-//     })
-//     .catch(error => console.error('Error:', error));
-// }

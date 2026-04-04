@@ -3,21 +3,19 @@ package com.example.jumbowatch.model;
 public class Notification {
     String message;
     String type;
-    String timestamp;
+    Long sightingId; // 0 for non sighting notifications. >0 for sighting-related notifications.
 
     public Notification() {}
 
-    public Notification(String message, String type) {
+    public Notification(String message, String type,Long sightingId) {
         this.message = message;
         this.type = type;
+        this.sightingId = sightingId;
     }
-    void setTimestamp(String timestamp) {
-        this.timestamp = timestamp;
-    }  
-    void setMessage(String message) {
+    public void setMessage(String message) {
         this.message = message;
     }
-    void setType(String type) {
+    public void setType(String type) {
         this.type = type;
     }
     public String getMessage() {
@@ -26,12 +24,15 @@ public class Notification {
     public String getType() {
         return type;
     }
-    public String getTimestamp() {
-        return timestamp;
+    public void setSightingId(Long sightingId) {
+        this.sightingId = sightingId;
     }
-    void clear() {
+    public Long getSightingId() {
+        return sightingId;
+    }
+    public void clear() {
         this.message = null;
         this.type = null;
-        this.timestamp = null;
+        this.sightingId = null;
     }
 }
