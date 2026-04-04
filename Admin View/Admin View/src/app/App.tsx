@@ -2,8 +2,8 @@ import { RouterProvider } from 'react-router';
 import React, { useState } from 'react';
 import { router } from './routes';
 import { ThemeProvider, useTheme } from './context/ThemeContext.tsx';
-// @ts-ignore - Keeps TS from complaining about the JS file
 import Auth from './utilities/Auth.js';
+import NotificationHandler from './utilities/NotificationHandler.jsx';
 import { Sun, Moon } from "lucide-react";
 
 const { login } = Auth;
@@ -83,14 +83,15 @@ function LoginUI({
   );
 }
 
-function MainApp() {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+function MainApp({mapTrigger}: {mapTrigger: number}) {
+  const [isLoggedIn, setIsLoggedIn] = useState(true);
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   
   // Dashboard states - specify string type for ID
   const [sightingId, setSightingId] = useState<string>('');
   const [newAdmin, setNewAdmin] = useState({ username: '', password: '' });
+  
 
   const BASE_URL = 'http://localhost:8080/api/admin';
 
@@ -125,9 +126,13 @@ function MainApp() {
 }
 
 export default function App() {
+  const [mapTrigger, setMapTrigger] = useState(0);
+  const handleNewAlert = () => setMapTrigger(prev => prev + 1);
   return (
+    
     <ThemeProvider>
-      <MainApp />
+      <NotificationHandler onNewAlert={handleNewAlert} />
+      <MainApp mapTrigger={mapTrigger} />
     </ThemeProvider>
   );
 }

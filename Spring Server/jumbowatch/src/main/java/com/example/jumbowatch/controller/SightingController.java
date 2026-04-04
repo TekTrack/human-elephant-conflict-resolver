@@ -53,7 +53,8 @@ public class SightingController {
             @RequestParam("latitude") String lat,
             @RequestParam("longitude") String lon,
             @RequestParam("photo") MultipartFile photo,
-            @RequestParam("source") String source
+            @RequestParam("source") String source,
+            @RequestParam("droneId") String droneId
         ) {
 
         try {
