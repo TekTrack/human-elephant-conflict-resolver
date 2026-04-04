@@ -38,6 +38,7 @@ public class Sighting {
     public String getPhotoFilename() { return photoFilename; }
     public boolean isVerified() { return verified; }
     public String getSource() { return source; }
+    public Long getId() { return id; }
 
     // Keep your old methods like verifySighting() here...
     public void setVerified(boolean verified) {

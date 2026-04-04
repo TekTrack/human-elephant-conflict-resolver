@@ -31,6 +31,8 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/api/admin/login").permitAll()
                 .requestMatchers("/api/admin/newadmin").authenticated()
+                .requestMatchers("/alert").permitAll()
+                .requestMatchers("/api/admin/notifications").permitAll() // For testing, can be removed later 
                 .anyRequest().authenticated())
                 .sessionManagement(session -> session
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS))

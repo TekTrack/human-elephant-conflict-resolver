@@ -20,6 +20,35 @@ const [mapTrigger, setMapTrigger] = useState(0);
   const [notification, setNotification] = useState(null);
   const BASE_URL = 'http://localhost:8080/api/admin';
 
+  // JavaScript running on the Admin Web Portal
+  function verifySighting(sightingId) {
+      fetch(`http://localhost:8080/api/admin/sightings/${sightingId}/verify`, {
+          method: 'PUT',
+          headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+          }
+      })
+      .then(response => response.text())
+      .then(data => {
+          alert("Success: " + data); // Shows "Sighting 1 verified!"
+      })
+      .catch(error => console.error('Error:', error));
+  };
+
+  const viewNotification = async (notification) => {
+    try {
+      if(notification[1] === "DroneAlert") {
+        window.open('/drones', '_blank');
+        
+      } else if(notification[1] === "SightingAlert") {
+        // Handle sighting alert specific logic
+      }
+    }catch (err) {
+      console.error( err);
+    }
+  };
+
   useEffect(() => {
     const fetchNotification = async () => {
       try {
@@ -38,6 +67,8 @@ const [mapTrigger, setMapTrigger] = useState(0);
           if(data.message) {
             setNotification([data.message,data.type]);
             onNewAlert(); // Notify parent component of new alert
+          }else{
+            return null; // No new notifications, don't update state
           }
         }
       } catch (nullErr) {
@@ -49,7 +80,7 @@ const [mapTrigger, setMapTrigger] = useState(0);
     return () => clearInterval(intervalId);
   }, []);
 
-  if (!notification) return null;
+  if (!notification) return null; // Don't render anything if there's no notification
 
   return (
     <div style={popupStyle}>
@@ -58,7 +89,7 @@ const [mapTrigger, setMapTrigger] = useState(0);
       <p>{"Type"}: {notification[1]}</p>
       <button onClick={() => setNotification(null)}>Close</button>
       <br/>
-      <button onClick={() => console.log(notification)}>View</button>
+      <button onClick={() => viewNotification(notification)}>View</button>
     </div>
 
   );
