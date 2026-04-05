@@ -35,17 +35,6 @@ export function FigmaAdminLayout() {
     { id: 1, title: "New Drone Sighting", desc: "Drone D-03 detected near boundary.", time: "2m ago", unread: true },
     { id: 2, title: "Battery Warning", desc: "Alpha Watcher is below 20% battery.", time: "15m ago", unread: true },
     { id: 3, title: "Zone Update", desc: "Server Room Zone coordinates modified.", time: "1h ago", unread: false },
-    { id: 3, title: "Zone Update", desc: "Server Room Zone coordinates modified.", time: "1h ago", unread: false },
-    { id: 3, title: "Zone Update", desc: "Server Room Zone coordinates modified.", time: "1h ago", unread: false },
-    { id: 3, title: "Zone Update", desc: "Server Room Zone coordinates modified.", time: "1h ago", unread: false },
-    { id: 3, title: "Zone Update", desc: "Server Room Zone coordinates modified.", time: "1h ago", unread: false },
-    { id: 3, title: "Zone Update", desc: "Server Room Zone coordinates modified.", time: "1h ago", unread: false },
-    { id: 3, title: "Zone Update", desc: "Server Room Zone coordinates modified.", time: "1h ago", unread: false },
-    { id: 3, title: "Zone Update", desc: "Server Room Zone coordinates modified.", time: "1h ago", unread: false },
-    { id: 3, title: "Zone Update", desc: "Server Room Zone coordinates modified.", time: "1h ago", unread: false },
-
-
-
   ]);
 
   const unreadCount = notifications.filter(n => n.unread).length;
