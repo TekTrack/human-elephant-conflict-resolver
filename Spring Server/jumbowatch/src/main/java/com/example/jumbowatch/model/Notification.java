@@ -1,16 +1,34 @@
 package com.example.jumbowatch.model;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
 
+@Entity
 public class Notification {
-    String message;
-    String type;
-    Long sightingId; // 0 for non sighting notifications. >0 for sighting-related notifications.
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+    private String message;
+    private String type;
+    private Long sightingId; // 0 for non sighting notifications. >0 for sighting-related notifications.
+    private int zoneId;
+
+    public int getZoneId() {
+        return zoneId;
+    }
+
+    public void setZoneId(int zoneId) {
+        this.zoneId = zoneId;
+    }
 
     public Notification() {}
 
-    public Notification(String message, String type,Long sightingId) {
+    public Notification(String message, String type,Long sightingId, int zoneId) {
         this.message = message;
         this.type = type;
         this.sightingId = sightingId;
+        this.zoneId = zoneId=0; // Default to 0 if not provided.
     }
     public void setMessage(String message) {
         this.message = message;
@@ -34,5 +52,6 @@ public class Notification {
         this.message = null;
         this.type = null;
         this.sightingId = null;
+        this.zoneId = 0;
     }
 }

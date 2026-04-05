@@ -1,6 +1,7 @@
 package com.example.jumbowatch.admin;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -8,6 +9,13 @@ import org.springframework.web.bind.annotation.*;
 import com.example.jumbowatch.controller.NotificationController;
 import com.example.jumbowatch.model.Notification;
 import com.example.jumbowatch.service.NotificationService;
+
+
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+
 
 @RestController
 @CrossOrigin(origins = "*")
@@ -26,6 +34,7 @@ public class AdminNotification extends NotificationController {
     public Map<String, String> sendNotification() {
         Map<String, String> response = new HashMap<>();
         Notification notification = nfs.getNotification();
+        nfs.saveNotification(); // Save the notification to the database    
         
         response.put("message", notification.getMessage());
         response.put("type", notification.getType());
