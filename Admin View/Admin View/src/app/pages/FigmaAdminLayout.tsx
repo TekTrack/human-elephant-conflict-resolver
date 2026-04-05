@@ -2,7 +2,7 @@ import { Outlet, Link, useLocation } from 'react-router';
 import { Sun, Moon,LayoutDashboard,  Bell, Map, AlertTriangle, Activity, Users} from "lucide-react";
 import { useTheme } from "../context/ThemeContext.tsx";
 import { useState } from "react";
-import { Button} from "../components/Button.tsx";
+//import { Button } from "../components/Button";
 
 
 const menuItems = [
@@ -10,7 +10,7 @@ const menuItems = [
   { label: "Geofencing", path: "/geofencing", icon: <Map size={20} /> },
   { label: "Sighting Alerts", path: "/sighting-alerts", icon: <AlertTriangle size={20} /> },
   { label: "Live Monitor", path: "/live-monitor", icon: <Activity size={20} /> },
-  { label: "Alert Map", path: "/alert-map", icon: <Bell size={20} /> },
+  { label: "Drone Map", path: "/alert-map", icon: <Bell size={20} /> },
   { label: "User Directory", path: "/user-directory", icon: <Users size={20} /> },
 
 ];
@@ -18,7 +18,7 @@ const menuItems = [
 export function FigmaAdminLayout() {
   const location = useLocation();
   const { theme, toggleTheme } = useTheme();
-  const [showNotifications, setShowNotifications] = useState(false);
+  //const [showNotifications, setShowNotifications] = useState(false);
   const [isCollapsed, setIsCollapsed] = useState(false);
 
   const isDark = theme === "dark";
