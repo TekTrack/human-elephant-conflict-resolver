@@ -1,0 +1,23 @@
+package com.example.jumbowatch.repository;
+
+import java.util.Optional;
+
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+
+import com.example.jumbowatch.model.User; // Assuming User is in the model package; adjust if necessary
+
+public interface UserRepository extends JpaRepository<User, String> {
+
+    //Find user by email (or username)
+    Optional<User> findByEmail(String email);
+
+    //Check if user with the same email already exists
+    boolean existsByEmail(String email);
+
+    //Check if user with the same Identity ID already exists
+    @Query("SELECT COUNT(u) > 0 FROM User u WHERE u.IdentityID = :identityID")
+    boolean existsByIdentityID(@Param("identityID") String identityID);
+
+}
