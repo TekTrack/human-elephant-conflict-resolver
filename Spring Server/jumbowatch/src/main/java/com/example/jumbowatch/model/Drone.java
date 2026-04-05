@@ -9,6 +9,15 @@ public class Drone {
     private String id;
     private double[] coordinates;
     private boolean remoteControlled;
+    private boolean active;
+
+    public boolean isActive() {
+        return active;
+    }
+
+    public void setActive(boolean active) {
+        this.active = active;
+    }
 
     public boolean isRemoteControlled() {
         return remoteControlled;
@@ -27,10 +36,11 @@ public class Drone {
     }
     
 
-    public Drone(String id, double[] coordinates, boolean remoteControlled) {
+    public Drone(String id, double[] coordinates, boolean remoteControlled, boolean active) {
         this.id = id;
         this.coordinates = coordinates;
         this.remoteControlled = remoteControlled;
+        this.active = active;
     }
     
     public String getId() {

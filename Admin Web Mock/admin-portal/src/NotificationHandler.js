@@ -37,12 +37,26 @@ const [mapTrigger, setMapTrigger] = useState(0);
   };
 
   const viewNotification = async (notification) => {
+    fetch(`{BASE_URL}/sightings/${notification[2]}`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+          }
+        })
+        .then(response => response.json())
+        .then(data => {
+          res=data;          // Handle the sighting data as needed
+          console.log('Sighting details:', res);
+          // For example, you could open a modal with the sighting details
+        })
+    
     try {
       if(notification[1] === "DroneAlert") {
         window.open('/drones', '_blank');
         
       } else if(notification[1] === "SightingAlert") {
-        // Handle sighting alert specific logic
+        window.open('/sightings', '_blank');
       }
     }catch (err) {
       console.error( err);
@@ -68,7 +82,7 @@ const [mapTrigger, setMapTrigger] = useState(0);
             setNotification([data.message,data.type]);
             onNewAlert(); // Notify parent component of new alert
           }else{
-            return null; // No new notifications, don't update state
+            return null; // No new notifications, don't update statet
           }
         }
       } catch (nullErr) {
