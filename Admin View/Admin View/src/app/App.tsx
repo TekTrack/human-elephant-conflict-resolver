@@ -2,6 +2,7 @@ import { RouterProvider } from 'react-router';
 import React, { useState } from 'react';
 import { router } from './routes';
 import { ThemeProvider, useTheme } from './context/ThemeContext.tsx';
+import { MapTriggerProvider } from './context/MapTriggerContext.tsx';
 import Auth from './utilities/Auth.js';
 import NotificationHandler from './utilities/NotificationHandler.jsx';
 import { Sun, Moon } from "lucide-react";
@@ -83,8 +84,8 @@ function LoginUI({
   );
 }
 
-function MainApp({mapTrigger}: {mapTrigger: number}) {
-  const [isLoggedIn, setIsLoggedIn] = useState(true);
+function MainApp() {
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   
@@ -128,11 +129,14 @@ function MainApp({mapTrigger}: {mapTrigger: number}) {
 export default function App() {
   const [mapTrigger, setMapTrigger] = useState(0);
   const handleNewAlert = () => setMapTrigger(prev => prev + 1);
+  const BASE_URL = 'http://localhost:8080/api/admin';
   return (
     
-    <ThemeProvider>
-      <NotificationHandler onNewAlert={handleNewAlert} />
-      <MainApp mapTrigger={mapTrigger} />
-    </ThemeProvider>
+    <MapTriggerProvider mapTrigger={mapTrigger} setMapTrigger={setMapTrigger} BASE_URL={BASE_URL}>
+      <ThemeProvider>
+        <NotificationHandler onNewAlert={handleNewAlert} />
+        <MainApp />
+      </ThemeProvider>
+    </MapTriggerProvider>
   );
 }

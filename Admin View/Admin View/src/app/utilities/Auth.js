@@ -8,7 +8,6 @@ const login = async (username, password) => {
   });
 
   const data = await res.json();
-
   // Save the token to local storage!
   localStorage.setItem('authToken', data.token); 
 };
