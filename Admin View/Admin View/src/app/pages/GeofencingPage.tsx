@@ -1,16 +1,18 @@
-import {useState, useRef, useCallback, useEffect} from "react";
-import {useTheme} from "../context/ThemeContext";
-import {MapPin, Plus, Edit, Trash2, X, RefreshCw, Check} from "lucide-react";// @ts-ignore
-import Map, {Source, Layer, Marker, Popup, NavigationControl} from "react-map-gl/maplibre";
-import type {MapRef, MapLayerMouseEvent, MapMouseEvent} from "react-map-gl/maplibre";
+import { useState, useRef, useCallback, useEffect } from "react";
+import { useTheme } from "../context/ThemeContext";
+import { useMapTrigger } from "../context/MapTriggerContext";
+import { MapPin, Plus, Edit, Trash2, X, RefreshCw } from "lucide-react";
+// @ts-ignore
+import Map, { Source, Layer, Marker, Popup, NavigationControl } from "react-map-gl/maplibre";
+import type { MapRef, MapLayerMouseEvent, MapMouseEvent } from "react-map-gl/maplibre";
 
-import {PageHeader} from "../components/PageHeader";
-import {StatCard} from "../components/StatCard";
-import {Card} from "../components/Card";
-import {Badge} from "../components/Badge";
-import {Button} from "../components/Button";
-import {Input} from "../components/Input";
-import {Select} from "../components/Select";
+import { PageHeader } from "../components/PageHeader";
+import { StatCard } from "../components/StatCard";
+import { Card } from "../components/Card";
+import { Badge } from "../components/Badge";
+import { Button } from "../components/Button";
+import { Input } from "../components/Input";
+import { Select } from "../components/Select";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 type GeofenceType = "Restricted" | "Monitored" | "High Security";
@@ -21,7 +23,7 @@ interface Geofence {
     id: number;
     name: string;
     type: GeofenceType;
-    radius: string;
+    //radius: string;
     alerts: number;
     status: GeofenceStatus;
     coordinates: string;
@@ -102,7 +104,8 @@ function zonesToGeoJSON(zones: Geofence[]) {
 }
 
 export function GeofencingPage() {
-    const {theme} = useTheme();
+    const { theme } = useTheme();
+    const { mapTrigger, BASE_URL } = useMapTrigger();
     const isDark = theme === "dark";
     const mapRef = useRef<MapRef>(null);
 
@@ -136,11 +139,37 @@ export function GeofencingPage() {
         setSightings(DUMMY_SIGHTINGS.filter((s) => new Date(s.timestamp).getTime() >= cutoffs[f]));
     }, []);
 
-    const fetchZones = () => setGeofences((prev) => [...prev]);
+    const completeFetchZones = (data: Geofence[]) => {
+        const formattedZones = data.map((zone) => ({
+                ...zone,
+                //radius: zone.radius || "0m", 
+                status: zone.status || "Active",
+                coordinates: `${((zone.minLat + zone.maxLat) / 2).toFixed(4)}, ${((zone.minLon + zone.maxLon) / 2).toFixed(4)}`
+            }));
+        return formattedZones;
+    };
+
+    const fetchZones = async () => {
+        try {
+        const token = localStorage.getItem('authToken'); 
+        const res = await fetch(`${BASE_URL}/zones`,{
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          }
+        });
+        const data = await res.json();
+        setGeofences(completeFetchZones(data));
+      } catch (err) {
+        console.error(err);
+      }
+    }
 
     useEffect(() => {
         fetchSightings(filter);
-    }, [filter, fetchSightings]);
+        fetchZones();
+    }, [filter, fetchSightings, mapTrigger]);
 
     const handleMapMouseDown = useCallback((e: MapMouseEvent) => {
         if (!drawMode) return;
@@ -195,11 +224,39 @@ export function GeofencingPage() {
         return Object.keys(next).length === 0;
     };
 
-    const deriveRadius = (): string => {
-        const latDiff = Math.abs(newZone.maxLat - newZone.minLat);
-        const lonDiff = Math.abs(newZone.maxLon - newZone.minLon);
-        const metres = Math.round(((latDiff + lonDiff) / 2) * 111_000);
-        return metres >= 1000 ? `${(metres / 1000).toFixed(1)}km` : `${metres}m`;
+    // const deriveRadius = (): string => {
+    //     const latDiff = Math.abs(newZone.maxLat - newZone.minLat);
+    //     const lonDiff = Math.abs(newZone.maxLon - newZone.minLon);
+    //     const metres = Math.round(((latDiff + lonDiff) / 2) * 111_000);
+    //     return metres >= 1000 ? `${(metres / 1000).toFixed(1)}km` : `${metres}m`;
+    // };
+
+    const saveZoneToDatabase = async (newZone: Geofence) => {
+    try {
+        const zoneData = {
+            name: newZone.name,
+            type: newZone.type,
+            minLat: newZone.minLat,
+            maxLat: newZone.maxLat,
+            minLon: newZone.minLon,
+            maxLon: newZone.maxLon
+        };
+        const token = localStorage.getItem('authToken'); // Grab the saved token
+        const res = await fetch(`${BASE_URL}/zones`, {
+            method: 'POST',
+            headers: { 
+                'Content-Type': 'application/json' 
+                ,'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify(zoneData)
+        });
+
+        const data = await res.json();
+        console.log(`✅ Zone saved: ${data.name}`);
+        fetchZones(); // Refresh the active zones
+        } catch (err) {
+        console.error(err);
+        }
     };
 
     const handleSaveZone = (): void => {
@@ -210,13 +267,14 @@ export function GeofencingPage() {
             id: Date.now(),
             name: newZone.name.trim(),
             type: newZone.type,
-            radius: deriveRadius(),
+            // radius: deriveRadius(),
             alerts: 0,
             status: "Active",
             coordinates: `${centreLatStr}, ${centreLonStr}`,
             minLat: newZone.minLat, maxLat: newZone.maxLat, minLon: newZone.minLon, maxLon: newZone.maxLon,
         };
         setGeofences((prev) => [...prev, zone]);
+        saveZoneToDatabase(zone);
         handleCloseModal();
     };
 
@@ -435,7 +493,7 @@ export function GeofencingPage() {
                                             <Badge
                                                 variant={getVariant(popupInfo.geofence.status) as any}>{popupInfo.geofence.status}</Badge>
                                         </div>
-                                        <div className="mt-2">🔵 Radius: {popupInfo.geofence.radius}</div>
+                                        {/* <div className="mt-2">🔵 Radius: {popupInfo.geofence.radius}</div> */}
                                         <div>🔔 Alerts: {popupInfo.geofence.alerts}</div>
                                         <div>📍 {popupInfo.geofence.coordinates}</div>
                                     </div>
@@ -471,16 +529,13 @@ export function GeofencingPage() {
                                 </div>
                                 <div className="flex items-center gap-6 text-sm">
                                     <span className="text-black dark:text-white">📍 {geofence.coordinates}</span>
-                                    <span
-                                        className="text-gray-600 dark:text-[rgba(255,255,255,0.6)]">🔵 Radius: {geofence.radius}</span>
-                                    <span
-                                        className="text-gray-600 dark:text-[rgba(255,255,255,0.6)]">🔔 {geofence.alerts} alerts</span>
+                                    {/* <span className="text-gray-600 dark:text-[rgba(255,255,255,0.6)]">🔵 Radius: {geofence.radius}</span> */}
+                                    <span className="text-gray-600 dark:text-[rgba(255,255,255,0.6)]">🔔 {geofence.alerts} alerts</span>
                                 </div>
                             </div>
                             <div className="flex items-center gap-2">
-                                <Button variant="ghost" className="p-2"><Edit className="w-4 h-4"/></Button>
-                                <Button variant="dangerIcon" className="p-2"
-                                        onClick={() => handleDelete(geofence.id)}><Trash2 className="w-4 h-4"/></Button>
+                                <Button variant="secondary" className="p-2"><Edit className="w-4 h-4" /></Button>
+                                <Button variant="danger" className="p-2" onClick={() => handleDelete(geofence.id)}><Trash2 className="w-4 h-4" /></Button>
                             </div>
                         </div>
                     </Card>
@@ -495,8 +550,7 @@ export function GeofencingPage() {
                     <Card className="relative w-full max-w-md p-6 shadow-2xl z-10" noPadding={false}>
                         <div className="flex items-center justify-between mb-6">
                             <h2 className="text-lg font-semibold text-black dark:text-white">Create New Geofence</h2>
-                            <Button variant="ghost" className="p-1.5" onClick={handleCloseModal}><X
-                                className="w-4 h-4"/></Button>
+                            <Button variant="secondary" className="p-1.5" onClick={handleCloseModal}><X className="w-4 h-4" /></Button>
                         </div>
 
                         {newZone.minLat !== 0 && (
