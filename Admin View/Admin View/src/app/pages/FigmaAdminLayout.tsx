@@ -1,24 +1,23 @@
 import { Outlet, Link, useLocation } from 'react-router';
-import { Sun, Moon,LayoutDashboard,  Bell, Map, AlertTriangle, Activity, Users} from "lucide-react";
+import { Sun, Moon,LayoutDashboard, LogOut ,  Drone  , Map, AlertTriangle, Activity, Bell , Users} from "lucide-react";
 import { useTheme } from "../context/ThemeContext.tsx";
 import { useState } from "react";
 //import { Button } from "../components/Button";
 
 
 const menuItems = [
-  { label: "Overview", path: "/", icon: <LayoutDashboard size={20} /> },
-  { label: "Geofencing", path: "/geofencing", icon: <Map size={20} /> },
-  { label: "Sighting Alerts", path: "/sighting-alerts", icon: <AlertTriangle size={20} /> },
-  { label: "Live Monitor", path: "/live-monitor", icon: <Activity size={20} /> },
-  { label: "Drone Map", path: "/alert-map", icon: <Bell size={20} /> },
-  { label: "User Directory", path: "/user-directory", icon: <Users size={20} /> },
+  { label: "Overview", path: "/", icon: <LayoutDashboard size={30} /> },
+  { label: "Geofencing", path: "/geofencing", icon: <Map size={30} /> },
+  { label: "Sighting Alerts", path: "/sighting-alerts", icon: <AlertTriangle size={30} /> },
+  { label: "Live Monitor", path: "/live-monitor", icon: <Activity size={30} /> },
+  { label: "Drone Map", path: "/alert-map", icon: <Drone   size={30} /> },
+  { label: "User Directory", path: "/user-directory", icon: <Users size={30} /> },
 
 ];
 
 export function FigmaAdminLayout() {
   const location = useLocation();
   const { theme, toggleTheme } = useTheme();
-  //const [showNotifications, setShowNotifications] = useState(false);
   const [isCollapsed, setIsCollapsed] = useState(false);
 
   const isDark = theme === "dark";
@@ -30,11 +29,24 @@ export function FigmaAdminLayout() {
   const menuItemActiveBg = isDark ? "bg-[rgba(255,255,255,0.1)]" : "bg-gray-300";
   const borderColor = isDark ? "border-[rgba(255,255,255,0.15)]" : "border-gray-300";
 
+  /*Dummy notifications*/
+  const [notifications, setNotifications] = useState([
+    { id: 1, title: "New Drone Sighting", desc: "Drone D-03 detected near boundary.", time: "2m ago", unread: true },
+    { id: 2, title: "Battery Warning", desc: "Alpha Watcher is below 20% battery.", time: "15m ago", unread: true },
+    { id: 3, title: "Zone Update", desc: "Server Room Zone coordinates modified.", time: "1h ago", unread: false },
+  ]);
+
+  const unreadCount = notifications.filter(n => n.unread).length;
+
+  const markAllRead = () => {
+    setNotifications(prev => prev.map(n => ({ ...n, unread: false })));
+  };
+
   return (
     <div className={`flex h-screen ${bgColor} ${textColor}`}>
       {/* Left Sidebar */}
       <aside
-          className={`${isCollapsed ? "w-16" : "w-60"} relative ${sidebarBg} border-r ${borderColor} flex flex-col transition-all duration-300 ease-in-out`}
+          className={`${isCollapsed ? "w-26" : "w-60"} relative ${sidebarBg} border-r ${borderColor} flex flex-col transition-all duration-300 ease-in-out`}
       >
 
         {/* Header Section (Contains Profile and Toggle Button) */}
@@ -70,7 +82,7 @@ export function FigmaAdminLayout() {
         </div>
 
         {/* Navigation */}
-        <nav className="flex-1 p-4 space-y-5 overflow-hidden">
+        <nav className="flex-1 p-4 space-y-6 overflow-hidden">
           {menuItems.map((item) => {
             const isActive = location.pathname === item.path;
             return (
@@ -96,6 +108,27 @@ export function FigmaAdminLayout() {
                 </Link>
             );
           })}
+
+
+          { /*logout button*/}
+          <div className={`p-4 py-100 border-t ${borderColor} shrink-0`}>
+            <Link
+                to="/logout"
+                title={isCollapsed ? "Logout" : ""}
+                className={`flex items-center px-4 py-2.5 rounded-lg transition-colors ${
+                    isDark ? "hover:bg-red-500/10 text-red-400" : "hover:bg-red-50 text-red-500"
+                } ${isCollapsed ? "justify-center px-0" : ""}`}
+            >
+              <div className={`${isCollapsed ? "mr-0" : "mr-3"}`}>
+                <LogOut size={20} />
+              </div>
+              <span className={`text-sm font-medium whitespace-nowrap transition-all duration-300 ${
+                  isCollapsed ? "w-0 opacity-0 hidden" : "w-auto opacity-100"
+              }`}>
+              Logout
+            </span>
+            </Link>
+          </div>
         </nav>
       </aside>
 

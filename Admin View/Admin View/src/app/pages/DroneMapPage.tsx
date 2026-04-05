@@ -1,6 +1,6 @@
 import { useState, useRef, useCallback, useMemo } from "react";
 import { useTheme } from "../context/ThemeContext";
-import { Navigation, Crosshair, X, Check, Battery, PowerOff } from "lucide-react";
+import { Navigation, Crosshair, X, Drone ,Check, Battery, PowerOff } from "lucide-react";
 // @ts-ignore
 import Map, { Source, Layer, Marker, NavigationControl } from "react-map-gl/maplibre";
 import type { MapRef, MapMouseEvent } from "react-map-gl/maplibre";
@@ -312,7 +312,7 @@ export function DroneMapPage() { // Note: You might want to rename this componen
                           className="w-8 h-8 rounded-full flex items-center justify-center text-white shadow-lg shadow-black/50"
                           style={{ backgroundColor: drone.color }}
                       >
-                        <Navigation className="w-4 h-4 transform rotate-45" />
+                        <Drone  className="w-5 h-5 " />
                       </div>
                     </Marker>
                 ))}
