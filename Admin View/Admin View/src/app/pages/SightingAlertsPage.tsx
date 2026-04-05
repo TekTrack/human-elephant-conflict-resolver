@@ -30,14 +30,7 @@ export function SightingAlertsPage() {
       time: "1 hour ago",
       location: "Building C - Lobby",
     },
-    {
-      id: 4,
-      title: "Resolved: Door Left Open",
-      description: "Security door at main entrance was secured",
-      status: "resolved",
-      time: "2 hours ago",
-      location: "Building A - Main Entrance",
-    },
+
   ];
 
   const getStatusIcon = (status: string) => {
