@@ -1,7 +1,7 @@
 import { Outlet, Link, useLocation } from 'react-router';
 import { Sun, Moon,LayoutDashboard, LogOut ,  Drone   , Map, AlertTriangle, Activity, Bell , Users} from "lucide-react";
 import { useTheme } from "../context/ThemeContext.tsx";
-import { useState } from "react";
+import {useContext, useState} from "react";
 //import { Button } from "../components/Button";
 
 
@@ -38,6 +38,7 @@ export function FigmaAdminLayout() {
   ]);
 
   const unreadCount = notifications.filter(n => n.unread).length;
+
 
   const markAllRead = () => {
     setNotifications(prev => prev.map(n => ({ ...n, unread: false })));
@@ -117,22 +118,22 @@ export function FigmaAdminLayout() {
 
           { /*logout button*/}
           <div className={`p-4 py-100 border-t ${borderColor} shrink-0`}>
-            <Link
-                to="/logout"
-                title={isCollapsed ? "Logout" : ""}
-                className={`flex items-center px-4 py-2.5 rounded-lg transition-colors ${
-                    isDark ? "hover:bg-red-500/10 text-red-400" : "hover:bg-red-50 text-red-500"
-                } ${isCollapsed ? "justify-center px-0" : ""}`}
-            >
-              <div className={`${isCollapsed ? "mr-0" : "mr-3"}`}>
-                <LogOut size={20} />
-              </div>
-              <span className={`text-sm font-medium whitespace-nowrap transition-all duration-300 ${
-                  isCollapsed ? "w-0 opacity-0 hidden" : "w-auto opacity-100"
-              }`}>
-              Logout
-            </span>
-            </Link>
+              <Link
+                  to="/logout"
+                  title={isCollapsed ? "Logout" : ""}
+                  className={`flex items-center px-4 py-2.5 rounded-lg transition-colors ${
+                      isDark ? "hover:bg-red-500/10 text-red-400" : "hover:bg-red-50 text-red-500"
+                  } ${isCollapsed ? "justify-center px-0" : ""}`}
+              >
+                <div className={`${isCollapsed ? "mr-0" : "mr-3"}`}>
+                  <LogOut size={20} />
+                </div>
+                <span className={`text-sm font-medium whitespace-nowrap transition-all duration-300 ${
+                    isCollapsed ? "w-0 opacity-0 hidden" : "w-auto opacity-100"
+                }`}>
+                Logout
+              </span>
+              </Link>
           </div>
         </nav>
       </aside>
@@ -183,13 +184,13 @@ export function FigmaAdminLayout() {
       {/* 1. Invisible Backdrop (Clicks outside close the panel) */}
       {showNotifications && (
           <div
-              className="absolute inset-0 bg-black/20 dark:bg-black/40 backdrop-blur-[2px] z-40 transition-opacity"
+              className="fixed inset-0 bg-black/20 dark:bg-black/40 backdrop-blur-[2px] z-40 transition-opacity"
               onClick={() => setShowNotifications(false)}
           />
       )}
 
       {/* 2. The Sliding Drawer */}
-      <div className={`absolute top-0 right-0 h-full w-80 md:w-96 ${sidebarBg} border-l ${borderColor} shadow-2xl z-50 transform transition-transform duration-300 ease-in-out flex flex-col ${
+      <div className={`fixed top-0 right-0 h-full w-80 md:w-96 ${sidebarBg} border-l ${borderColor} shadow-2xl z-50 transform transition-transform duration-300 ease-in-out flex flex-col ${
               showNotifications ? "translate-x-0" : "translate-x-full"
           }`}>
         {/* Drawer Header */}

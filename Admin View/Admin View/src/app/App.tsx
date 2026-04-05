@@ -1,5 +1,5 @@
 import { RouterProvider } from 'react-router';
-import React, { useState } from 'react';
+import React, {createContext, useState} from 'react';
 import { router } from './routes';
 import { ThemeProvider, useTheme } from './context/ThemeContext.tsx';
 import { MapTriggerProvider } from './context/MapTriggerContext.tsx';
@@ -85,10 +85,11 @@ function LoginUI({
 }
 
 function MainApp() {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(true);
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
-  
+
+
   // Dashboard states - specify string type for ID
   const [sightingId, setSightingId] = useState<string>('');
   const [newAdmin, setNewAdmin] = useState({ username: '', password: '' });
