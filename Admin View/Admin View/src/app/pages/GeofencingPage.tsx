@@ -1,17 +1,17 @@
-import {useState, useRef, useCallback, useEffect} from "react";
-import {useTheme} from "../context/ThemeContext";
+import { useState, useRef, useCallback, useEffect } from "react";
+import { useTheme } from "../context/ThemeContext";
 import { useMapTrigger } from "../context/MapTriggerContext";
-import {MapPin, Plus, Edit, Trash2, X, RefreshCw, Check} from "lucide-react";// @ts-ignore
-import Map, {Source, Layer, Marker, Popup, NavigationControl} from "react-map-gl/maplibre";
-import type {MapRef, MapLayerMouseEvent, MapMouseEvent} from "react-map-gl/maplibre";
+import { MapPin, Plus, Edit, Trash2, X, RefreshCw, Check } from "lucide-react";// @ts-ignore
+import Map, { Source, Layer, Marker, Popup, NavigationControl } from "react-map-gl/maplibre";
+import type { MapRef, MapLayerMouseEvent, MapMouseEvent } from "react-map-gl/maplibre";
 
-import {PageHeader} from "../components/PageHeader";
-import {StatCard} from "../components/StatCard";
-import {Card} from "../components/Card";
-import {Badge} from "../components/Badge";
-import {Button} from "../components/Button";
-import {Input} from "../components/Input";
-import {Select} from "../components/Select";
+import { PageHeader } from "../components/PageHeader";
+import { StatCard } from "../components/StatCard";
+import { Card } from "../components/Card";
+import { Badge } from "../components/Badge";
+import { Button } from "../components/Button";
+import { Input } from "../components/Input";
+import { Select } from "../components/Select";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 type GeofenceType = "Restricted" | "Monitored" | "High Security";
@@ -61,7 +61,7 @@ interface PopupInfo {
 const MAP_STYLE = "https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json";
 const MAP_STYLE_LIGHT = "https://basemaps.cartocdn.com/gl/positron-gl-style/style.json";
 
-const defaultForm: NewZoneForm = {name: "", type: "Monitored", minLat: 0, maxLat: 0, minLon: 0, maxLon: 0};
+const defaultForm: NewZoneForm = { name: "", type: "Monitored", minLat: 0, maxLat: 0, minLon: 0, maxLon: 0 };
 
 // const DUMMY_SIGHTINGS: Sighting[] = [
 //     {latitude: 40.714, longitude: -74.006, timestamp: new Date().toISOString(), type: "user"},
@@ -106,7 +106,7 @@ function zonesToGeoJSON(zones: Geofence[]) {
 }
 
 export function GeofencingPage() {
-    const {theme} = useTheme();
+    const { theme } = useTheme();
     const isDark = theme === "dark";
     const mapRef = useRef<MapRef>(null);
     const { mapTrigger, BASE_URL } = useMapTrigger();
@@ -143,12 +143,12 @@ export function GeofencingPage() {
 
     const fetchSightings = async (filter: FilterValue) => {
         const token = localStorage.getItem('authToken'); // Grab the saved token
-        const res = await fetch(`${BASE_URL}/sightings/filter?timeframe=${filter}`,{
-        method: 'GET',
-        headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
-        }
+        const res = await fetch(`${BASE_URL}/sightings/filter?timeframe=${filter}`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            }
         });
         const data = await res.json();
         setSightings(data);
@@ -156,33 +156,33 @@ export function GeofencingPage() {
 
     const completeFetchZones = (data: Geofence[]) => {
         const formattedZones = data.map((zone) => ({
-                ...zone,
-                //radius: zone.radius || "0m", 
-                status: zone.status || "Active",
-                coordinates: `${((zone.minLat + zone.maxLat) / 2).toFixed(4)}, ${((zone.minLon + zone.maxLon) / 2).toFixed(4)}`
-            }));
+            ...zone,
+            //radius: zone.radius || "0m", 
+            status: zone.status || "Active",
+            coordinates: `${((zone.minLat + zone.maxLat) / 2).toFixed(4)}, ${((zone.minLon + zone.maxLon) / 2).toFixed(4)}`
+        }));
         return formattedZones;
     };
 
     const fetchZones = async () => {
         try {
-        const token = localStorage.getItem('authToken'); 
-        const res = await fetch(`${BASE_URL}/zones`,{
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
-          }
-        });
-        if(res.ok){
-        const data = await res.json();
-        setGeofences(completeFetchZones(data));
-        } else {
-            console.error('Failed to fetch zones');
+            const token = localStorage.getItem('authToken');
+            const res = await fetch(`${BASE_URL}/zones`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+            if (res.ok) {
+                const data = await res.json();
+                setGeofences(completeFetchZones(data));
+            } else {
+                console.error('Failed to fetch zones');
+            }
+        } catch (err) {
+            console.error(err);
         }
-      } catch (err) {
-        console.error(err);
-      }
     }
 
     useEffect(() => {
@@ -194,19 +194,19 @@ export function GeofencingPage() {
         if (!drawMode) return;
         e.preventDefault();
         setIsDrawing(true);
-        setDrawStart({lng: e.lngLat.lng, lat: e.lngLat.lat});
-        setDrawEnd({lng: e.lngLat.lng, lat: e.lngLat.lat});
+        setDrawStart({ lng: e.lngLat.lng, lat: e.lngLat.lat });
+        setDrawEnd({ lng: e.lngLat.lng, lat: e.lngLat.lat });
     }, [drawMode]);
 
     const handleMapMouseMove = useCallback((e: MapMouseEvent) => {
         if (!isDrawing || !drawMode) return;
-        setDrawEnd({lng: e.lngLat.lng, lat: e.lngLat.lat});
+        setDrawEnd({ lng: e.lngLat.lng, lat: e.lngLat.lat });
     }, [isDrawing, drawMode]);
 
     const handleMapMouseUp = useCallback((e: MapMouseEvent) => {
         if (!isDrawing || !drawMode || !drawStart) return;
         setIsDrawing(false);
-        const end = {lng: e.lngLat.lng, lat: e.lngLat.lat};
+        const end = { lng: e.lngLat.lng, lat: e.lngLat.lat };
         setDrawEnd(end);
 
         const minLat = Math.min(drawStart.lat, end.lat);
@@ -220,7 +220,7 @@ export function GeofencingPage() {
             return;
         }
 
-        setNewZone((prev) => ({...prev, minLat, maxLat, minLon, maxLon}));
+        setNewZone((prev) => ({ ...prev, minLat, maxLat, minLon, maxLon }));
         setDrawMode(false);
         setShowModal(true);
     }, [isDrawing, drawMode, drawStart]);
@@ -231,7 +231,7 @@ export function GeofencingPage() {
         const id = e.features[0].properties?.id as number;
         const zone = geofences.find((z) => z.id === id);
         if (!zone) return;
-        setPopupInfo({longitude: e.lngLat.lng, latitude: e.lngLat.lat, geofence: zone});
+        setPopupInfo({ longitude: e.lngLat.lng, latitude: e.lngLat.lat, geofence: zone });
     }, [geofences, drawMode]);
 
     const validate = (): boolean => {
@@ -251,30 +251,30 @@ export function GeofencingPage() {
     // };
 
     const saveZoneToDatabase = async (newZone: Geofence) => {
-    try {
-        const zoneData = {
-            name: newZone.name,
-            type: newZone.type,
-            minLat: newZone.minLat,
-            maxLat: newZone.maxLat,
-            minLon: newZone.minLon,
-            maxLon: newZone.maxLon
-        };
-        const token = localStorage.getItem('authToken'); // Grab the saved token
-        const res = await fetch(`${BASE_URL}/zones`, {
-            method: 'POST',
-            headers: { 
-                'Content-Type': 'application/json' 
-                ,'Authorization': `Bearer ${token}`
-            },
-            body: JSON.stringify(zoneData)
-        });
+        try {
+            const zoneData = {
+                name: newZone.name,
+                type: newZone.type,
+                minLat: newZone.minLat,
+                maxLat: newZone.maxLat,
+                minLon: newZone.minLon,
+                maxLon: newZone.maxLon
+            };
+            const token = localStorage.getItem('authToken'); // Grab the saved token
+            const res = await fetch(`${BASE_URL}/zones`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                    , 'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify(zoneData)
+            });
 
-        const data = await res.json();
-        console.log(`✅ Zone saved: ${data.name}`);
-        fetchZones(); // Refresh the active zones
+            const data = await res.json();
+            console.log(`✅ Zone saved: ${data.name}`);
+            fetchZones(); // Refresh the active zones
         } catch (err) {
-        console.error(err);
+            console.error(err);
         }
     };
 
@@ -297,10 +297,30 @@ export function GeofencingPage() {
         handleCloseModal();
     };
 
-    const handleDelete = (id: number): void => {
-        setGeofences((prev) => prev.filter((g) => g.id !== id));
-        if (popupInfo?.geofence.id === id) setPopupInfo(null);
-    };
+    // const handleDelete = (id: number): void => {
+    //     setGeofences((prev) => prev.filter((g) => g.id !== id));
+    //     if (popupInfo?.geofence.id === id) setPopupInfo(null);
+    // };
+    const handleDelete = async (id: number): Promise<void> => {
+        try {
+            const token = localStorage.getItem('authToken'); // Grab the saved token
+            const res = await fetch(`${BASE_URL}/zones/${id}`, {
+                method: 'DELETE',
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+
+            if (!res.ok) {
+                throw new Error('Failed to delete zone');
+            }
+
+            fetchZones();}
+        catch (err) {
+            console.error(err);
+        }
+    };    
+
 
     const handleCloseModal = (): void => {
         setShowModal(false);
@@ -344,7 +364,7 @@ export function GeofencingPage() {
                             setDrawEnd(null);
                         }}
                     >
-                        <Plus className="w-4 h-4"/>
+                        <Plus className="w-4 h-4" />
                         {drawMode ? "Drawing… (drag to select)" : "Create Geofence"}
                     </Button>
                 }
@@ -353,12 +373,12 @@ export function GeofencingPage() {
             {/* Stats */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <StatCard label="Total Zones" value={geofences.length}
-                          icon={<MapPin className="w-5 h-5 text-blue-600"/>} iconBgClass="bg-blue-100"/>
+                    icon={<MapPin className="w-5 h-5 text-blue-600" />} iconBgClass="bg-blue-100" />
                 <StatCard label="New User Sightings" value={geofences.filter((g) => g.status === "Active").length}
-                          icon={<MapPin className="w-5 h-5 text-green-600"/>} iconBgClass="bg-green-100"
-                          valueColorClass="text-green-500"/>
+                    icon={<MapPin className="w-5 h-5 text-green-600" />} iconBgClass="bg-green-100"
+                    valueColorClass="text-green-500" />
                 <StatCard label="New Drone Sightings" value={geofences.filter((g) => g.type === "High Security").length}
-                          icon={<MapPin className="w-5 h-5 text-red-600"/>} iconBgClass="bg-red-100"/>
+                    icon={<MapPin className="w-5 h-5 text-red-600" />} iconBgClass="bg-red-100" />
             </div>
 
             {/* Interactive Map Wrapper */}
@@ -391,21 +411,19 @@ export function GeofencingPage() {
                             checked={showUserSightings}
                             onChange={(e) => setShowUserSightings(e.target.checked)}
                         />
-                        <div className={`flex items-center justify-center w-4 h-4 rounded transition-all duration-200 ${
-                            showUserSightings
-                                ? "bg-blue-500 border-transparent shadow-[0_0_10px_rgba(59,130,246,0.3)]"
-                                : isDark
-                                    ? "border border-[rgba(255,255,255,0.3)] group-hover:border-[rgba(255,255,255,0.5)] bg-[rgba(255,255,255,0.05)]"
-                                    : "border border-gray-300 group-hover:border-gray-400 bg-white"
-                        }`}>
+                        <div className={`flex items-center justify-center w-4 h-4 rounded transition-all duration-200 ${showUserSightings
+                            ? "bg-blue-500 border-transparent shadow-[0_0_10px_rgba(59,130,246,0.3)]"
+                            : isDark
+                                ? "border border-[rgba(255,255,255,0.3)] group-hover:border-[rgba(255,255,255,0.5)] bg-[rgba(255,255,255,0.05)]"
+                                : "border border-gray-300 group-hover:border-gray-400 bg-white"
+                            }`}>
                             {showUserSightings && <Check className="w-3 h-3 text-white" strokeWidth={3} />}
                         </div>
-                        <span className={`font-medium transition-colors ${
-                            isDark
-                                ? (showUserSightings ? "text-white" : "text-[rgba(255,255,255,0.5)] group-hover:text-[rgba(255,255,255,0.8)]")
-                                : (showUserSightings ? "text-gray-900" : "text-gray-500 group-hover:text-gray-700")
-                        }`}>
-                             User Sightings
+                        <span className={`font-medium transition-colors ${isDark
+                            ? (showUserSightings ? "text-white" : "text-[rgba(255,255,255,0.5)] group-hover:text-[rgba(255,255,255,0.8)]")
+                            : (showUserSightings ? "text-gray-900" : "text-gray-500 group-hover:text-gray-700")
+                            }`}>
+                            User Sightings
                         </span>
                     </label>
 
@@ -417,22 +435,20 @@ export function GeofencingPage() {
                             checked={showDroneSightings}
                             onChange={(e) => setShowDroneSightings(e.target.checked)}
                         />
-                        <div className={`flex items-center justify-center w-4 h-4 rounded transition-all duration-200 ${
-                            showDroneSightings
-                                ? "bg-red-500 border-transparent shadow-[0_0_10px_rgba(239,68,68,0.3)]"
-                                : isDark
-                                    ? "border border-[rgba(255,255,255,0.3)] group-hover:border-[rgba(255,255,255,0.5)] bg-[rgba(255,255,255,0.05)]"
-                                    : "border border-gray-300 group-hover:border-gray-400 bg-white"
-                        }`}>
+                        <div className={`flex items-center justify-center w-4 h-4 rounded transition-all duration-200 ${showDroneSightings
+                            ? "bg-red-500 border-transparent shadow-[0_0_10px_rgba(239,68,68,0.3)]"
+                            : isDark
+                                ? "border border-[rgba(255,255,255,0.3)] group-hover:border-[rgba(255,255,255,0.5)] bg-[rgba(255,255,255,0.05)]"
+                                : "border border-gray-300 group-hover:border-gray-400 bg-white"
+                            }`}>
                             {showDroneSightings && <Check className="w-3 h-3 text-white" strokeWidth={3} />}
                         </div>
-                        <span className={`font-medium transition-colors ${
-                            isDark
-                                ? (showDroneSightings ? "text-white" : "text-[rgba(255,255,255,0.5)] group-hover:text-[rgba(255,255,255,0.8)]")
-                                : (showDroneSightings ? "text-gray-900" : "text-gray-500 group-hover:text-gray-700")
-                        }`}>
-      Drone Sightings
-    </span>
+                        <span className={`font-medium transition-colors ${isDark
+                            ? (showDroneSightings ? "text-white" : "text-[rgba(255,255,255,0.5)] group-hover:text-[rgba(255,255,255,0.8)]")
+                            : (showDroneSightings ? "text-gray-900" : "text-gray-500 group-hover:text-gray-700")
+                            }`}>
+                            Drone Sightings
+                        </span>
                     </label>
 
                     {/* Refresh Button (ml-auto pushes it all the way to the right) */}
@@ -449,12 +465,12 @@ export function GeofencingPage() {
                 )}
 
                 {/* Map Container */}
-                <div style={{height: "600px", width: "100%"}}>
+                <div style={{ height: "600px", width: "100%" }}>
                     <Map
                         ref={mapRef}
-                        initialViewState={{longitude: 80.7718, latitude: 7.8731, zoom: 8}}
+                        initialViewState={{ longitude: 80.7718, latitude: 7.8731, zoom: 8 }}
                         mapStyle={isDark ? MAP_STYLE : MAP_STYLE_LIGHT}
-                        style={{width: "100%", height: "100%"}}
+                        style={{ width: "100%", height: "100%" }}
                         interactiveLayerIds={["zones-fill"]}
                         onClick={handleZoneClick}
                         onMouseDown={handleMapMouseDown}
@@ -463,25 +479,25 @@ export function GeofencingPage() {
                         cursor={drawMode ? "crosshair" : "auto"}
                         dragPan={!drawMode}
                     >
-                        <NavigationControl position="top-right"/>
+                        <NavigationControl position="top-right" />
                         <Source id="zones" type="geojson" data={zonesGeoJSON}>
                             <Layer id="zones-fill" type="fill"
-                                   paint={{"fill-color": ["get", "fillColor"], "fill-opacity": 0.25}}/>
+                                paint={{ "fill-color": ["get", "fillColor"], "fill-opacity": 0.25 }} />
                             <Layer id="zones-outline" type="line"
-                                   paint={{"line-color": ["get", "color"], "line-width": 2}}/>
+                                paint={{ "line-color": ["get", "color"], "line-width": 2 }} />
                         </Source>
                         {draftGeoJSON && (
                             <Source id="draft" type="geojson" data={draftGeoJSON}>
                                 <Layer id="draft-fill" type="fill"
-                                       paint={{"fill-color": "#60a5fa", "fill-opacity": 0.2}}/>
+                                    paint={{ "fill-color": "#60a5fa", "fill-opacity": 0.2 }} />
                                 <Layer id="draft-outline" type="line"
-                                       paint={{"line-color": "#3b82f6", "line-width": 2, "line-dasharray": [4, 2]}}/>
+                                    paint={{ "line-color": "#3b82f6", "line-width": 2, "line-dasharray": [4, 2] }} />
                             </Source>
                         )}
-                        {(sightings||[])
+                        {(sightings || [])
                             .filter((s) => {
                                 // Filter out if it's a user sighting and the user box is unchecked
-                                if (s.source=== "user" && !showUserSightings) return false;
+                                if (s.source === "user" && !showUserSightings) return false;
                                 // Filter out if it's a drone sighting and the drone box is unchecked
                                 if (s.source === "drone" && !showDroneSightings) return false;
                                 // Otherwise, show it
@@ -491,9 +507,8 @@ export function GeofencingPage() {
                                 <Marker key={i} longitude={s.longitude} latitude={s.latitude} anchor="bottom">
                                     <div
                                         title={`${s.source === 'drone' ? '🚁' : '👤'} Sighting at ${new Date(s.timestamp).toLocaleString()}`}
-                                        className={`w-6 h-6 rounded-full border-2 border-white flex items-center justify-center text-xs shadow-md cursor-default ${
-                                            s.source === 'drone' ? 'bg-red-500' : 'bg-blue-500'
-                                        }`}
+                                        className={`w-6 h-6 rounded-full border-2 border-white flex items-center justify-center text-xs shadow-md cursor-default ${s.source === 'drone' ? 'bg-red-500' : 'bg-blue-500'
+                                            }`}
                                     >
                                         {s.source === 'drone' ? '🚁' : '👤'}
                                     </div>
@@ -502,10 +517,10 @@ export function GeofencingPage() {
                         }
                         {popupInfo && (
                             <Popup longitude={popupInfo.longitude} latitude={popupInfo.latitude} anchor="bottom"
-                                   onClose={() => setPopupInfo(null)} closeOnClick={false} style={{zIndex: 10}}>
-                                <div style={{minWidth: 180, fontFamily: "sans-serif", fontSize: 13, color: "black"}}>
-                                    <strong style={{fontSize: 14}}>{popupInfo.geofence.name}</strong>
-                                    <div style={{marginTop: 6, lineHeight: 1.7}}>
+                                onClose={() => setPopupInfo(null)} closeOnClick={true} closeButton={true} style={{ zIndex: 10 }}>
+                                <div style={{ minWidth: 180, fontFamily: "sans-serif", fontSize: 13, color: "black" }}>
+                                    <strong style={{ fontSize: 14 }}>{popupInfo.geofence.name}</strong>
+                                    <div style={{ marginTop: 6, lineHeight: 1.7 }}>
                                         <div className="flex gap-2">
                                             <Badge
                                                 variant={getVariant(popupInfo.geofence.type) as any}>{popupInfo.geofence.type}</Badge>
@@ -526,11 +541,11 @@ export function GeofencingPage() {
                 <div
                     className={`flex flex-wrap items-center gap-4 px-4 py-2 text-xs border-t ${isDark ? "border-[rgba(255,255,255,0.08)] text-[rgba(255,255,255,0.5)]" : "border-gray-100 text-gray-500"}`}>
                     <span className="flex items-center gap-1"><span
-                        className="inline-block w-3 h-3 rounded-sm bg-red-500/60"/> High Security</span>
+                        className="inline-block w-3 h-3 rounded-sm bg-red-500/60" /> High Security</span>
                     <span className="flex items-center gap-1"><span
-                        className="inline-block w-3 h-3 rounded-sm bg-orange-400/60"/> Restricted</span>
+                        className="inline-block w-3 h-3 rounded-sm bg-orange-400/60" /> Restricted</span>
                     <span className="flex items-center gap-1"><span
-                        className="inline-block w-3 h-3 rounded-sm bg-blue-500/60"/> Monitored</span>
+                        className="inline-block w-3 h-3 rounded-sm bg-blue-500/60" /> Monitored</span>
                     <span className="ml-auto">Click a zone to view details · Draw Zone to create by dragging</span>
                 </div>
             </Card>
@@ -555,9 +570,9 @@ export function GeofencingPage() {
                                 </div>
                             </div>
                             <div className="flex items-center gap-2">
-                                <Button variant="ghost" className="p-2"><Edit className="w-4 h-4"/></Button>
+                                <Button variant="ghost" className="p-2"><Edit className="w-4 h-4" /></Button>
                                 <Button variant="dangerIcon" className="p-2"
-                                        onClick={() => handleDelete(geofence.id)}><Trash2 className="w-4 h-4"/></Button>
+                                    onClick={() => handleDelete(geofence.id)}><Trash2 className="w-4 h-4" /></Button>
                             </div>
                         </div>
                     </Card>
@@ -567,13 +582,13 @@ export function GeofencingPage() {
             {/* Create Geofence Modal */}
             {showModal && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-                    <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={handleCloseModal}/>
+                    <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={handleCloseModal} />
 
                     <Card className="relative w-full max-w-md p-6 shadow-2xl z-10" noPadding={false}>
                         <div className="flex items-center justify-between mb-6">
                             <h2 className="text-lg font-semibold text-black dark:text-white">Create New Geofence</h2>
                             <Button variant="ghost" className="p-1.5" onClick={handleCloseModal}><X
-                                className="w-4 h-4"/></Button>
+                                className="w-4 h-4" /></Button>
                         </div>
 
                         {newZone.minLat !== 0 && (
@@ -588,12 +603,12 @@ export function GeofencingPage() {
                                 label="Zone Name *"
                                 placeholder="e.g. Server Room Zone"
                                 value={newZone.name}
-                                onChange={(e) => setNewZone({...newZone, name: e.target.value})}
+                                onChange={(e) => setNewZone({ ...newZone, name: e.target.value })}
                                 error={errors.name}
                             />
 
                             <Select label="Zone Type" value={newZone.type}
-                                    onChange={(e) => setNewZone({...newZone, type: e.target.value as GeofenceType})}>
+                                onChange={(e) => setNewZone({ ...newZone, type: e.target.value as GeofenceType })}>
                                 <option value="Monitored">Monitored</option>
                                 <option value="Restricted">Restricted</option>
                                 <option value="High Security">High Security</option>
@@ -601,20 +616,20 @@ export function GeofencingPage() {
 
                             <div className="grid grid-cols-2 gap-3">
                                 <Input type="number" label="Min Latitude *" placeholder="e.g. 40.71"
-                                       value={newZone.minLat || ""}
-                                       onChange={(e) => setNewZone({...newZone, minLat: parseFloat(e.target.value)})}/>
+                                    value={newZone.minLat || ""}
+                                    onChange={(e) => setNewZone({ ...newZone, minLat: parseFloat(e.target.value) })} />
                                 <Input type="number" label="Max Latitude *" placeholder="e.g. 40.72"
-                                       value={newZone.maxLat || ""} error={errors.maxLat}
-                                       onChange={(e) => setNewZone({...newZone, maxLat: parseFloat(e.target.value)})}/>
+                                    value={newZone.maxLat || ""} error={errors.maxLat}
+                                    onChange={(e) => setNewZone({ ...newZone, maxLat: parseFloat(e.target.value) })} />
                             </div>
 
                             <div className="grid grid-cols-2 gap-3">
                                 <Input type="number" label="Min Longitude *" placeholder="e.g. -74.01"
-                                       value={newZone.minLon || ""}
-                                       onChange={(e) => setNewZone({...newZone, minLon: parseFloat(e.target.value)})}/>
+                                    value={newZone.minLon || ""}
+                                    onChange={(e) => setNewZone({ ...newZone, minLon: parseFloat(e.target.value) })} />
                                 <Input type="number" label="Max Longitude *" placeholder="e.g. -74.00"
-                                       value={newZone.maxLon || ""} error={errors.maxLon}
-                                       onChange={(e) => setNewZone({...newZone, maxLon: parseFloat(e.target.value)})}/>
+                                    value={newZone.maxLon || ""} error={errors.maxLon}
+                                    onChange={(e) => setNewZone({ ...newZone, maxLon: parseFloat(e.target.value) })} />
                             </div>
                         </div>
 
