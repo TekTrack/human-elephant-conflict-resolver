@@ -297,10 +297,30 @@ export function GeofencingPage() {
         handleCloseModal();
     };
 
-    const handleDelete = (id: number): void => {
-        setGeofences((prev) => prev.filter((g) => g.id !== id));
-        if (popupInfo?.geofence.id === id) setPopupInfo(null);
-    };
+    // const handleDelete = (id: number): void => {
+    //     setGeofences((prev) => prev.filter((g) => g.id !== id));
+    //     if (popupInfo?.geofence.id === id) setPopupInfo(null);
+    // };
+    const handleDelete = async (id: number): Promise<void> => {
+        try {
+            const token = localStorage.getItem('authToken'); // Grab the saved token
+            const res = await fetch(`${BASE_URL}/zones/${id}`, {
+                method: 'DELETE',
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+
+            if (!res.ok) {
+                throw new Error('Failed to delete zone');
+            }
+
+            fetchZones();}
+        catch (err) {
+            console.error(err);
+        }
+    };    
+
 
     const handleCloseModal = (): void => {
         setShowModal(false);
