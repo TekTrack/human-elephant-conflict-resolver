@@ -33,6 +33,7 @@ public class SecurityConfig {
                 .requestMatchers("/api/admin/newadmin").authenticated()
                 .requestMatchers("/alert").permitAll()
                 .requestMatchers("/api/admin/allnotifications/**").permitAll()
+                .requestMatchers("/api/admin/zones/**").permitAll()
                 .requestMatchers("/api/admin/notifications").permitAll() // For testing, can be removed later 
                 .anyRequest().authenticated())
                 .sessionManagement(session -> session

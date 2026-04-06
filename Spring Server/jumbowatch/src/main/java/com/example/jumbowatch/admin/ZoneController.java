@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestBody;                     
 import org.springframework.web.bind.annotation.RequestMapping;                      //A////////////D 
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 
 import com.example.jumbowatch.model.Zone;
 import com.example.jumbowatch.repository.ZoneRepository;
@@ -18,7 +19,8 @@ import com.example.jumbowatch.model.Sighting;
 
 @RestController
 @RequestMapping("/api/admin/zones")
-@CrossOrigin(origins = "*") // Lets the web app connect!
+@CrossOrigin(origins = "http://localhost:5173") // Lets the web app connect!
+//@CrossOrigin(origins = "*") // Allows the web app to connect to this controller 
 public class ZoneController {
 
     @Autowired
@@ -45,16 +47,16 @@ public class ZoneController {
         zoneRepo.deleteAll();
     }
 
-    // Future: Add PUT endpoint to update zones if needed
+    @DeleteMapping("/{id}")
+    public void deleteZoneById(@PathVariable Long id) {
+        zoneRepo.deleteById(id);
+    }
+
     // @PutMapping("/{id}")
     // public Zone updateZone(@PathVariable Long id, @RequestBody Zone zone) {
     //     zone.setId(id);
     //     return zoneRepo.save(zone);
     // }
-    //Zone Blooming If the Drone is Inthe Zone, then the Zone Blooms (turns red on the map) and Admin gets an immediate notification. This is handled in the AlertController when a new sighting is saved. The containsSighting method in the Zone class checks if the sighting falls within any defined zones, and if so, updates the AdminNotification accordingly.
-    //return true id the Drone i s inte Zone
-    //Hear we pass the ZoneCorners to the web app to draw the rectangle on the map and also pass the message to AdminNotification to update the notification for the admin.
     
-
 }
 

@@ -14,7 +14,7 @@ import { Input } from "../components/Input";
 import { Select } from "../components/Select";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
-type GeofenceType = "Restricted" | "Monitored" | "High Security";
+type GeofenceType = "Caution" | "Monitored" | "Danger";
 type GeofenceStatus = "Active" | "Inactive";
 type FilterValue = "all" | "hour" | "day" | "week";
 
@@ -71,8 +71,8 @@ const defaultForm: NewZoneForm = { name: "", type: "Monitored", minLat: 0, maxLa
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 function getZoneColor(type: GeofenceType): string {
-    if (type === "High Security") return "#ef4444";
-    if (type === "Restricted") return "#f97316";
+    if (type === "Danger") return "#ef4444";
+    if (type === "Caution") return "#f97316";
     return "#3b82f6";
 }
 
@@ -297,22 +297,19 @@ export function GeofencingPage() {
         handleCloseModal();
     };
 
-    // const handleDelete = (id: number): void => {
-    //     setGeofences((prev) => prev.filter((g) => g.id !== id));
-    //     if (popupInfo?.geofence.id === id) setPopupInfo(null);
-    // };
     const handleDelete = async (id: number): Promise<void> => {
         try {
             const token = localStorage.getItem('authToken'); // Grab the saved token
             const res = await fetch(`${BASE_URL}/zones/${id}`, {
                 method: 'DELETE',
                 headers: {
+                    'Content-Type': 'application/json',
                     'Authorization': `Bearer ${token}`
                 }
             });
 
             if (!res.ok) {
-                throw new Error('Failed to delete zone');
+                window.alert('Failed to delete zone');
             }
 
             fetchZones();}
@@ -332,8 +329,8 @@ export function GeofencingPage() {
 
     // ── Render Helpers ─────────────────────────────────────────────────────────
     const getVariant = (type: string) => {
-        if (type === "High Security") return "critical";
-        if (type === "Restricted") return "warning";
+        if (type === "Danger") return "critical";
+        if (type === "Caution") return "warning";
         if (type === "Active") return "success";
         if (type === "Inactive") return "neutral";
         return "info";
@@ -377,7 +374,7 @@ export function GeofencingPage() {
                 <StatCard label="New User Sightings" value={geofences.filter((g) => g.status === "Active").length}
                     icon={<MapPin className="w-5 h-5 text-green-600" />} iconBgClass="bg-green-100"
                     valueColorClass="text-green-500" />
-                <StatCard label="New Drone Sightings" value={geofences.filter((g) => g.type === "High Security").length}
+                <StatCard label="New Drone Sightings" value={geofences.filter((g) => g.type === "Danger").length}
                     icon={<MapPin className="w-5 h-5 text-red-600" />} iconBgClass="bg-red-100" />
             </div>
 
@@ -541,9 +538,9 @@ export function GeofencingPage() {
                 <div
                     className={`flex flex-wrap items-center gap-4 px-4 py-2 text-xs border-t ${isDark ? "border-[rgba(255,255,255,0.08)] text-[rgba(255,255,255,0.5)]" : "border-gray-100 text-gray-500"}`}>
                     <span className="flex items-center gap-1"><span
-                        className="inline-block w-3 h-3 rounded-sm bg-red-500/60" /> High Security</span>
+                        className="inline-block w-3 h-3 rounded-sm bg-red-500/60" /> Danger</span>
                     <span className="flex items-center gap-1"><span
-                        className="inline-block w-3 h-3 rounded-sm bg-orange-400/60" /> Restricted</span>
+                        className="inline-block w-3 h-3 rounded-sm bg-orange-400/60" /> Caution</span>
                     <span className="flex items-center gap-1"><span
                         className="inline-block w-3 h-3 rounded-sm bg-blue-500/60" /> Monitored</span>
                     <span className="ml-auto">Click a zone to view details · Draw Zone to create by dragging</span>
