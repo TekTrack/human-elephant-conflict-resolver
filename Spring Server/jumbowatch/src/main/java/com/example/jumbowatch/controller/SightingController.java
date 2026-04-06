@@ -79,7 +79,7 @@ public class SightingController {
             if (now - lastSaveTime > COOLDOWN_MS) {
                 sightingRepo.save(newSighting);
 
-                if ("DRONE".equals(newSighting.getSource())) {
+                if ("drone".equals(newSighting.getSource())) {
                     nfs.setNotification(
                         "New drone alert! Count: " + newSighting.getElephantCount(),
                         "DroneAlert",
