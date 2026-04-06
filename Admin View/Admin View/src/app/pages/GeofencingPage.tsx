@@ -33,10 +33,13 @@ interface Geofence {
 }
 
 interface Sighting {
+    id: number;
+    photoFilename: string;
+    verified: boolean;
     latitude: number;
     longitude: number;
     timestamp: string;
-    type: "user" | "drone";
+    source: "user" | "drone";
 }
 
 interface NewZoneForm {
@@ -58,15 +61,13 @@ interface PopupInfo {
 const MAP_STYLE = "https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json";
 const MAP_STYLE_LIGHT = "https://basemaps.cartocdn.com/gl/positron-gl-style/style.json";
 
-  const { mapTrigger, BASE_URL } = useMapTrigger();
-
 const defaultForm: NewZoneForm = {name: "", type: "Monitored", minLat: 0, maxLat: 0, minLon: 0, maxLon: 0};
 
-const DUMMY_SIGHTINGS: Sighting[] = [
-    {latitude: 40.714, longitude: -74.006, timestamp: new Date().toISOString(), type: "user"},
-    {latitude: 40.712, longitude: -74.008, timestamp: new Date(Date.now() - 3_600_000).toISOString(), type: "drone"},
-    {latitude: 40.716, longitude: -74.003, timestamp: new Date(Date.now() - 86_400_000).toISOString(), type: "user"},
-];
+// const DUMMY_SIGHTINGS: Sighting[] = [
+//     {latitude: 40.714, longitude: -74.006, timestamp: new Date().toISOString(), type: "user"},
+//     {latitude: 40.712, longitude: -74.008, timestamp: new Date(Date.now() - 3_600_000).toISOString(), type: "drone"},
+//     {latitude: 40.716, longitude: -74.003, timestamp: new Date(Date.now() - 86_400_000).toISOString(), type: "user"},
+// ];
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 function getZoneColor(type: GeofenceType): string {
@@ -108,6 +109,7 @@ export function GeofencingPage() {
     const {theme} = useTheme();
     const isDark = theme === "dark";
     const mapRef = useRef<MapRef>(null);
+    const { mapTrigger, BASE_URL } = useMapTrigger();
 
     // ── State ───────────────────────────────────────────────────────────────────
     const [geofences, setGeofences] = useState<Geofence[]>([]);
@@ -116,7 +118,7 @@ export function GeofencingPage() {
     const [errors, setErrors] = useState<Partial<Record<keyof NewZoneForm, string>>>({});
 
     const [filter, setFilter] = useState<FilterValue>("all");
-    const [sightings, setSightings] = useState<Sighting[]>(DUMMY_SIGHTINGS);
+    const [sightings, setSightings] = useState<Sighting[]>();
     const [popupInfo, setPopupInfo] = useState<PopupInfo | null>(null);
 
     const [isDrawing, setIsDrawing] = useState(false);
@@ -128,16 +130,29 @@ export function GeofencingPage() {
     const [showDroneSightings, setShowDroneSightings] = useState(true);
 
     // ── Logic Functions ────────────────────────────────────────────────────────
-    const fetchSightings = useCallback((f: FilterValue) => {
-        const now = Date.now();
-        const cutoffs: Record<FilterValue, number> = {
-            all: 0,
-            hour: now - 3_600_000,
-            day: now - 86_400_000,
-            week: now - 604_800_000
-        };
-        setSightings(DUMMY_SIGHTINGS.filter((s) => new Date(s.timestamp).getTime() >= cutoffs[f]));
-    }, []);
+    // const fetchSightings = useCallback((f: FilterValue) => {
+    //     const now = Date.now();
+    //     const cutoffs: Record<FilterValue, number> = {
+    //         all: 0,
+    //         hour: now - 3_600_000,
+    //         day: now - 86_400_000,
+    //         week: now - 604_800_000
+    //     };
+    //     setSightings(DUMMY_SIGHTINGS.filter((s) => new Date(s.timestamp).getTime() >= cutoffs[f]));
+    // }, []);
+
+    const fetchSightings = async (filter: FilterValue) => {
+        const token = localStorage.getItem('authToken'); // Grab the saved token
+        const res = await fetch(`${BASE_URL}/sightings/filter?timeframe=${filter}`,{
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+        }
+        });
+        const data = await res.json();
+        setSightings(data);
+    };
 
     const completeFetchZones = (data: Geofence[]) => {
         const formattedZones = data.map((zone) => ({
@@ -463,24 +478,24 @@ export function GeofencingPage() {
                                        paint={{"line-color": "#3b82f6", "line-width": 2, "line-dasharray": [4, 2]}}/>
                             </Source>
                         )}
-                        {sightings
+                        {(sightings||[])
                             .filter((s) => {
                                 // Filter out if it's a user sighting and the user box is unchecked
-                                if (s.type === "user" && !showUserSightings) return false;
+                                if (s.source=== "user" && !showUserSightings) return false;
                                 // Filter out if it's a drone sighting and the drone box is unchecked
-                                if (s.type === "drone" && !showDroneSightings) return false;
+                                if (s.source === "drone" && !showDroneSightings) return false;
                                 // Otherwise, show it
                                 return true;
                             })
                             .map((s, i) => (
                                 <Marker key={i} longitude={s.longitude} latitude={s.latitude} anchor="bottom">
                                     <div
-                                        title={`${s.type === 'drone' ? '🚁' : '👤'} Sighting at ${new Date(s.timestamp).toLocaleString()}`}
+                                        title={`${s.source === 'drone' ? '🚁' : '👤'} Sighting at ${new Date(s.timestamp).toLocaleString()}`}
                                         className={`w-6 h-6 rounded-full border-2 border-white flex items-center justify-center text-xs shadow-md cursor-default ${
-                                            s.type === 'drone' ? 'bg-red-500' : 'bg-blue-500'
+                                            s.source === 'drone' ? 'bg-red-500' : 'bg-blue-500'
                                         }`}
                                     >
-                                        {s.type === 'drone' ? '🚁' : '👤'}
+                                        {s.source === 'drone' ? '🚁' : '👤'}
                                     </div>
                                 </Marker>
                             ))
