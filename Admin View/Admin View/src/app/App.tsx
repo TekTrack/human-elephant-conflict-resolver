@@ -1,3 +1,4 @@
+
 import { RouterProvider } from 'react-router';
 import React, {createContext, useState} from 'react';
 import { router } from './routes';
@@ -85,7 +86,7 @@ function LoginUI({
 }
 
 function MainApp() {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(!!localStorage.getItem('authToken'));
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
 
@@ -100,20 +101,9 @@ function MainApp() {
   // 🔐 Login Flow
   const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    try {
-      const res = await fetch(`${BASE_URL}/login`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username, password })
-      });
-      if (res.ok) {
-        setIsLoggedIn(true);
-        login(username, password); // Store credentials in Auth utility
-      } else {
-        alert('❌ Invalid credentials');
-      }
-    } catch (err) {
-      console.error(err);
+    const success = await login(username, password); // Store credentials in Auth utility
+    if(success) {
+      setIsLoggedIn(true);
     }
   };
 

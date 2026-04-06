@@ -3,6 +3,7 @@ import { Sun, Moon,LayoutDashboard, LogOut ,  Drone   , Map, AlertTriangle, Acti
 import { useTheme } from "../context/ThemeContext.tsx";
 import { useEffect, useState } from "react";
 import { useMapTrigger } from '../context/MapTriggerContext.tsx';
+import Auth from '../utilities/Auth.js';
 //import { Button } from "../components/Button";
 
 interface Notification {
@@ -183,12 +184,9 @@ useEffect(() => {
           { /*logout button*/}
           <div className={`p-4 py-100 border-t ${borderColor} shrink-0`}>
               <Link
-                  to="/logout"
-                  title={isCollapsed ? "Logout" : ""}
-                  className={`flex items-center px-4 py-2.5 rounded-lg transition-colors ${
-                      isDark ? "hover:bg-red-500/10 text-red-400" : "hover:bg-red-50 text-red-500"
-                  } ${isCollapsed ? "justify-center px-0" : ""}`}
-              >
+              onClick={Auth.logout}
+              title={isCollapsed ? "Logout" : ""}
+              className={`flex items-center px-4 py-2.5 rounded-lg transition-colors ${isDark ? "hover:bg-red-500/10 text-red-400" : "hover:bg-red-50 text-red-500"} ${isCollapsed ? "justify-center px-0" : ""}`} to={''}              >
                 <div className={`${isCollapsed ? "mr-0" : "mr-3"}`}>
                   <LogOut size={20} />
                 </div>

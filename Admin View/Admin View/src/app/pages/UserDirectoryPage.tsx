@@ -518,7 +518,7 @@ export function UserDirectoryPage() {
       setError(null);
       
 
-      const token = sessionStorage.getItem("token") || "";
+      const token =localStorage.getItem("authToken") || "";
       const config = { headers: { Authorization: `Bearer ${token}` } };
 
 
