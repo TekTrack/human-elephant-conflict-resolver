@@ -30,6 +30,7 @@ interface Geofence {
     maxLat: number;
     minLon: number;
     maxLon: number;
+    lastSightingDate: number; 
 }
 
 interface Sighting {
@@ -154,6 +155,24 @@ export function GeofencingPage() {
         setSightings(data);
     };
 
+    const checkZoneBreached = (zones: Geofence[]) => {
+        zones.forEach((zone) => {
+            if (!zone.lastSightingDate) {
+                zone.type = "Monitored";
+                return;
+            }
+            const now = new Date().getTime();
+            const sighting = new Date(zone.lastSightingDate).getTime();     
+            const hoursSince = (now - sighting) / (1000 * 60 * 60);
+
+            if (hoursSince < 24) {
+                zone.type = "Danger";
+            } else {
+                zone.type = "Caution";
+            }
+        });
+    };
+
     const completeFetchZones = (data: Geofence[]) => {
         const formattedZones = data.map((zone) => ({
             ...zone,
@@ -161,6 +180,7 @@ export function GeofencingPage() {
             status: zone.status || "Active",
             coordinates: `${((zone.minLat + zone.maxLat) / 2).toFixed(4)}, ${((zone.minLon + zone.maxLon) / 2).toFixed(4)}`
         }));
+        checkZoneBreached(formattedZones);
         return formattedZones;
     };
 
@@ -188,7 +208,8 @@ export function GeofencingPage() {
     useEffect(() => {
         fetchSightings(filter);
         fetchZones();
-    }, [filter, fetchSightings, mapTrigger]);
+    }, [filter, mapTrigger]);
+
 
     const handleMapMouseDown = useCallback((e: MapMouseEvent) => {
         if (!drawMode) return;
@@ -291,6 +312,7 @@ export function GeofencingPage() {
             status: "Active",
             coordinates: `${centreLatStr}, ${centreLonStr}`,
             minLat: newZone.minLat, maxLat: newZone.maxLat, minLon: newZone.minLon, maxLon: newZone.maxLon,
+            lastSightingDate: 0
         };
         setGeofences((prev) => [...prev, zone]);
         saveZoneToDatabase(zone);
@@ -330,7 +352,7 @@ export function GeofencingPage() {
     // ── Render Helpers ─────────────────────────────────────────────────────────
     const getVariant = (type: string) => {
         if (type === "Danger") return "critical";
-        if (type === "Caution") return "warning";
+        if (type === "CautionF") return "warning";
         if (type === "Active") return "success";
         if (type === "Inactive") return "neutral";
         return "info";
@@ -607,8 +629,8 @@ export function GeofencingPage() {
                             <Select label="Zone Type" value={newZone.type}
                                 onChange={(e) => setNewZone({ ...newZone, type: e.target.value as GeofenceType })}>
                                 <option value="Monitored">Monitored</option>
-                                <option value="Restricted">Restricted</option>
-                                <option value="High Security">High Security</option>
+                                <option value="Caution">Caution</option>
+                                <option value="Danger">Danger</option>
                             </Select>
 
                             <div className="grid grid-cols-2 gap-3">
