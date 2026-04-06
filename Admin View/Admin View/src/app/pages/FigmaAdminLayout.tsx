@@ -1,9 +1,17 @@
 import { Outlet, Link, useLocation } from 'react-router';
 import { Sun, Moon,LayoutDashboard, LogOut ,  Drone   , Map, AlertTriangle, Activity, Bell , Users} from "lucide-react";
 import { useTheme } from "../context/ThemeContext.tsx";
-import {useContext, useState} from "react";
+import { useEffect, useState } from "react";
+import { useMapTrigger } from '../context/MapTriggerContext.tsx';
 //import { Button } from "../components/Button";
 
+interface Notification {
+  id: number;
+  message : string;
+  type : string;
+  unread: boolean;
+  time: string | number; // You can adjust this type based on your timestamp format
+}
 
 const menuItems = [
   { label: "Overview", path: "/", icon: <LayoutDashboard size={30} /> },
@@ -21,6 +29,8 @@ export function FigmaAdminLayout() {
   const [showNotifications, setShowNotifications] = useState(false);
   const [isCollapsed, setIsCollapsed] = useState(false);
 
+  const { mapTrigger, BASE_URL } = useMapTrigger();
+
   const isDark = theme === "dark";
   const bgColor = isDark ? "bg-[#333]" : "bg-white";
   const textColor = isDark ? "text-white" : "text-black";
@@ -30,11 +40,65 @@ export function FigmaAdminLayout() {
   const menuItemActiveBg = isDark ? "bg-[rgba(255,255,255,0.1)]" : "bg-gray-300";
   const borderColor = isDark ? "border-[rgba(255,255,255,0.15)]" : "border-gray-300";
 
+  /*Time function */
+  const formatSmartTime = (timestamp: number | string | Date) => {
+    const now = new Date();
+    const past = new Date(timestamp);
+    const diffInMs = now.getTime() - past.getTime();
+    const diffInMins = Math.floor(diffInMs / (1000 * 60));
+    const diffInHours = Math.floor(diffInMins / 60);
+
+    // 1. Less than a minute
+    if (diffInMins < 1) return "Just now";
+
+    // 2. Less than an hour
+    if (diffInMins < 60) return `${diffInMins}m ago`;
+
+    // 3. Less than 24 hours
+    if (diffInHours < 24) return `${diffInHours}h ago`;
+
+    // 4. Older than a day - Show the actual date (e.g., "Oct 08")
+    return past.toLocaleDateString([], { month: 'short', day: '2-digit' });
+  };
+
+
   /*Dummy notifications*/
-  const [notifications, setNotifications] = useState([
-    { id: 1, title: "New Drone Sighting", desc: "Drone D-03 detected near boundary.", time: "2m ago", unread: true },
-    { id: 2, title: "Battery Warning", desc: "Alpha Watcher is below 20% battery.", time: "15m ago", unread: true },
-    { id: 3, title: "Zone Update", desc: "Server Room Zone coordinates modified.", time: "1h ago", unread: false },
+  const fetchNotifications = async (zoneId: number) => {
+    try {
+      const response = await fetch(`${BASE_URL}/allnotifications?zoneId=${zoneId}`,
+        {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${localStorage.getItem("authToken")}`,
+        },
+      });
+      const data = await response.json();
+      const result: Notification[] = data.map((item: any) => ({
+        id: item.id,
+        title: item.type, 
+        message: item.message,
+        unread: true, // You can adjust this based on your data structure
+        time: formatSmartTime(item.time ||Date.now()), 
+      }));
+      setNotifications(result);
+    }catch (error) {
+      console.error("Error fetching notifications:", error);
+    }
+  };
+
+useEffect(() => {
+    fetchNotifications(0);
+    const intervalId = setInterval(() => {
+    fetchNotifications(0);
+  }, 60000);
+  return () => clearInterval(intervalId);
+}, [mapTrigger]);
+
+  const [notifications, setNotifications] = useState<Notification[]>([
+    // { id: 1, title: "New Drone Sighting", desc: "Drone D-03 detected near boundary.", time: "2m ago", unread: true },
+    // { id: 2, title: "Battery Warning", desc: "Alpha Watcher is below 20% battery.", time: "15m ago", unread: true },
+    // { id: 3, title: "Zone Update", desc: "Server Room Zone coordinates modified.", time: "1h ago", unread: false },
   ]);
 
   const unreadCount = notifications.filter(n => n.unread).length;
@@ -219,13 +283,13 @@ export function FigmaAdminLayout() {
                   }`}
               >
                 <div className="flex justify-between items-start mb-1">
-                  <h4 className="font-medium text-sm">{notification.title}</h4>
+                  <h4 className="font-medium text-sm">{notification.message}</h4>
                   {notification.unread && (
                       <span className="w-2 h-2 rounded-full bg-blue-500 mt-1 shrink-0" />
                   )}
                 </div>
                 <p className={`text-xs mb-2 ${isDark ? "text-[rgba(255,255,255,0.6)]" : "text-gray-600"}`}>
-                  {notification.desc}
+                  {notification.type}
                 </p>
                 <span className={`text-[10px] uppercase font-bold ${textSecondary}`}>
                 {notification.time}
