@@ -2,7 +2,7 @@ import type { ReactNode, ButtonHTMLAttributes } from "react";
 import { useTheme } from "../context/ThemeContext.tsx";
 
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
-    variant?: "primary" | "secondary" | "danger";
+    variant?: "primary" | "secondary" | "danger" | "ghost" | "dangerIcon";
     children: ReactNode;
 }
 
