@@ -113,8 +113,15 @@ public class AdminController {
     @GetMapping("/users")
     public ResponseEntity<Object> getAllUsers(Principal principal) {
         try {
+            String adminUsername = principal.getName();
+            System.out.println("Admin Username: " + adminUsername); // Debugging line
 
-            Iterable<User> users = userRepository.findAll();
+            String AdminID = adminRepository.findAdminIdByUsername(adminUsername);
+            if (AdminID == null) {
+                throw new RuntimeException("Admin ID not found for username: " + adminUsername);
+            }
+
+            Iterable<User> users = userRepository.findUsersByAdminId(AdminID);
             Map<String, Object> response = new HashMap<>();
             response.put("message", "Users retrieved successfully!");
             response.put("status", HttpStatus.OK.value());
@@ -127,5 +134,4 @@ public class AdminController {
             return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
         }
     }
-
 }

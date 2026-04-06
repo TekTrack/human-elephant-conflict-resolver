@@ -3,6 +3,8 @@ package com.example.jumbowatch.repository;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import com.example.jumbowatch.model.Admin;
@@ -15,5 +17,8 @@ public interface AdminRepository extends JpaRepository<Admin, String> {
 
     //Check if user with the same email already exists
     boolean existsByEmail(String email);
+
+    @Query("SELECT a.adminid FROM Admin a WHERE a.username = :username")
+    String findAdminIdByUsername(@Param("username") String username);
 
 }

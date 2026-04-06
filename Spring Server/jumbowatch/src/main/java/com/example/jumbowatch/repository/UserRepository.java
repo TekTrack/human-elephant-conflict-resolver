@@ -1,5 +1,6 @@
 package com.example.jumbowatch.repository;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -19,5 +20,8 @@ public interface UserRepository extends JpaRepository<User, String> {
     //Check if user with the same Identity ID already exists
     @Query("SELECT COUNT(u) > 0 FROM User u WHERE u.IdentityID = :identityID")
     boolean existsByIdentityID(@Param("identityID") String identityID);
+
+    @Query("SELECT u FROM User u WHERE u.AdminID = :adminId")
+    List<User> findUsersByAdminId(@Param("adminId") String adminId);
 
 }
