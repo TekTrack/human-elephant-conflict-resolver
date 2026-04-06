@@ -134,4 +134,45 @@ public class AdminController {
             return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
         }
     }
+
+    //get Admin Details Endpoint
+    @GetMapping("/details")
+    public ResponseEntity<Object> getAdminDetails(Principal principal) {
+        try {
+            String adminUsername = principal.getName();
+
+            Admin admin = adminRepository.findById(adminUsername)
+                    .orElseThrow(() -> new RuntimeException("Admin not found"));
+
+            Map<String, Object> response = new HashMap<>();
+            response.put("message", "Admin details retrieved successfully!");
+            response.put("status", HttpStatus.OK.value());
+            response.put("data", admin);
+            return new ResponseEntity<>(response, HttpStatus.OK);
+        } catch (Exception e) {
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("message", "Failed to retrieve admin details");
+            errorResponse.put("error", e.getMessage());
+            return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    //get all admin details Endpoint
+    @GetMapping("/alladmins")
+    public ResponseEntity<Object> getAllAdmins() {
+        try {
+            Iterable<Admin> admins = adminRepository.findAll();
+            Map<String, Object> response = new HashMap<>();
+            response.put("message", "Admins retrieved successfully!");
+            response.put("status", HttpStatus.OK.value());
+            response.put("data", admins);
+            return new ResponseEntity<>(response, HttpStatus.OK);
+        } catch (Exception e) {
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("message", "Failed to retrieve admins");
+            errorResponse.put("error", e.getMessage());
+            return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
+        }
+    }
+
 }
