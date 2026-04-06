@@ -20,21 +20,16 @@ public class User {
     public User() {
     }
 
-    public User(String email, String password, String name, String phoneNumber, String IdentityID, String AdminID, int categoryIndex) {
-        String[] categories = {"civil", "guide", "photoGrapher"};
+    public User(String email, String password, String name, String phoneNumber, String IdentityID, String AdminID, String userCategory) {
 
         this.email = email;
         this.password = password;
         this.name = name;
         this.phoneNumber = phoneNumber;
+        this.userCategory = userCategory;
         this.IdentityID = IdentityID;
         this.AdminID = AdminID;
 
-        if (categoryIndex >= 0 && categoryIndex < categories.length) {
-            this.userCategory = categories[categoryIndex];
-        } else {
-            throw new IllegalArgumentException("Invalid category index");
-        }
     }
 
     // Getters and Setters...

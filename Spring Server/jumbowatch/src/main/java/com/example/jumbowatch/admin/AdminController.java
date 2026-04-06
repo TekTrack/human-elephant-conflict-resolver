@@ -175,4 +175,32 @@ public class AdminController {
         }
     }
 
+    //User Creation Endpoint
+    @PostMapping("/createuser")
+    public ResponseEntity<Object> createUser(@RequestBody User user) {
+        try {
+            if (userRepository.existsByEmail(user.getEmail())) {
+                return ResponseEntity.status(409).body(Map.of("message", "User with this email already exists"));
+            }
+
+            //Identity ID Check
+            if (userRepository.existsByIdentityID(user.getIdentityID())) {
+                return ResponseEntity.status(409).body(Map.of("message", "User with this Identity ID already exists"));
+            }
+
+            // Password hashing before saving to the database
+            user.setPassword(passwordEncoder.encode(user.getPassword()));
+            User savedUser = userRepository.save(user);
+
+            return ResponseEntity.status(201).body(Map.of(
+                    "message", "User created successfully!",
+                    "status", 201,
+                    "data", savedUser
+            ));
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body(Map.of("message", "Error: " + e.getMessage()));
+        }
+
+    }
+
 }
