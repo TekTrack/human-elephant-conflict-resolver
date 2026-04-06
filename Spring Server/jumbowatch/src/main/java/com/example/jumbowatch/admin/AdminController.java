@@ -1,5 +1,6 @@
 package com.example.jumbowatch.admin;
 
+import java.security.Principal;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -8,6 +9,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -15,7 +17,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.example.jumbowatch.model.Admin;
 import com.example.jumbowatch.model.JwtUtil;
+import com.example.jumbowatch.model.User;
 import com.example.jumbowatch.repository.AdminRepository;
+import com.example.jumbowatch.repository.UserRepository;
 
 @RestController
 @RequestMapping("/api/admin")
@@ -28,6 +32,8 @@ public class AdminController {
     private JwtUtil jwtUtil;
     @Autowired
     private BCryptPasswordEncoder passwordEncoder;
+    @Autowired
+    private UserRepository userRepository;
 
     //Admin Registration Endpoint
     @PostMapping("/newadmin")
@@ -102,4 +108,71 @@ public class AdminController {
             return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
         }
     }
+
+    //Get the All User Details Endpoint
+    @GetMapping("/users")
+    public ResponseEntity<Object> getAllUsers(Principal principal) {
+        try {
+            String adminUsername = principal.getName();
+            System.out.println("Admin Username: " + adminUsername); // Debugging line
+
+            String AdminID = adminRepository.findAdminIdByUsername(adminUsername);
+            if (AdminID == null) {
+                throw new RuntimeException("Admin ID not found for username: " + adminUsername);
+            }
+
+            Iterable<User> users = userRepository.findUsersByAdminId(AdminID);
+            Map<String, Object> response = new HashMap<>();
+            response.put("message", "Users retrieved successfully!");
+            response.put("status", HttpStatus.OK.value());
+            response.put("data", users);
+            return new ResponseEntity<>(response, HttpStatus.OK);
+        } catch (Exception e) {
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("message", "Failed to retrieve users");
+            errorResponse.put("error", e.getMessage());
+            return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    //get Admin Details Endpoint
+    @GetMapping("/details")
+    public ResponseEntity<Object> getAdminDetails(Principal principal) {
+        try {
+            String adminUsername = principal.getName();
+
+            Admin admin = adminRepository.findById(adminUsername)
+                    .orElseThrow(() -> new RuntimeException("Admin not found"));
+
+            Map<String, Object> response = new HashMap<>();
+            response.put("message", "Admin details retrieved successfully!");
+            response.put("status", HttpStatus.OK.value());
+            response.put("data", admin);
+            return new ResponseEntity<>(response, HttpStatus.OK);
+        } catch (Exception e) {
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("message", "Failed to retrieve admin details");
+            errorResponse.put("error", e.getMessage());
+            return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    //get all admin details Endpoint
+    @GetMapping("/alladmins")
+    public ResponseEntity<Object> getAllAdmins() {
+        try {
+            Iterable<Admin> admins = adminRepository.findAll();
+            Map<String, Object> response = new HashMap<>();
+            response.put("message", "Admins retrieved successfully!");
+            response.put("status", HttpStatus.OK.value());
+            response.put("data", admins);
+            return new ResponseEntity<>(response, HttpStatus.OK);
+        } catch (Exception e) {
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("message", "Failed to retrieve admins");
+            errorResponse.put("error", e.getMessage());
+            return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
+        }
+    }
+
 }
