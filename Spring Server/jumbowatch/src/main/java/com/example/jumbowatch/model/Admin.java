@@ -7,11 +7,11 @@ import jakarta.persistence.Id;
 public class Admin {
 
     @Id
+    private String adminid;
     private String username;
     private String password;
     private String email;
     private String phone;
-    private String adminid;
     private String name;
 
     public Admin() {
@@ -55,5 +55,19 @@ public class Admin {
     public void setPassword(String password) {
         this.password = password;
     }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public void setPhone(String phone) {
+        this.phone = phone;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    
 
 }

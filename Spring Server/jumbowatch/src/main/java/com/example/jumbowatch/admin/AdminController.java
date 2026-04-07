@@ -21,6 +21,8 @@ import com.example.jumbowatch.model.User;
 import com.example.jumbowatch.repository.AdminRepository;
 import com.example.jumbowatch.repository.UserRepository;
 
+import tools.jackson.databind.ObjectMapper;
+
 @RestController
 @RequestMapping("/api/admin")
 @CrossOrigin(origins = "*")
@@ -115,6 +117,7 @@ public class AdminController {
         try {
             String adminUsername = principal.getName();
             System.out.println("Admin Username: " + adminUsername); // Debugging line
+            
 
             String AdminID = adminRepository.findAdminIdByUsername(adminUsername);
             if (AdminID == null) {
@@ -162,10 +165,23 @@ public class AdminController {
     public ResponseEntity<Object> getAllAdmins() {
         try {
             Iterable<Admin> admins = adminRepository.findAll();
+            System.out.println("--- Current Admin IDs ---");
+        admins.forEach(admin -> System.out.println("Admin ID: " + admin.getAdminId()));
             Map<String, Object> response = new HashMap<>();
             response.put("message", "Admins retrieved successfully!");
             response.put("status", HttpStatus.OK.value());
             response.put("data", admins);
+          
+ObjectMapper mapper = new ObjectMapper();
+String jsonResponse = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(response);
+
+System.out.println("--- Full JSON Response to Frontend ---");
+System.out.println(jsonResponse);
+System.out.println("--------------------------------------");
+
+
+
+
             return new ResponseEntity<>(response, HttpStatus.OK);
         } catch (Exception e) {
             Map<String, Object> errorResponse = new HashMap<>();
@@ -191,7 +207,7 @@ public class AdminController {
             // Password hashing before saving to the database
             user.setPassword(passwordEncoder.encode(user.getPassword()));
             User savedUser = userRepository.save(user);
-
+           // System.out.println(user);
             return ResponseEntity.status(201).body(Map.of(
                     "message", "User created successfully!",
                     "status", 201,
@@ -202,5 +218,125 @@ public class AdminController {
         }
 
     }
+
+
+    //Admin Logout Endpoint (Token Invalidation)
+    @PostMapping("/logout")
+    public ResponseEntity<Object> logoutAdmin(Principal principal) {
+        try {
+            String adminUsername = principal.getName();
+            jwtUtil.invalidateToken(adminUsername);
+            Map<String, Object> response = new HashMap<>();
+            response.put("message", "Logout successful!");
+            response.put("status", HttpStatus.OK.value());
+            return new ResponseEntity<>(response, HttpStatus.OK);
+        } catch (Exception e) {
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("message", "Logout failed");
+            errorResponse.put("error", e.getMessage());
+            return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
+        }
+    }
+
+
+    //User Update Endpoint
+    @PostMapping("/updateuser")
+    public ResponseEntity<Object> updateUser(@RequestBody User user) {
+        try {
+            User existingUser = userRepository.findByEmail(user.getEmail())
+                    .orElseThrow(() -> new RuntimeException("User not found"));
+
+            existingUser.setName(user.getName());
+            existingUser.setPhoneNumber(user.getPhoneNumber());
+            existingUser.setUserCategory(user.getUserCategory());
+            existingUser.setIdentityID(user.getIdentityID());
+            existingUser.setAdminID(user.getAdminID());
+
+            if (user.getPassword() != null && !user.getPassword().isEmpty()) {
+                existingUser.setPassword(passwordEncoder.encode(user.getPassword()));
+            }
+
+            User updatedUser = userRepository.save(existingUser);
+
+            Map<String, Object> response = new HashMap<>();
+            response.put("message", "User updated successfully!");
+            response.put("status", HttpStatus.OK.value());
+            response.put("data", updatedUser);
+            return new ResponseEntity<>(response, HttpStatus.OK);
+        } catch (Exception e) {
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("message", "Failed to update user");
+            errorResponse.put("error", e.getMessage());
+            return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    //Admin Update Endpoint
+    @PostMapping("/updateadmin")
+    public ResponseEntity<Object> updateAdmin(@RequestBody Admin admin) {
+        try {
+            Admin existingAdmin = adminRepository.findById(admin.getAdminId())
+                    .orElseThrow(() -> new RuntimeException("Admin not found"));
+
+            existingAdmin.setEmail(admin.getEmail());
+            existingAdmin.setPhone(admin.getPhone());
+            existingAdmin.setName(admin.getName());
+
+            if (admin.getPassword() != null && !admin.getPassword().isEmpty()) {
+                existingAdmin.setPassword(passwordEncoder.encode(admin.getPassword()));
+            }
+
+            Admin updatedAdmin = adminRepository.save(existingAdmin);
+
+            Map<String, Object> response = new HashMap<>();
+            response.put("message", "Admin updated successfully!");
+            response.put("status", HttpStatus.OK.value());
+            response.put("data", updatedAdmin);
+            return new ResponseEntity<>(response, HttpStatus.OK);
+        } catch (Exception e) {
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("message", "Failed to update admin");
+            errorResponse.put("error", e.getMessage());
+            return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
+        }
+    }
+
+
+    //user deletion endpoint
+    @PostMapping("/deleteuser")
+    public ResponseEntity<Object> deleteUser(@RequestBody User user) {
+        try {
+            userRepository.delete(user);
+            Map<String, Object> response = new HashMap<>();
+            response.put("message", "User deleted successfully!");
+            response.put("status", HttpStatus.OK.value());
+            return new ResponseEntity<>(response, HttpStatus.OK);
+        } catch (Exception e) {
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("message", "Failed to delete user");
+            errorResponse.put("error", e.getMessage());
+            return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    //Admin Deletion Endpoint
+    @PostMapping("/deleteadmin")
+    public ResponseEntity<Object> deleteAdmin(@RequestBody Admin admin) {
+        try {
+            adminRepository.delete(admin);
+            Map<String, Object> response = new HashMap<>();
+            response.put("message", "Admin deleted successfully!");
+            response.put("status", HttpStatus.OK.value());
+            return new ResponseEntity<>(response, HttpStatus.OK);
+        } catch (Exception e) {
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("message", "Failed to delete admin");
+            errorResponse.put("error", e.getMessage());
+            return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
+        }
+    }
+
+
+
 
 }

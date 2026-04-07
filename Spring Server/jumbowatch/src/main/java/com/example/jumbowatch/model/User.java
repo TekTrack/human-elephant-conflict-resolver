@@ -20,7 +20,8 @@ public class User {
     public User() {
     }
 
-    public User(String email, String password, String name, String phoneNumber, String IdentityID, String AdminID, String userCategory) {
+    public User(String email, String password, String name, String phoneNumber, String IdentityID, String AdminID,
+            String userCategory) {
 
         this.email = email;
         this.password = password;
@@ -64,5 +65,29 @@ public class User {
     public String getAdminID() {
         return AdminID;
     }
+
+
+    public void setAdminID(String adminID) {
+        AdminID = adminID;
+    }
+
+    public void setIdentityID(String identityID) {
+        IdentityID = identityID;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public void setPhoneNumber(String phoneNumber) {
+        this.phoneNumber = phoneNumber;
+    }
+
+    public void setUserCategory(String userCategory) {
+        this.userCategory = userCategory;   
+    }
+
+    
+
 
 }
