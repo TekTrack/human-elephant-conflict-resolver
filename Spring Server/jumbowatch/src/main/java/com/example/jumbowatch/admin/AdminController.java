@@ -42,6 +42,9 @@ public class AdminController {
     public ResponseEntity<Object> createAdmin(@RequestBody Admin admin) {
         try {
 
+
+            System.out.println("Received admin registration request: " + admin.getUsername()); // Debugging line
+
             //Check if admin with the same username already exists
             if (adminRepository.existsById(admin.getUsername())) {
                 Map<String, Object> errorResponse = new HashMap<>();
@@ -56,6 +59,20 @@ public class AdminController {
                 return new ResponseEntity<>(errorResponse, HttpStatus.CONFLICT);
             }
 
+            // //check if admin with the same phone number already exists
+            // if (adminRepository.existsByPhone(admin.getPhone())) {
+            //     Map<String, Object> errorResponse = new HashMap<>();
+            //     errorResponse.put("message", "Admin with this phone number already exists");
+            //     return new ResponseEntity<>(errorResponse, HttpStatus.CONFLICT);
+            // }
+
+            // //Check if admin with the same admin ID already exists
+            // if (adminRepository.existsByAdminId(admin.getAdminId())) {
+            //     Map<String, Object> errorResponse = new HashMap<>();
+            //     errorResponse.put("message", "Admin with this Admin ID already exists");
+            //     return new ResponseEntity<>(errorResponse, HttpStatus.CONFLICT);
+            // }
+
             String hashedPassword = passwordEncoder.encode(admin.getPassword());
             admin.setPassword(hashedPassword);
 
@@ -65,7 +82,12 @@ public class AdminController {
             response.put("message", "Admin created successfully!");
             response.put("status", HttpStatus.CREATED.value());
             response.put("data", savedAdmin);
+   ObjectMapper mapper = new ObjectMapper();
+            String jsonResponse = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(response);
 
+            System.out.println("--- Full JSON Response to Frontend ---");
+            System.out.println(jsonResponse);
+            System.out.println("--------------------------------------");
             return new ResponseEntity<>(response, HttpStatus.CREATED);
 
         } catch (Exception e) {
@@ -97,6 +119,7 @@ public class AdminController {
                 response.put("status", HttpStatus.OK.value());
                 response.put("token", token);
                 response.put("data", admin);
+               
                 return new ResponseEntity<>(response, HttpStatus.OK);
             } else {
                 Map<String, Object> errorResponse = new HashMap<>();
@@ -129,7 +152,17 @@ public class AdminController {
             response.put("message", "Users retrieved successfully!");
             response.put("status", HttpStatus.OK.value());
             response.put("data", users);
-            return new ResponseEntity<>(response, HttpStatus.OK);
+           
+
+            // ObjectMapper mapper = new ObjectMapper();
+            // String jsonResponse = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(response);
+
+            // System.out.println("--- Full JSON Response to Frontend ---");
+            // System.out.println(jsonResponse);
+            // System.out.println("--------------------------------------");
+        return new ResponseEntity<>(response, HttpStatus.OK);
+
+
         } catch (Exception e) {
             Map<String, Object> errorResponse = new HashMap<>();
             errorResponse.put("message", "Failed to retrieve users");
@@ -172,16 +205,12 @@ public class AdminController {
             response.put("status", HttpStatus.OK.value());
             response.put("data", admins);
           
-ObjectMapper mapper = new ObjectMapper();
-String jsonResponse = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(response);
+            // ObjectMapper mapper = new ObjectMapper();
+            // String jsonResponse = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(response);
 
-System.out.println("--- Full JSON Response to Frontend ---");
-System.out.println(jsonResponse);
-System.out.println("--------------------------------------");
-
-
-
-
+            // System.out.println("--- Full JSON Response to Frontend ---");
+            // System.out.println(jsonResponse);
+            // System.out.println("--------------------------------------");
             return new ResponseEntity<>(response, HttpStatus.OK);
         } catch (Exception e) {
             Map<String, Object> errorResponse = new HashMap<>();
@@ -243,14 +272,14 @@ System.out.println("--------------------------------------");
     @PostMapping("/updateuser")
     public ResponseEntity<Object> updateUser(@RequestBody User user) {
         try {
+
+
+            System.out.println("Attempting to update user: " + user.getEmail()); // Debugging line
             User existingUser = userRepository.findByEmail(user.getEmail())
                     .orElseThrow(() -> new RuntimeException("User not found"));
 
             existingUser.setName(user.getName());
             existingUser.setPhoneNumber(user.getPhoneNumber());
-            existingUser.setUserCategory(user.getUserCategory());
-            existingUser.setIdentityID(user.getIdentityID());
-            existingUser.setAdminID(user.getAdminID());
 
             if (user.getPassword() != null && !user.getPassword().isEmpty()) {
                 existingUser.setPassword(passwordEncoder.encode(user.getPassword()));
@@ -271,13 +300,16 @@ System.out.println("--------------------------------------");
         }
     }
 
-    //Admin Update Endpoint
+   // Admin Update Endpoint
     @PostMapping("/updateadmin")
     public ResponseEntity<Object> updateAdmin(@RequestBody Admin admin) {
         try {
-            Admin existingAdmin = adminRepository.findById(admin.getAdminId())
+            Admin existingAdmin = adminRepository.findById(admin.getUsername())
                     .orElseThrow(() -> new RuntimeException("Admin not found"));
 
+                    System.out.println("Attempting to update admin: " + admin.getUsername()); // Debugging line
+
+            existingAdmin.setAdminId(admin.getAdminId());
             existingAdmin.setEmail(admin.getEmail());
             existingAdmin.setPhone(admin.getPhone());
             existingAdmin.setName(admin.getName());
@@ -302,11 +334,15 @@ System.out.println("--------------------------------------");
     }
 
 
-    //user deletion endpoint
+    // User Deletion Endpoint
     @PostMapping("/deleteuser")
     public ResponseEntity<Object> deleteUser(@RequestBody User user) {
         try {
-            userRepository.delete(user);
+
+            String userEmail = user.getEmail(); // Get the email from the request body
+            User existingUser = userRepository.findByEmail(userEmail)
+                    .orElseThrow(() -> new RuntimeException("User not found with email: " + userEmail));
+            userRepository.delete(existingUser); // Delete the user using the email
             Map<String, Object> response = new HashMap<>();
             response.put("message", "User deleted successfully!");
             response.put("status", HttpStatus.OK.value());
@@ -319,11 +355,23 @@ System.out.println("--------------------------------------");
         }
     }
 
-    //Admin Deletion Endpoint
+   // Admin Deletion Endpoint
     @PostMapping("/deleteadmin")
     public ResponseEntity<Object> deleteAdmin(@RequestBody Admin admin) {
         try {
-            adminRepository.delete(admin);
+
+            System.out.println("Attempting to delete admin: " + admin.getAdminId()); // Debugging line
+
+            String adminId = admin.getAdminId(); // Get the admin ID from the request body
+            //get the usename of the admin to be deleted
+            String username = adminRepository.findUsernameByAdminId(adminId);
+            if (username == null) {
+                throw new RuntimeException("Admin not found with ID: " + adminId);
+            }
+
+                    System.out.println("Admin username to be deleted: " + username); // Debugging line
+
+            adminRepository.deleteById(username); // Delete the admin using the username
             Map<String, Object> response = new HashMap<>();
             response.put("message", "Admin deleted successfully!");
             response.put("status", HttpStatus.OK.value());
@@ -335,8 +383,5 @@ System.out.println("--------------------------------------");
             return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
         }
     }
-
-
-
 
 }

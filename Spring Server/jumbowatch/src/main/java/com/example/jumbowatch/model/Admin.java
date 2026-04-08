@@ -7,13 +7,13 @@ import jakarta.persistence.Id;
 public class Admin {
 
     @Id
-    private String adminid;
     private String username;
     private String password;
     private String email;
     private String phone;
     private String name;
-
+    private String adminid;
+    
     public Admin() {
         // Default constructor for JPA
     }
@@ -66,6 +66,10 @@ public class Admin {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public void setAdminId(String adminid) {
+        this.adminid = adminid;
     }
 
     
