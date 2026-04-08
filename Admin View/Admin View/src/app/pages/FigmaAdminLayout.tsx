@@ -102,8 +102,19 @@ useEffect(() => {
     setNotifications(prev => prev.map(n => ({ ...n, unread: false })));
   };
 
-  const deleteAll=()=>{
-    setNotifications([]);
+  const deleteAll= async()=>{
+    try{
+      const res= await fetch(`${BASE_URL}/allnotifications`,{
+        method: "DELETE",
+        headers: {
+          'Content-Type':'application/json',
+          'Authorization': `Bearer ${localStorage.getItem("authToken")}`
+        }
+      });
+      fetchNotifications(0);
+    }catch(err){
+      console.error(err);
+    }
   }
 
   return (
