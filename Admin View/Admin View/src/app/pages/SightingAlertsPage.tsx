@@ -1,37 +1,109 @@
+import { useEffect,useState } from "react";
 import { useTheme } from "../context/ThemeContext.tsx";
 import { AlertTriangle, CheckCircle, XCircle, Clock } from "lucide-react";
+import { useMapTrigger } from "../context/MapTriggerContext.tsx";
+
+type FilterValue = "all" | "hour" | "day" | "week";
+
+interface Sighting {
+    id: number;
+    photoFilename: string;
+    verified: boolean;
+    latitude: number;
+    longitude: number;
+    timestamp: string;
+    source: "user" | "drone";
+    droneId: number;
+}
+interface Alert{
+    id:number;
+    title : string;
+    description : string;
+    status: string;
+    time: string;
+    location: string;  
+    rawTime: string;
+}
 
 export function SightingAlertsPage() {
   const { theme } = useTheme();
   const isDark = theme === "dark";
+  const [sightings, setSightings] = useState<Sighting[]>();
+  const [filter,setFilter] = useState("all");
 
-  const alerts = [
-    {
-      id: 1,
-      title: "Critical: Unauthorized Access Attempt",
-      description: "Multiple failed login attempts detected from IP 192.168.1.100",
-      status: "critical",
-      time: "2 minutes ago",
-      location: "Building A - Floor 3",
-    },
-    {
-      id: 2,
-      title: "Warning: Unusual Activity Detected",
-      description: "Movement detected in restricted area during off-hours",
-      status: "warning",
-      time: "15 minutes ago",
-      location: "Building B - Parking",
-    },
-    {
-      id: 3,
-      title: "Info: New Device Connected",
-      description: "Unknown device connected to network",
-      status: "info",
-      time: "1 hour ago",
-      location: "Building C - Lobby",
-    },
+  const {BASE_URL,mapTrigger,setMapTrigger} = useMapTrigger();
 
-  ];
+  const [alerts,setAlerts] = useState<Alert[]>([
+    // {
+    //   id: 1,
+    //   title: "Critical: Unauthorized Access Attempt",
+    //   description: "Multiple failed login attempts detected from IP 192.168.1.100",
+    //   status: "critical",
+    //   time: "2 minutes ago",
+    //   location: "Building A - Floor 3",
+    // },
+    // {
+    //   id: 2,
+    //   title: "Warning: Unusual Activity Detected",
+    //   description: "Movement detected in restricted area during off-hours",
+    //   status: "warning",
+    //   time: "15 minutes ago",
+    //   location: "Building B - Parking",
+    // },
+    // {
+    //   id: 3,
+    //   title: "Info: New Device Connected",
+    //   description: "Unknown device connected to network",
+    //   status: "info",
+    //   time: "1 hour ago",
+    //   location: "Building C - Lobby",
+    // }
+  ]);
+
+  const fetchSightings = async (filter: FilterValue) => {
+        const token = localStorage.getItem('authToken'); // Grab the saved token
+        const res = await fetch(`${BASE_URL}/sightings/filter?timeframe=${filter}`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            }
+        });
+        const data = await res.json();
+        setSightings(data);
+        showSightings(data);
+    };
+
+  useEffect(() => {
+        fetchSightings(filter as FilterValue);
+    }, [filter,mapTrigger]);
+
+  const formatSmartTime = (timestamp: number | string | Date) => {
+    const now = new Date();
+    const past = new Date(timestamp);
+    const diffInMs = now.getTime() - past.getTime();
+    const diffInMins = Math.floor(diffInMs / (1000 * 60));
+    const diffInHours = Math.floor(diffInMins / 60);
+
+    if (diffInMins < 1) return "Just now";
+    if (diffInMins < 60) return `${diffInMins}m ago`;
+    if (diffInHours < 24) return `${diffInHours}h ago`;
+    return past.toLocaleDateString([], { month: 'short', day: '2-digit' });
+  };
+
+  const showSightings = async (sightings : Sighting[]) =>{
+    const alertSet = sightings.map((sighting)=>({
+      id:sighting.id,
+      time:formatSmartTime(sighting.timestamp),
+      title:`ELEPHANT Sighting!`,
+      description: (()=>{if(sighting.source==="drone"){return "Critical: Drone No: "+sighting.droneId+ " has idenfied an elephant!";}else{return "Warning: There is a elephant sighting by an app user. Check Details!"}})(),
+      status: (()=>{if(sighting.source==="drone"||sighting.verified){return "critical";}else{return "warning";}})(),
+      location: `Latitude : ${sighting.latitude} , Longitude : ${sighting.longitude} `,
+      rawTime: sighting.timestamp
+
+    }));
+    setAlerts(alertSet);
+  };
 
   const getStatusIcon = (status: string) => {
     switch (status) {
@@ -56,6 +128,10 @@ export function SightingAlertsPage() {
       resolved: "bg-green-100 text-green-700",
     };
     return styles[status as keyof typeof styles] || "";
+  };
+
+  const getAlertCount = (stausType: string)=>{
+    return alerts.filter(a => a.status === stausType).length;
   };
 
   return (
@@ -90,7 +166,7 @@ export function SightingAlertsPage() {
             </div>
             <div>
               <p className={`text-sm ${isDark ? "text-[rgba(255,255,255,0.6)]" : "text-gray-600"}`}>Critical</p>
-              <p className="text-xl font-semibold">3</p>
+              <p className="text-xl font-semibold">{getAlertCount("critical")}</p>
             </div>
           </div>
         </div>
@@ -102,7 +178,7 @@ export function SightingAlertsPage() {
             </div>
             <div>
               <p className={`text-sm ${isDark ? "text-[rgba(255,255,255,0.6)]" : "text-gray-600"}`}>Warning</p>
-              <p className="text-xl font-semibold">7</p>
+              <p className="text-xl font-semibold">{getAlertCount("warning")}</p>
             </div>
           </div>
         </div>
@@ -114,7 +190,7 @@ export function SightingAlertsPage() {
             </div>
             <div>
               <p className={`text-sm ${isDark ? "text-[rgba(255,255,255,0.6)]" : "text-gray-600"}`}>Info</p>
-              <p className="text-xl font-semibold">12</p>
+              <p className="text-xl font-semibold">{getAlertCount("info")}</p>
             </div>
           </div>
         </div>
@@ -126,7 +202,7 @@ export function SightingAlertsPage() {
             </div>
             <div>
               <p className={`text-sm ${isDark ? "text-[rgba(255,255,255,0.6)]" : "text-gray-600"}`}>Resolved</p>
-              <p className="text-xl font-semibold">45</p>
+              <p className="text-xl font-semibold">{getAlertCount("resolved")}</p>
             </div>
           </div>
         </div>
@@ -134,7 +210,9 @@ export function SightingAlertsPage() {
 
       {/* Alerts List */}
       <div className="space-y-3">
-        {alerts.map((alert) => (
+        {alerts
+        .sort((a, b) => new Date(b.rawTime).getTime() - new Date(a.rawTime).getTime())
+        .map((alert) => (
           <div
             key={alert.id}
             className={`p-5 rounded-xl border ${

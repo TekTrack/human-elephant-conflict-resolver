@@ -41,6 +41,7 @@ interface Sighting {
     longitude: number;
     timestamp: string;
     source: "user" | "drone";
+    droneId:number;
 }
 
 interface NewZoneForm {

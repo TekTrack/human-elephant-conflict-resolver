@@ -16,18 +16,20 @@ public class Sighting {
     private double longitude;
     private String photoFilename;
     private boolean verified = false;
-    private String source; 
+    private String source;
+    private Long droneId; 
 
     // The Constructor
     public Sighting() {}
 
-    public Sighting(int count, LocalDateTime timestamp, double lat, double lon, String photo, String source) {
+    public Sighting(int count, LocalDateTime timestamp, double lat, double lon, String photo, String source,Long droneId) {
         this.elephantCount = count;
         this.timestamp = timestamp;
         this.latitude = lat;
         this.longitude = lon;
         this.photoFilename = photo;
         this.source = source;
+        this.droneId =droneId;
     }
 
     // Getters and Setters
@@ -39,15 +41,17 @@ public class Sighting {
     public boolean isVerified() { return verified; }
     public String getSource() { return source; }
     public Long getId() { return id; }
+    public Long getDroneId(){ return droneId; }
 
     // Keep your old methods like verifySighting() here...
     public void setVerified(boolean verified) {
         this.verified = verified;
     }
 
-    // Add this to print the object easily in the terminal
     @Override
     public String toString() {
-        return "Sighting [Count=" + elephantCount + ", Time=" + timestamp + ", Lat=" + latitude + ", Lon=" + longitude + ", Photo=" + photoFilename + "]";
+        return "Sighting [id=" + id + ", elephantCount=" + elephantCount + ", timestamp=" + timestamp + ", latitude="
+                + latitude + ", longitude=" + longitude + ", photoFilename=" + photoFilename + ", verified=" + verified
+                + ", source=" + source + ", droneId=" + droneId + "]";
     }
 }

@@ -78,7 +78,7 @@ public class SightingController {
 
             latestImages.put(droneId, photo.getBytes());
             
-            Sighting newSighting = new Sighting(Integer.parseInt(count), nowTime, Double.parseDouble(lat), Double.parseDouble(lon), filename, source);
+            Sighting newSighting = new Sighting(Integer.parseInt(count), nowTime, Double.parseDouble(lat), Double.parseDouble(lon), filename, source,droneId);
 
             // 4. Save data to supabase (with cooldown to prevent spamming). Also admin notifications are sent immediately, while user reports wait for verification.
             long now = System.currentTimeMillis();
