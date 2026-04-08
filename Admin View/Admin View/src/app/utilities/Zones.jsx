@@ -9,24 +9,6 @@
 //     return hoursSince < 24 ? 'red' : 'yellow'; 
 //   };
 
-//   const fetchSightings = async (timeframe) => {
-//     const token = localStorage.getItem('authToken'); // Grab the saved token
-//     const res = await fetch(`${BASE_URL}/sightings/filter?timeframe=${timeframe}`,{
-//       method: 'GET',
-//       headers: {
-//         'Content-Type': 'application/json',
-//         'Authorization': `Bearer ${token}`
-//       }
-//     });
-//     const data = await res.json();
-//     setSightings(data);
-//   };
-
-  
-    // useEffect(() => {
-    //     fetchZones(); // Load zones when the component mounts
-    //     fetchSightings(filter);
-    // }, [filter,mapTrigger]);
 
 
 

@@ -7,6 +7,9 @@ import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
+import org.springframework.http.ResponseEntity;
+import org.springframework.http.MediaType;
 
 import com.example.jumbowatch.admin.AdminNotification;
 import com.example.jumbowatch.model.Sighting;
@@ -18,10 +21,12 @@ import com.example.jumbowatch.service.NotificationService;
 import org.springframework.beans.factory.annotation.Autowired;
 
 @RestController
-@CrossOrigin(origins = "*") // Allows the web app to connect to this controller
+@CrossOrigin(origins = "http://localhost:5173")// Allows the web app to connect to this controller
 public class SightingController {
     private long lastSaveTime = 0;
     private final long COOLDOWN_MS = 60000; // 60 seconds
+    private final ConcurrentHashMap<Long, byte[]> latestImages = new ConcurrentHashMap<>();
+
     @Autowired
     private SightingRepository sightingRepo;
     @Autowired
@@ -54,23 +59,24 @@ public class SightingController {
             @RequestParam("longitude") String lon,
             @RequestParam("photo") MultipartFile photo,
             @RequestParam("source") String source,
-            @RequestParam("droneId") String droneId
+            @RequestParam("droneId") Long droneId
         ) {
 
         try {
             // 1. Force absolute path for the folder
-            Path saveFolder = Paths.get("elephant_alerts").toAbsolutePath();
+            Path saveFolder = Paths.get("elephant_alerts/"+droneId.toString()).toAbsolutePath();
             Files.createDirectories(saveFolder);
 
             // 2. Format time for filename
             LocalDateTime nowTime = LocalDateTime.now();
             String timestamp = nowTime.format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss"));
             String filename = "alert_" + timestamp + ".jpg";
-            Path filePath = saveFolder.resolve(filename);
+            //Path filePath = saveFolder.resolve(filename);
 
             // 3. Save using Files.copy (Bulletproof method 🛡️)
-            Files.copy(photo.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
+            //Files.copy(photo.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
 
+            latestImages.put(droneId, photo.getBytes());
             
             Sighting newSighting = new Sighting(Integer.parseInt(count), nowTime, Double.parseDouble(lat), Double.parseDouble(lon), filename, source);
 
@@ -118,6 +124,7 @@ public class SightingController {
             System.out.println("📍 GPS:   " + lat + ", " + lon);
             System.out.println("⏰ Time:  " + time);
             System.out.println("📁 Photo: " + filename);
+            System.out.println("Drone ID: " + droneId);
             System.out.println("========================================");
 
             return "Alert Received";
@@ -127,5 +134,21 @@ public class SightingController {
             e.printStackTrace(); // This prints the exact error in the terminal if it fails again
             return "Failed to process alert.";
         }
+    }
+
+    @GetMapping(value = "/api/admin/liveDroneFeed/{id}", produces = MediaType.IMAGE_JPEG_VALUE)
+    public ResponseEntity<byte[]> getLatestImage(@PathVariable Long id) {
+        
+        // Grab the bytes from our map
+        byte[] imageBytes = latestImages.get(id);
+
+        if (imageBytes != null) {
+            return ResponseEntity.ok()
+                    .contentType(MediaType.IMAGE_JPEG)
+                    .body(imageBytes);
+        }
+
+        // Return a 404 if the drone hasn't sent anything yet
+        return ResponseEntity.notFound().build();
     }
 }
