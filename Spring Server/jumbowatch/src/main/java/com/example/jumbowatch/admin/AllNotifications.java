@@ -7,6 +7,7 @@ import com.example.jumbowatch.repository.NotificationRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -20,8 +21,11 @@ public class AllNotifications {
     public List<Notification> getAllNotifications(@RequestParam(required = false) Integer zoneId) {
     if (zoneId == null || zoneId == 0) {
         return notificationRepository.findAll(); // Show everything if no zone selected
+        }
+        return notificationRepository.findByZoneId(zoneId);
     }
-    return notificationRepository.findByZoneId(zoneId);
-}
-
+    @DeleteMapping
+    public deleteAllNotifications(){
+        notificationRepository.deleteAll(); 
+    }
 }

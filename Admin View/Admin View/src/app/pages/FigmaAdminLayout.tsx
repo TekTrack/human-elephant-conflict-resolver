@@ -41,7 +41,7 @@ export function FigmaAdminLayout() {
   const menuItemActiveBg = isDark ? "bg-[rgba(255,255,255,0.1)]" : "bg-gray-300";
   const borderColor = isDark ? "border-[rgba(255,255,255,0.15)]" : "border-gray-300";
 
-  /*Time function */
+
   const formatSmartTime = (timestamp: number | string | Date) => {
     const now = new Date();
     const past = new Date(timestamp);
@@ -49,16 +49,9 @@ export function FigmaAdminLayout() {
     const diffInMins = Math.floor(diffInMs / (1000 * 60));
     const diffInHours = Math.floor(diffInMins / 60);
 
-    // 1. Less than a minute
     if (diffInMins < 1) return "Just now";
-
-    // 2. Less than an hour
     if (diffInMins < 60) return `${diffInMins}m ago`;
-
-    // 3. Less than 24 hours
     if (diffInHours < 24) return `${diffInHours}h ago`;
-
-    // 4. Older than a day - Show the actual date (e.g., "Oct 08")
     return past.toLocaleDateString([], { month: 'short', day: '2-digit' });
   };
 
