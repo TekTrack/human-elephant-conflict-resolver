@@ -54,4 +54,13 @@ public class JwtUtil {
         }
     }
 
+    public boolean invalidateToken(String token) {
+        try {
+            Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token);
+            return false;
+        } catch (Exception e) {
+            return true;
+        }
+    }
+
 }

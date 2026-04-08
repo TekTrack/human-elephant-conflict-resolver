@@ -21,4 +21,17 @@ public interface AdminRepository extends JpaRepository<Admin, String> {
     @Query("SELECT a.adminid FROM Admin a WHERE a.username = :username")
     String findAdminIdByUsername(@Param("username") String username);
 
+    // //Check if admin with the same admin ID already exists
+    // boolean existsByAdminId(String adminId);
+
+    // //Check if admin with the same username already exists
+    // boolean existsByUsername(String username);
+
+    // //Check if admin with the same phone number already exists
+    // boolean existsByPhone(String phone);
+
+    //get usermname by Admin ID
+    @Query("SELECT a.username FROM Admin a WHERE a.adminid = :adminId")
+    String findUsernameByAdminId(@Param("adminId") String adminId);
+
 }

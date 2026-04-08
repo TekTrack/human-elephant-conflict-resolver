@@ -20,21 +20,17 @@ public class User {
     public User() {
     }
 
-    public User(String email, String password, String name, String phoneNumber, String IdentityID, String AdminID, int categoryIndex) {
-        String[] categories = {"civil", "guide", "photoGrapher"};
+    public User(String email, String password, String name, String phoneNumber, String IdentityID, String AdminID,
+            String userCategory) {
 
         this.email = email;
         this.password = password;
         this.name = name;
         this.phoneNumber = phoneNumber;
+        this.userCategory = userCategory;
         this.IdentityID = IdentityID;
         this.AdminID = AdminID;
 
-        if (categoryIndex >= 0 && categoryIndex < categories.length) {
-            this.userCategory = categories[categoryIndex];
-        } else {
-            throw new IllegalArgumentException("Invalid category index");
-        }
     }
 
     // Getters and Setters...
@@ -69,5 +65,29 @@ public class User {
     public String getAdminID() {
         return AdminID;
     }
+
+
+    public void setAdminID(String adminID) {
+        AdminID = adminID;
+    }
+
+    public void setIdentityID(String identityID) {
+        IdentityID = identityID;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public void setPhoneNumber(String phoneNumber) {
+        this.phoneNumber = phoneNumber;
+    }
+
+    public void setUserCategory(String userCategory) {
+        this.userCategory = userCategory;   
+    }
+
+    
+
 
 }
