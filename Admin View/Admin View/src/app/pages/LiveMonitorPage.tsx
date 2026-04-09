@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Video, Activity, Radio, Eye, X, Loader2, AlertCircle, RefreshCw, CheckCircle2, Plus } from "lucide-react";
+import { Video, Activity, Radio, Eye, X, Loader2, AlertCircle, RefreshCw, CheckCircle2, Plus, Drone } from "lucide-react";
 import { PageHeader } from "../components/PageHeader";
 import { StatCard } from "../components/StatCard";
 import { Card } from "../components/Card";
@@ -7,6 +7,7 @@ import { Badge } from "../components/Badge";
 import { Button } from "../components/Button";
 import { Input } from "../components/Input";
 import { Select } from "../components/Select";
+import { useParams } from "react-router";
 
 import { useTheme } from "../context/ThemeContext";
 import { useMapTrigger } from "../context/MapTriggerContext";
@@ -22,6 +23,7 @@ export function LiveMonitorPage() {
   const { theme } = useTheme();
   const isDark = theme === "dark";
   const { BASE_URL } = useMapTrigger();
+  const { droneId } = useParams<{droneId: string}>();
   
   const [drones, setDrones] = useState<Drone[]>([]);
   const [loading, setLoading] = useState(true);
@@ -102,13 +104,13 @@ export function LiveMonitorPage() {
     fetchDrones();
   }, [BASE_URL]);
 
-  const fetchDroneFeed = async (droneId: string | number): Promise<string | null> => {
+  const fetchDroneFeed = async (droneid: string | number): Promise<string | null> => {
     try {
       setVideoError(false);
       
       // 👇 TRICK THE BROWSER: Add '?t=timestamp' so it never caches the image!
       const cacheBuster = new Date().getTime();
-      const res = await fetch(`${BASE_URL}/liveDroneFeed/${droneId}?t=${cacheBuster}`, {
+      const res = await fetch(`${BASE_URL}/liveDroneFeed/${droneid}?t=${cacheBuster}`, {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('authToken')}`
@@ -130,30 +132,32 @@ export function LiveMonitorPage() {
   };
 
   useEffect(() => {
-    // 1. If no drone is selected, don't run the timer
-    if (!selectedDrone) return;
+    if (droneId && drones.length > 0) {
+      const foundDrone = drones.find(d => d.id === Number(droneId));     
+      if (foundDrone) {
+        handleViewDrone(foundDrone);
+      }
+    }
+  }, [droneId, drones]);
 
-    // 2. Start the timer
+  useEffect(() => {
+    if (!selectedDrone) return;
     const intervalId = setInterval(async () => {
-      // Fetch the new image
       const newUrl = await fetchDroneFeed(selectedDrone.id);
       
       if (newUrl) {
         setDroneImageSrc((oldUrl) => {
-          // 👇 CRITICAL: Destroy the old image from memory before showing the new one!
           if (oldUrl) {
             URL.revokeObjectURL(oldUrl);
           }
-          return newUrl; // Update the state with the fresh frame
+          return newUrl; 
         });
       }
-    }, 1000); // Fetches a new frame every 1 second (1000ms)
-
-    // 3. Cleanup when the modal closes
+    }, 1000);
     return () => {
       clearInterval(intervalId);
     };
-  }, [selectedDrone]); // Re-run if the selected drone changes
+  }, [selectedDrone]); 
 
   const activeDronesCount = drones.filter(d => d.active).length;
   const maintenanceCount = drones.filter(d => !d.active).length;

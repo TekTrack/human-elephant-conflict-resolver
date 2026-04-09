@@ -305,7 +305,7 @@ export function SightingAlertsPage() {
                     action={
                       selectedAlert.sighting.source === "drone" && (
                         <button
-                          onClick={() =>navigate('/live-monitor')}
+                          onClick={() =>navigate(`/live-monitor/${selectedAlert.sighting.droneId}`)}
                           className={`p-1.5 rounded-lg transition-colors border ${isDark ? "bg-red-500/10 border-red-500/20 hover:bg-red-500/20 text-red-400 hover:text-red-300" : "bg-red-50 border-red-200 hover:bg-red-100 text-red-600 hover:text-red-700"}`}
                           title="View Live Feed"
                         >
@@ -343,7 +343,7 @@ export function SightingAlertsPage() {
                 </Button>
 
                 {selectedAlert.sighting.source === "drone" ? (
-                  <Button variant="primary" className="flex-1 shadow-lg shadow-blue-500/20" onClick={() => alert("Navigate to Drone View for Drone ID: " + selectedAlert.sighting.droneId)}>
+                  <Button variant="primary" className="flex-1 shadow-lg shadow-blue-500/20" onClick={() => navigate(`/live-monitor/${selectedAlert.sighting.droneId}`)}>
                     <Video className="w-4 h-4 mr-2 inline" /> View Drone
                   </Button>
                 ) : (

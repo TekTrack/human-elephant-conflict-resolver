@@ -16,8 +16,9 @@ export const router = createBrowserRouter([
       { path: "sighting-alerts", Component: SightingAlertsPage },
       { path: "live-monitor", Component: LiveMonitorPage },
       { path: "alert-map", Component: DroneMapPage },
+      { path: "live-monitor/:droneId",Component: LiveMonitorPage},
       { path: "user-directory", Component: UserDirectoryPage },
-      { path: "geofencing", Component: GeofencingPage },
+      { path: "geofencing", Component: GeofencingPage }
     ],
   },
 ]);
