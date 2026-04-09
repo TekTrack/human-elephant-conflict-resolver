@@ -19,6 +19,7 @@ import { Button } from "../components/Button";
 import { Navigate, useNavigate } from "react-router";
 import {StatCard} from "../components/StatCard.tsx";
 import {PageHeader} from "../components/PageHeader.tsx";
+import { useParams } from "react-router";
 
 
 type FilterValue = "all" | "hour" | "day" | "week";
@@ -56,6 +57,7 @@ export function SightingAlertsPage() {
   const [alerts, setAlerts] = useState<Alert[]>([]);
 
   const navigate = useNavigate();
+  const { sightingId } = useParams<{sightingId:string}>();
 
   const fetchSightings = async (filter: FilterValue) => {
     const token = localStorage.getItem('authToken'); // Grab the saved token
@@ -70,6 +72,11 @@ export function SightingAlertsPage() {
     setSightings(data);
     showSightings(data);
   };
+
+  useEffect(()=>{
+    const currentSighting= alerts.find(s=>s.id===Number(sightingId));
+    setSelectedAlert(currentSighting||null);
+  },[sightingId,alerts])
 
   useEffect(() => {
     fetchSightings(filter as FilterValue);
