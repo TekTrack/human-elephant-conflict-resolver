@@ -7,8 +7,28 @@ import { MapTriggerProvider } from './context/MapTriggerContext.tsx';
 import Auth from './utilities/Auth.js';
 import NotificationHandler from './utilities/NotificationHandler.jsx';
 import { Sun, Moon } from "lucide-react";
+import { jwtDecode } from "jwt-decode";
 
 const { login } = Auth;
+
+const checkTokenValidity = () => {
+  const token = localStorage.getItem('authToken');
+  if (!token) return false;
+    try {
+      const decoded = jwtDecode(token);
+      const currentTime = Date.now() / 1000;
+      
+      // If the token's expiration time is in the past, it's dead!
+      if (decoded.exp && decoded.exp < currentTime) {
+        localStorage.removeItem('authToken'); // Clean it up
+        return false;
+      }
+      return true; // Token exists and is alive!
+    } catch (error) {
+      return false; // Token is mangled or invalid
+    }
+  };
+
 
 function LoginUI({ 
   handleLogin, 
@@ -86,7 +106,7 @@ function LoginUI({
 }
 
 function MainApp() {
-  const [isLoggedIn, setIsLoggedIn] = useState(!!localStorage.getItem('authToken'));
+  const [isLoggedIn, setIsLoggedIn] = useState(checkTokenValidity);
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
 
