@@ -93,7 +93,7 @@ function MainApp() {
   const bgColor = isDark ? "bg-[#333]" : "bg-[#f9fafb]";
   const textColor = isDark ? "text-white" : "text-black";
 
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(true);
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [isCheckingAuth, setIsCheckingAuth] = useState(true);

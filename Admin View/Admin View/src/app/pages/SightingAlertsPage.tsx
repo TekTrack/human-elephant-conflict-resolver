@@ -1,10 +1,24 @@
 import { useEffect, useState } from "react";
 import { useTheme } from "../context/ThemeContext.tsx";
-import { AlertTriangle, CheckCircle, XCircle, Clock, X, Video, Check, MapPin } from "lucide-react";
+import {
+  AlertTriangle,
+  CheckCircle,
+  XCircle,
+  Clock,
+  X,
+  Video,
+  Check,
+  MapPin,
+  ScanEye,
+  CheckLine,
+  ClockPlus, Drone, DroneIcon, Radio, Plus
+} from "lucide-react";
 import { useMapTrigger } from "../context/MapTriggerContext.tsx";
 import { Card } from "../components/Card";
 import { Button } from "../components/Button";
 import { Navigate, useNavigate } from "react-router";
+import {StatCard} from "../components/StatCard.tsx";
+import {PageHeader} from "../components/PageHeader.tsx";
 
 
 type FilterValue = "all" | "hour" | "day" | "week";
@@ -134,74 +148,100 @@ export function SightingAlertsPage() {
 
   return (
     <div className="p-8 space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-semibold">Sighting Alerts</h1>
-          <p className={`text-sm mt-1 ${isDark ? "text-[rgba(255,255,255,0.4)]" : "text-gray-500"}`}>
-            Monitor and manage security alerts in real-time
-          </p>
-        </div>
-        <div className="flex gap-2">
-          <button className={`px-4 py-2 rounded-lg text-sm ${isDark ? "bg-[rgba(255,255,255,0.1)] hover:bg-[rgba(255,255,255,0.15)]" : "bg-gray-200 hover:bg-gray-300"
-            }`}>
-            Filter
-          </button>
-          <button className={`px-4 py-2 rounded-lg text-sm ${isDark ? "bg-blue-600 hover:bg-blue-700" : "bg-blue-500 hover:bg-blue-600"
-            } text-white`}>
-            Mark All Read
-          </button>
-        </div>
-      </div>
+
+      <PageHeader
+          title="User Sighting Alerts"
+          description="Elephants sightings captured by users"
+      />
 
       {/* Stats Summary */}
+
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <div className={`p-4 rounded-xl ${isDark ? "bg-[rgba(255,255,255,0.05)]" : "bg-gray-100"}`}>
-          <div className="flex items-center gap-3">
-            <div className="p-2 rounded-lg bg-red-100">
-              <XCircle className="w-5 h-5 text-red-600" />
-            </div>
-            <div>
-              <p className={`text-sm ${isDark ? "text-[rgba(255,255,255,0.6)]" : "text-gray-600"}`}>Critical</p>
-              <p className="text-xl font-semibold">{getAlertCount("critical")}</p>
-            </div>
-          </div>
-        </div>
 
-        <div className={`p-4 rounded-xl ${isDark ? "bg-[rgba(255,255,255,0.05)]" : "bg-gray-100"}`}>
-          <div className="flex items-center gap-3">
-            <div className="p-2 rounded-lg bg-yellow-100">
-              <AlertTriangle className="w-5 h-5 text-yellow-600" />
-            </div>
-            <div>
-              <p className={`text-sm ${isDark ? "text-[rgba(255,255,255,0.6)]" : "text-gray-600"}`}>Warning</p>
-              <p className="text-xl font-semibold">{getAlertCount("warning")}</p>
-            </div>
-          </div>
-        </div>
+        <StatCard
+            label={"Total User Sightings"}
+            value={getAlertCount("critical")}
+            icon={<ScanEye/>}
+            iconBgClass=" bg-blue-500 text-white "
+        >
+        </StatCard>
 
-        <div className={`p-4 rounded-xl ${isDark ? "bg-[rgba(255,255,255,0.05)]" : "bg-gray-100"}`}>
-          <div className="flex items-center gap-3">
-            <div className="p-2 rounded-lg bg-blue-100">
-              <Clock className="w-5 h-5 text-blue-600" />
-            </div>
-            <div>
-              <p className={`text-sm ${isDark ? "text-[rgba(255,255,255,0.6)]" : "text-gray-600"}`}>Info</p>
-              <p className="text-xl font-semibold">{getAlertCount("info")}</p>
-            </div>
-          </div>
-        </div>
+        <StatCard
+            label={"Resolved User Sightings"}
+            value={getAlertCount("resolved")}
+            icon={<CheckLine/>}
+            iconBgClass="pr bg-green-500 text-white  "
+        >
+        </StatCard>
 
-        <div className={`p-4 rounded-xl ${isDark ? "bg-[rgba(255,255,255,0.05)]" : "bg-gray-100"}`}>
-          <div className="flex items-center gap-3">
-            <div className="p-2 rounded-lg bg-green-100">
-              <CheckCircle className="w-5 h-5 text-green-600" />
-            </div>
-            <div>
-              <p className={`text-sm ${isDark ? "text-[rgba(255,255,255,0.6)]" : "text-gray-600"}`}>Resolved</p>
-              <p className="text-xl font-semibold">{getAlertCount("resolved")}</p>
-            </div>
-          </div>
-        </div>
+        <StatCard
+            label={"Unresolved User Sightings"}
+            value={getAlertCount("unresolved")}
+            icon={<X/>}
+            iconBgClass="pr bg-red-500 text-white  "
+        >
+        </StatCard>
+
+        <StatCard
+            label={"New User Sightings"}
+            value={getAlertCount("new")}
+            icon={<ClockPlus />}
+            iconBgClass="pr bg-orange-500 text-white  "
+        >
+        </StatCard>
+
+
+
+
+
+
+        {/*<div className={`p-4 rounded-xl ${isDark ? "bg-[rgba(255,255,255,0.05)]" : "bg-gray-100"}`}>*/}
+        {/*  <div className="flex items-center gap-3">*/}
+        {/*    <div className="p-2 rounded-lg bg-red-100">*/}
+        {/*      <XCircle className="w-5 h-5 text-red-600" />*/}
+        {/*    </div>*/}
+        {/*    <div>*/}
+        {/*      <p className={`text-sm ${isDark ? "text-[rgba(255,255,255,0.6)]" : "text-gray-600"}`}>Critical</p>*/}
+        {/*      <p className="text-xl font-semibold">{getAlertCount("critical")}</p>*/}
+        {/*    </div>*/}
+        {/*  </div>*/}
+        {/*</div>*/}
+
+        {/*<div className={`p-4 rounded-xl ${isDark ? "bg-[rgba(255,255,255,0.05)]" : "bg-gray-100"}`}>*/}
+        {/*  <div className="flex items-center gap-3">*/}
+        {/*    <div className="p-2 rounded-lg bg-yellow-100">*/}
+        {/*      <AlertTriangle className="w-5 h-5 text-yellow-600" />*/}
+        {/*    </div>*/}
+        {/*    <div>*/}
+        {/*      <p className={`text-sm ${isDark ? "text-[rgba(255,255,255,0.6)]" : "text-gray-600"}`}>Warning</p>*/}
+        {/*      <p className="text-xl font-semibold">{getAlertCount("warning")}</p>*/}
+        {/*    </div>*/}
+        {/*  </div>*/}
+        {/*</div>*/}
+
+        {/*<div className={`p-4 rounded-xl ${isDark ? "bg-[rgba(255,255,255,0.05)]" : "bg-gray-100"}`}>*/}
+        {/*  <div className="flex items-center gap-3">*/}
+        {/*    <div className="p-2 rounded-lg bg-blue-100">*/}
+        {/*      <Clock className="w-5 h-5 text-blue-600" />*/}
+        {/*    </div>*/}
+        {/*    <div>*/}
+        {/*      <p className={`text-sm ${isDark ? "text-[rgba(255,255,255,0.6)]" : "text-gray-600"}`}>Info</p>*/}
+        {/*      <p className="text-xl font-semibold">{getAlertCount("info")}</p>*/}
+        {/*    </div>*/}
+        {/*  </div>*/}
+        {/*</div>*/}
+
+        {/*<div className={`p-4 rounded-xl ${isDark ? "bg-[rgba(255,255,255,0.05)]" : "bg-gray-100"}`}>*/}
+        {/*  <div className="flex items-center gap-3">*/}
+        {/*    <div className="p-2 rounded-lg bg-green-100">*/}
+        {/*      <CheckCircle className="w-5 h-5 text-green-600" />*/}
+        {/*    </div>*/}
+        {/*    <div>*/}
+        {/*      <p className={`text-sm ${isDark ? "text-[rgba(255,255,255,0.6)]" : "text-gray-600"}`}>Resolved</p>*/}
+        {/*      <p className="text-xl font-semibold">{getAlertCount("resolved")}</p>*/}
+        {/*    </div>*/}
+        {/*  </div>*/}
+        {/*</div>*/}
       </div>
 
       {/* Alerts List */}
@@ -356,6 +396,40 @@ export function SightingAlertsPage() {
           </Card>
         </div>
       )}
+      <PageHeader
+          title="Drone Sighting Alerts"
+          description="Real-time Drone Sightings"
+      />
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <StatCard
+            label={"Total Drone Sightings"}
+            value={getAlertCount("Drones")}
+            icon={<Drone />}
+            iconBgClass="pr bg-yellow-500 text-white  "
+        >
+        </StatCard>
+        <StatCard
+            label={"Checked Drone Sightings"}
+            value={getAlertCount("checked-drones")}
+            icon={<CheckLine />}
+            iconBgClass="pr bg-green-500 text-white  "
+        >
+        </StatCard>
+        <StatCard
+            label={"New Drone Sightings"}
+            value={getAlertCount("unchecked-drones")}
+            icon={<ClockPlus/>}
+            iconBgClass="pr bg-orange-500 text-white  "
+        >
+        </StatCard>
+
+      </div>
+
+
+
+
     </div>
+
+
   );
 }

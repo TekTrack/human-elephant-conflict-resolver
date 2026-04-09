@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="1df404a4-54fe-4d3f-8772-2e4d55ea2850" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/../Admin View/Admin View/src/app/App.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/../Admin View/Admin View/src/app/App.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/jumbowatch/src/main/java/com/example/jumbowatch/admin/AdminController.java" beforeDir="false" afterPath="$PROJECT_DIR$/jumbowatch/src/main/java/com/example/jumbowatch/admin/AdminController.java" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/.." />
+  </component>
+  <component name="GitHubPullRequestSearchHistory"><![CDATA[{
+  "lastFilter": {
+    "state": "OPEN",
+    "assignee": "Yomal-al"
+  }
+}]]></component>
+  <component name="GithubPullRequestsUISettings"><![CDATA[{
+  "selectedUrlAndAccountId": {
+    "url": "https://github.com/Yomal-al/human-elephant-conflict-resolver.git",
+    "accountId": "73f0e1e6-3f3c-482f-b282-66e25d33f16c"
+  }
+}]]></component>
+  <component name="ProjectColorInfo"><![CDATA[{
+  "associatedIndex": 7
+}]]></component>
+  <component name="ProjectId" id="3Bx52fGiPg7JpgLNwTp7PP8ejhg" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "Application.JumbowatchApplication.executor": "Run",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "git-widget-placeholder": "main",
+    "kotlin-language-version-configured": "true",
+    "last_opened_file_path": "C:/Users/Yomal/WebstormProjects/human-elephant-conflict-resolver/Spring Server",
+    "project.structure.last.edited": "Project",
+    "project.structure.proportion": "0.0",
+    "project.structure.side.proportion": "0.0"
+  }
+}]]></component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="1df404a4-54fe-4d3f-8772-2e4d55ea2850" name="Changes" comment="" />
+      <created>1775417674679</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1775417674679</updated>
+    </task>
+    <servers />
+  </component>
+</project>
