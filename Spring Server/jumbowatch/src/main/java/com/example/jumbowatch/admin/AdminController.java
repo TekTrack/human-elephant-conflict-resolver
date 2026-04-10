@@ -59,20 +59,6 @@ public class AdminController {
                 return new ResponseEntity<>(errorResponse, HttpStatus.CONFLICT);
             }
 
-            // //check if admin with the same phone number already exists
-            // if (adminRepository.existsByPhone(admin.getPhone())) {
-            //     Map<String, Object> errorResponse = new HashMap<>();
-            //     errorResponse.put("message", "Admin with this phone number already exists");
-            //     return new ResponseEntity<>(errorResponse, HttpStatus.CONFLICT);
-            // }
-
-            // //Check if admin with the same admin ID already exists
-            // if (adminRepository.existsByAdminId(admin.getAdminId())) {
-            //     Map<String, Object> errorResponse = new HashMap<>();
-            //     errorResponse.put("message", "Admin with this Admin ID already exists");
-            //     return new ResponseEntity<>(errorResponse, HttpStatus.CONFLICT);
-            // }
-
             String hashedPassword = passwordEncoder.encode(admin.getPassword());
             admin.setPassword(hashedPassword);
 
@@ -152,14 +138,6 @@ public class AdminController {
             response.put("message", "Users retrieved successfully!");
             response.put("status", HttpStatus.OK.value());
             response.put("data", users);
-           
-
-            // ObjectMapper mapper = new ObjectMapper();
-            // String jsonResponse = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(response);
-
-            // System.out.println("--- Full JSON Response to Frontend ---");
-            // System.out.println(jsonResponse);
-            // System.out.println("--------------------------------------");
         return new ResponseEntity<>(response, HttpStatus.OK);
 
 
@@ -172,7 +150,7 @@ public class AdminController {
     }
 
     //get Admin Details Endpoint
-    @GetMapping("/details")
+    @GetMapping("/me")
     public ResponseEntity<Object> getAdminDetails(Principal principal) {
         try {
             String adminUsername = principal.getName();
@@ -204,13 +182,6 @@ public class AdminController {
             response.put("message", "Admins retrieved successfully!");
             response.put("status", HttpStatus.OK.value());
             response.put("data", admins);
-          
-            // ObjectMapper mapper = new ObjectMapper();
-            // String jsonResponse = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(response);
-
-            // System.out.println("--- Full JSON Response to Frontend ---");
-            // System.out.println(jsonResponse);
-            // System.out.println("--------------------------------------");
             return new ResponseEntity<>(response, HttpStatus.OK);
         } catch (Exception e) {
             Map<String, Object> errorResponse = new HashMap<>();
@@ -221,11 +192,16 @@ public class AdminController {
     }
 
     //User Creation Endpoint
+    //this is Admin created users that they have no smart phones then we need to know there Phone numer only
     @PostMapping("/createuser")
     public ResponseEntity<Object> createUser(@RequestBody User user) {
         try {
-            if (userRepository.existsByEmail(user.getEmail())) {
-                return ResponseEntity.status(409).body(Map.of("message", "User with this email already exists"));
+
+            System.out.println("I am Hit");
+
+            //Phone number Check
+            if(userRepository.existByphoneNumber(user.getPhoneNumber())){
+                return ResponseEntity.status(409).body(Map.of("message", "User with this Phone Number already exists"));
             }
 
             //Identity ID Check
@@ -233,8 +209,7 @@ public class AdminController {
                 return ResponseEntity.status(409).body(Map.of("message", "User with this Identity ID already exists"));
             }
 
-            // Password hashing before saving to the database
-            user.setPassword(passwordEncoder.encode(user.getPassword()));
+
             User savedUser = userRepository.save(user);
            // System.out.println(user);
             return ResponseEntity.status(201).body(Map.of(
@@ -267,44 +242,15 @@ public class AdminController {
         }
     }
 
-
-    //User Update Endpoint
-    @PostMapping("/updateuser")
-    public ResponseEntity<Object> updateUser(@RequestBody User user) {
-        try {
-
-
-            System.out.println("Attempting to update user: " + user.getEmail()); // Debugging line
-            User existingUser = userRepository.findByEmail(user.getEmail())
-                    .orElseThrow(() -> new RuntimeException("User not found"));
-
-            existingUser.setName(user.getName());
-            existingUser.setPhoneNumber(user.getPhoneNumber());
-
-            if (user.getPassword() != null && !user.getPassword().isEmpty()) {
-                existingUser.setPassword(passwordEncoder.encode(user.getPassword()));
-            }
-
-            User updatedUser = userRepository.save(existingUser);
-
-            Map<String, Object> response = new HashMap<>();
-            response.put("message", "User updated successfully!");
-            response.put("status", HttpStatus.OK.value());
-            response.put("data", updatedUser);
-            return new ResponseEntity<>(response, HttpStatus.OK);
-        } catch (Exception e) {
-            Map<String, Object> errorResponse = new HashMap<>();
-            errorResponse.put("message", "Failed to update user");
-            errorResponse.put("error", e.getMessage());
-            return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
-        }
-    }
-
    // Admin Update Endpoint
     @PostMapping("/updateadmin")
     public ResponseEntity<Object> updateAdmin(@RequestBody Admin admin) {
         try {
-            Admin existingAdmin = adminRepository.findById(admin.getUsername())
+
+            System.out.println("I am hit");
+            System.out.println(admin.getAdminId());
+
+            Admin existingAdmin = adminRepository.userfindbyID(admin.getAdminId())
                     .orElseThrow(() -> new RuntimeException("Admin not found"));
 
                     System.out.println("Attempting to update admin: " + admin.getUsername()); // Debugging line
@@ -313,6 +259,29 @@ public class AdminController {
             existingAdmin.setEmail(admin.getEmail());
             existingAdmin.setPhone(admin.getPhone());
             existingAdmin.setName(admin.getName());
+
+            Admin updatedAdmin = adminRepository.save(existingAdmin);
+
+            Map<String, Object> response = new HashMap<>();
+            response.put("message", "Admin updated successfully!");
+            response.put("status", HttpStatus.OK.value());
+            response.put("data", updatedAdmin);
+            return new ResponseEntity<>(response, HttpStatus.OK);
+        } catch (Exception e) {
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("message", "Failed to update admin");
+            errorResponse.put("error", e.getMessage());
+            return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    @PostMapping("/changepassword")
+   public ResponseEntity<Object> changepassword(@RequestBody Admin admin) {
+        try {
+            Admin existingAdmin = adminRepository.userfindbyID(admin.getAdminId())
+                    .orElseThrow(() -> new RuntimeException("Admin not found"));
+
+                    System.out.println("Attempting to update admin: " + admin.getUsername()); // Debugging line
 
             if (admin.getPassword() != null && !admin.getPassword().isEmpty()) {
                 existingAdmin.setPassword(passwordEncoder.encode(admin.getPassword()));
@@ -339,10 +308,10 @@ public class AdminController {
     public ResponseEntity<Object> deleteUser(@RequestBody User user) {
         try {
 
-            String userEmail = user.getEmail(); // Get the email from the request body
-            User existingUser = userRepository.findByEmail(userEmail)
-                    .orElseThrow(() -> new RuntimeException("User not found with email: " + userEmail));
-            userRepository.delete(existingUser); // Delete the user using the email
+            String userphoneNumber = user.getPhoneNumber(); // Get the email from the request body
+            User existingUser = userRepository.getuserfomPhone(userphoneNumber)
+                    .orElseThrow(() -> new RuntimeException("User not found with phone Number: " + userphoneNumber));
+            userRepository.delete(existingUser); // Delete the user using the phone number
             Map<String, Object> response = new HashMap<>();
             response.put("message", "User deleted successfully!");
             response.put("status", HttpStatus.OK.value());

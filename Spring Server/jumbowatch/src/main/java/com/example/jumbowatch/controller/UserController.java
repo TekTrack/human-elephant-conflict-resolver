@@ -40,6 +40,12 @@ public class UserController {
                 return ResponseEntity.status(409).body(Map.of("message", "User with this Identity ID already exists"));
             }
 
+            //Phone Number Check
+            if(userRepository.existByphoneNumber(user.getPhoneNumber())){
+                return ResponseEntity.status(409).body(Map.of("message", "User with this Phone Number is already exists"));
+            }
+
+
             // Password hashing before saving to the database
             user.setPassword(passwordEncoder.encode(user.getPassword()));
             User savedUser = userRepository.save(user);
