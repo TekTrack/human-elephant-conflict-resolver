@@ -33,11 +33,7 @@ public class SecurityConfig {
                 .requestMatchers("/api/user/register").permitAll()
                 .requestMatchers("/api/admin/newadmin").authenticated()
                 .requestMatchers("/alert").permitAll()
-                .requestMatchers("/api/admin/allnotifications/**").permitAll()
-                .requestMatchers("/api/admin/zones/**").permitAll()
-                .requestMatchers("/api/admin/liveDroneFeed/**").permitAll()
-                .requestMatchers("/api/admin/drones").permitAll()
-                .requestMatchers("/api/admin/notifications").permitAll() // For testing, can be removed later 
+                .requestMatchers("/api/admin/**").authenticated()
                 .requestMatchers("/error").permitAll()
                 .anyRequest().authenticated())
                 .sessionManagement(session -> session

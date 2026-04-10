@@ -1,33 +1,15 @@
 
 import { RouterProvider } from 'react-router';
-import React, {createContext, useState} from 'react';
+import React, {createContext, useEffect, useState} from 'react';
 import { router } from './routes';
 import { ThemeProvider, useTheme } from './context/ThemeContext.tsx';
 import { MapTriggerProvider } from './context/MapTriggerContext.tsx';
 import Auth from './utilities/Auth.js';
 import NotificationHandler from './utilities/NotificationHandler.jsx';
-import { Sun, Moon } from "lucide-react";
+import { Sun, Moon, Loader2 } from "lucide-react";
 import { jwtDecode } from "jwt-decode";
 
 const { login } = Auth;
-
-const checkTokenValidity = () => {
-  const token = localStorage.getItem('authToken');
-  if (!token) return false;
-    try {
-      const decoded = jwtDecode(token);
-      const currentTime = Date.now() / 1000;
-      
-      // If the token's expiration time is in the past, it's dead!
-      if (decoded.exp && decoded.exp < currentTime) {
-        localStorage.removeItem('authToken'); // Clean it up
-        return false;
-      }
-      return true; // Token exists and is alive!
-    } catch (error) {
-      return false; // Token is mangled or invalid
-    }
-  };
 
 
 function LoginUI({ 
@@ -106,17 +88,50 @@ function LoginUI({
 }
 
 function MainApp() {
-  const [isLoggedIn, setIsLoggedIn] = useState(checkTokenValidity);
+  const { theme } = useTheme();
+  const isDark = theme === "dark";
+  const bgColor = isDark ? "bg-[#333]" : "bg-[#f9fafb]";
+  const textColor = isDark ? "text-white" : "text-black";
+
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
-
+  const [isCheckingAuth, setIsCheckingAuth] = useState(true);
 
   // Dashboard states - specify string type for ID
   const [sightingId, setSightingId] = useState<string>('');
   const [newAdmin, setNewAdmin] = useState({ username: '', password: '' });
-  
 
-  const BASE_URL = 'http://localhost:8080/api/admin';
+  useEffect(() => {
+    const verifyToken = async () => {
+      const token = localStorage.getItem('authToken');
+      if (!token) {
+        setIsCheckingAuth(false);
+        return;
+      }
+
+      try {
+        const BASE_URL = 'http://localhost:8080/api/admin';
+        const res = await fetch(`${BASE_URL}/sightings/filter?timeframe=all`, {
+          method: 'GET',
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+
+        if (res.ok) {
+          setIsLoggedIn(true); 
+        } else {
+          localStorage.removeItem('authToken'); 
+          setIsLoggedIn(false);
+        }
+      } catch (error) {
+        setIsLoggedIn(false); 
+      } finally {
+        setIsCheckingAuth(false); // Done checking!
+      }
+    };
+
+    verifyToken();
+  }, []);
 
   // 🔐 Login Flow
   const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -127,14 +142,25 @@ function MainApp() {
     }
   };
 
-  // 🖥️ UI Render
-  if (!isLoggedIn) {
-    return <LoginUI handleLogin={handleLogin} setUsername={setUsername} setPassword={setPassword} />;
+  if (isCheckingAuth) {
+    return (
+      <div className={`flex min-h-screen items-center justify-center ${bgColor} ${textColor} transition-colors duration-300`}>
+        <div className="flex flex-col items-center space-y-4">
+          <Loader2 className="w-10 h-10 animate-spin text-blue-500" />
+          <div className="text-xl font-semibold tracking-tight">Verifying session...</div>
+        </div>
+      </div>
+    );
   }
 
+  if (!isLoggedIn) {
+      return <LoginUI handleLogin={handleLogin} setUsername={setUsername} setPassword={setPassword} />;
+  }  
+
   return (
-     <RouterProvider router={router} />
+    <RouterProvider router={router} />
   );
+  
 }
 
 export default function App() {

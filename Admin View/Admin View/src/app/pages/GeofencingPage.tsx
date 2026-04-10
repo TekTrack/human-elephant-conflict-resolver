@@ -4,6 +4,7 @@ import { useMapTrigger } from "../context/MapTriggerContext";
 import { MapPin, Plus, Edit, Trash2, X, RefreshCw, Check } from "lucide-react";// @ts-ignore
 import Map, { Source, Layer, Marker, Popup, NavigationControl } from "react-map-gl/maplibre";
 import type { MapRef, MapLayerMouseEvent, MapMouseEvent } from "react-map-gl/maplibre";
+import { useNavigate,useParams } from "react-router";
 
 import { PageHeader } from "../components/PageHeader";
 import { StatCard } from "../components/StatCard";
@@ -112,6 +113,7 @@ export function GeofencingPage() {
     const isDark = theme === "dark";
     const mapRef = useRef<MapRef>(null);
     const { mapTrigger, BASE_URL } = useMapTrigger();
+    const navigate = useNavigate(); 
 
     // ── State ───────────────────────────────────────────────────────────────────
     const [geofences, setGeofences] = useState<Geofence[]>([]);
@@ -210,7 +212,6 @@ export function GeofencingPage() {
         fetchSightings(filter);
         fetchZones();
     }, [filter, mapTrigger]);
-
 
     const handleMapMouseDown = useCallback((e: MapMouseEvent) => {
         if (!drawMode) return;
@@ -524,8 +525,8 @@ export function GeofencingPage() {
                                 return true;
                             })
                             .map((s, i) => (
-                                <Marker key={i} longitude={s.longitude} latitude={s.latitude} anchor="bottom">
-                                    <div
+                                <Marker key={i} longitude={s.longitude} latitude={s.latitude} anchor="bottom" onClick={()=>{s.source === 'drone'? navigate(`/live-monitor/${s.droneId}`): navigate(`/sighting-alerts/${s.id}`)}}>
+                                    <div 
                                         title={`${s.source === 'drone' ? '🚁' : '👤'} Sighting at ${new Date(s.timestamp).toLocaleString()}`}
                                         className={`w-6 h-6 rounded-full border-2 border-white flex items-center justify-center text-xs shadow-md cursor-default ${s.source === 'drone' ? 'bg-red-500' : 'bg-blue-500'
                                             }`}

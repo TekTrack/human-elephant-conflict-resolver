@@ -15,12 +15,12 @@ export const router = createBrowserRouter([
     children: [
       { index: true, Component: OverviewPage },
       { path: "sighting-alerts", Component: SightingAlertsPage },
+      { path: "sighting-alerts/:sightingId", Component: SightingAlertsPage },
       { path: "live-monitor", Component: LiveMonitorPage },
       { path: "alert-map", Component: DroneMapPage },
+      { path: "live-monitor/:droneId",Component: LiveMonitorPage},
       { path: "user-directory", Component: UserDirectoryPage },
-      { path: "geofencing", Component: GeofencingPage },
-      { path: "admin-edit", Component: AdminEditPage },
-
+      { path: "geofencing", Component: GeofencingPage }
     ],
   },
 ]);
