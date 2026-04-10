@@ -1,9 +1,11 @@
 import { Outlet, Link, useLocation } from 'react-router';
 import { Sun, Moon,LayoutDashboard, LogOut ,  Drone   , Map, AlertTriangle, Activity, Bell , Users} from "lucide-react";
 import { useTheme } from "../context/ThemeContext.tsx";
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useMapTrigger } from '../context/MapTriggerContext.tsx';
 import Auth from '../utilities/Auth.js';
+import type { router } from '../routes.ts';
+import { useNavigate } from 'react-router';
 //import { Button } from "../components/Button";
 
 interface Notification {
@@ -22,6 +24,7 @@ const menuItems = [
   { label: "Drone Map", path: "/alert-map", icon: <Drone   size={30} /> },
   { label: "User Directory", path: "/user-directory", icon: <Users size={30} /> },
 
+
 ];
 
 export function FigmaAdminLayout() {
@@ -29,7 +32,7 @@ export function FigmaAdminLayout() {
   const { theme, toggleTheme } = useTheme();
   const [showNotifications, setShowNotifications] = useState(false);
   const [isCollapsed, setIsCollapsed] = useState(false);
-
+  const navigate = useNavigate();
   const { mapTrigger, BASE_URL } = useMapTrigger();
 
   const isDark = theme === "dark";
@@ -128,12 +131,33 @@ useEffect(() => {
         <div className={`flex items-center justify-between h-[72px] px-4 border-b ${borderColor} overflow-hidden`}>
 
           {/* Admin Profile (Fades out and hides when collapsed) */}
-          <div className={`flex items-center transition-all duration-300 ${isCollapsed ? "w-0 opacity-0 hidden" : "w-auto opacity-100"}`}>
+          {/* <div className={`flex items-center transition-all duration-300 ${isCollapsed ? "w-0 opacity-0 hidden" : "w-auto opacity-100"}`}>
+            <button
+              onClick={() => { router.navigate("/AdminEditPage") }}
+            >
             <div className={`shrink-0 w-8 h-8 rounded-full ${isDark ? "bg-white" : "bg-black"} flex items-center justify-center`}>
               <span className={`text-sm font-bold ${isDark ? "text-black" : "text-white"}`}>A</span>
             </div>
+            </button>
             <span className="font-medium ml-3 whitespace-nowrap">Admin</span>
-          </div>
+          </div> */}
+          {/* Admin Profile Container */}
+<div className={`flex items-center transition-all duration-300 ease-in-out ${isCollapsed ? "w-0 opacity-0" : "w-full opacity-100"} overflow-hidden`}>
+  
+  <button
+    onClick={() => navigate("/admin-edit")}
+    className="focus:outline-none hover:opacity-80 transition-opacity cursor-pointer"
+  >
+    <div className={`shrink-0 w-8 h-8 rounded-full flex items-center justify-center ${isDark ? "bg-white" : "bg-black"}`}>
+      <span className={`text-sm font-bold ${isDark ? "text-black" : "text-white"}`}>A</span>
+    </div>
+  </button>
+
+  {/* Text Label - Wraps to prevent layout shifts during collapse */}
+  <div className="ml-3 overflow-hidden">
+    <span className="font-medium whitespace-nowrap">Admin</span>
+  </div>
+</div>
 
           {/* Toggle Button (Hamburger when closed, Chevron when open) */}
           <button
