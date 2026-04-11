@@ -20,7 +20,8 @@ export const router = createBrowserRouter([
       { path: "alert-map", Component: DroneMapPage },
       { path: "live-monitor/:droneId",Component: LiveMonitorPage},
       { path: "user-directory", Component: UserDirectoryPage },
-      { path: "geofencing", Component: GeofencingPage }
+      { path: "geofencing", Component: GeofencingPage },
+      {path:"admin-edit", Component: AdminEditPage}
     ],
   },
 ]);

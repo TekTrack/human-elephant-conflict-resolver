@@ -1,5 +1,5 @@
 import { Outlet, Link, useLocation } from 'react-router';
-import { Sun, Moon,LayoutDashboard, LogOut ,  Drone   , Map, AlertTriangle, Activity, Bell , Users} from "lucide-react";
+import { Sun, Moon,LayoutDashboard, LogOut ,  Drone ,Menu ,User  , Map, AlertTriangle, Activity, Bell , Users} from "lucide-react";
 import { useTheme } from "../context/ThemeContext.tsx";
 import React, { useEffect, useState } from "react";
 import { useMapTrigger } from '../context/MapTriggerContext.tsx';
@@ -123,41 +123,57 @@ useEffect(() => {
   return (
     <div className={`flex h-screen ${bgColor} ${textColor}`}>
       {/* Left Sidebar */}
-      <aside
-          className={`${isCollapsed ? "w-26" : "w-60"} relative ${sidebarBg} border-r ${borderColor} flex flex-col transition-all duration-300 ease-in-out`}
-      >
+      <aside className={`${isCollapsed ? "w-26" : "w-60"} relative ${sidebarBg} border-r ${borderColor} flex flex-col transition-all duration-300 ease-in-out`}>
 
         {/* Header Section (Contains Profile and Toggle Button) */}
         <div className={`flex items-center justify-between h-[72px] px-4 border-b ${borderColor} overflow-hidden`}>
 
           {/* Admin Profile (Fades out and hides when collapsed) */}
-          {/* <div className={`flex items-center transition-all duration-300 ${isCollapsed ? "w-0 opacity-0 hidden" : "w-auto opacity-100"}`}>
-            <button
-              onClick={() => { router.navigate("/AdminEditPage") }}
-            >
-            <div className={`shrink-0 w-8 h-8 rounded-full ${isDark ? "bg-white" : "bg-black"} flex items-center justify-center`}>
-              <span className={`text-sm font-bold ${isDark ? "text-black" : "text-white"}`}>A</span>
-            </div>
-            </button>
-            <span className="font-medium ml-3 whitespace-nowrap">Admin</span>
-          </div> */}
+
+          {/*<div className={`flex items-center transition-all duration-300 ${isCollapsed ? "w-0 opacity-0 hidden" : "w-auto opacity-100"}`}>*/}
+          {/*  <button*/}
+          {/*    onClick={() => { router.navigate("/AdminEditPage") }}*/}
+          {/*  >*/}
+          {/*  <div className={`shrink-0 w-8 h-8 rounded-full ${isDark ? "bg-white" : "bg-black"} flex items-center justify-center`}>*/}
+          {/*    <span className={`text-sm font-bold ${isDark ? "text-black" : "text-white"}`}>A</span>*/}
+          {/*  </div>*/}
+          {/*  </button>*/}
+          {/*  <span className="font-medium ml-3 whitespace-nowrap">Admin</span>*/}
+          {/*</div>*/}
+
           {/* Admin Profile Container */}
-<div className={`flex items-center transition-all duration-300 ease-in-out ${isCollapsed ? "w-0 opacity-0" : "w-full opacity-100"} overflow-hidden`}>
-  
-  <button
-    onClick={() => navigate("/admin-edit")}
-    className="focus:outline-none hover:opacity-80 transition-opacity cursor-pointer"
-  >
-    <div className={`shrink-0 w-8 h-8 rounded-full flex items-center justify-center ${isDark ? "bg-white" : "bg-black"}`}>
-      <span className={`text-sm font-bold ${isDark ? "text-black" : "text-white"}`}>A</span>
-    </div>
-  </button>
+
+          <div className={`flex items-center py-2.5 rounded-lg transition-all duration-300 ease-in-out ${isCollapsed ? "w-0 opacity-0" : "w-full opacity-100"} overflow-hidden `} >
+
+            <button
+                onClick={() => navigate("/admin-edit")}
+                title="Edit Admin Profile"
+                className={`flex items-center px-4 py-2.5 rounded-lg cursor-pointer transition-all duration-300 ease-in-out overflow-hidden whitespace-nowrap ${
+                    isDark ? "hover:bg-gray-800 " : "hover:bg-gray-200 "
+                } ${
+                    isCollapsed ? "w-0 opacity-0 px-0 hidden" : "w-full opacity-100"
+                }`}
+            >
+              <User className="shrink-0 mr-3" size={20} />
+              <span className="font-medium">Admin</span>
+            </button>
+
+
+
+{/*  <button*/}
+{/*    onClick={() => navigate("/admin-edit")}*/}
+{/*    className="focus:outline-none hover:opacity-80 transition-opacity cursor-pointer"*/}
+{/*  >*/}
+{/*    <div className={`shrink-0 w-8 h-8 rounded-full flex items-center justify-center ${isDark ? "bg-white" : "bg-black"}`}>*/}
+{/*      <span className={`text-sm font-bold ${isDark ? "text-black" : "text-white"}`}>A</span>*/}
+{/*    </div>*/}
+{/*  </button>*/}
 
   {/* Text Label - Wraps to prevent layout shifts during collapse */}
-  <div className="ml-3 overflow-hidden">
-    <span className="font-medium whitespace-nowrap">Admin</span>
-  </div>
-</div>
+  {/*<div className="ml-3 overflow-hidden">*/}
+  {/*  <span className="font-medium whitespace-nowrap">Admin</span>*/}
+  {/*</div>*/}
+            </div>
 
           {/* Toggle Button (Hamburger when closed, Chevron when open) */}
           <button
@@ -165,12 +181,8 @@ useEffect(() => {
               className={`flex items-center justify-center p-2 rounded-lg hover:bg-gray-100 ${isDark ? "hover:bg-gray-800 text-white" : "text-gray-600"} transition-colors ${isCollapsed ? "mx-auto w-full" : ""}`}
           >
             {isCollapsed ? (
-                // Hamburger Icon (Matches your uploaded image)
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                  <line x1="4" y1="12" x2="20" y2="12"></line>
-                  <line x1="4" y1="6" x2="20" y2="6"></line>
-                  <line x1="4" y1="18" x2="20" y2="18"></line>
-                </svg>
+                    // Hamburger Icon
+                <Menu size={30}></Menu>
             ) : (
                 // Collapse Chevron (Allows user to slide it back left)
                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -178,6 +190,7 @@ useEffect(() => {
                 </svg>
             )}
           </button>
+
         </div>
 
         {/* Navigation */}
