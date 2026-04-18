@@ -7,7 +7,7 @@ export default function Overview() {
       {/* Header Title */}
       <View className="px-5 pt-16 pb-6">
         <Text className="text-3xl font-bold text-black">
-          Drone Map
+          Instructions
         </Text>
 
         <Text className="text-gray-500 mt-1">
@@ -24,7 +24,7 @@ export default function Overview() {
           </Text>
 
           <Text className="text-gray-600">
-            This is your admin drone maps page. From here you can manage alerts,
+            This is your admin geofencing page. From here you can manage alerts,
             monitor drones, view maps, and control the system.
           </Text>
         </View>

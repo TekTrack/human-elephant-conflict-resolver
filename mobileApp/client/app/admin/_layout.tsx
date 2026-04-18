@@ -57,12 +57,11 @@ export default function AdminLayout() {
     <GestureHandlerRootView style={{ flex: 1 }}>
       <Drawer drawerContent={(props) => <CustomDrawerContent {...props} />}>
         <Drawer.Screen name="overview" />
-        <Drawer.Screen name="live-monitor" />
-        <Drawer.Screen name="drone-map" />
         <Drawer.Screen name="sighting-alerts" />
         <Drawer.Screen name="geofencing" />
         <Drawer.Screen name="users-list" />
-
+        <Drawer.Screen name="upload-image" />
+        <Drawer.Screen name="Instructions" />
       </Drawer>
     </GestureHandlerRootView>
   );
