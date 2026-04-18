@@ -6,6 +6,7 @@ import { LiveMonitorPage } from "./pages/LiveMonitorPage.tsx";
 import { DroneMapPage } from "./pages/DroneMapPage.tsx";
 import { UserDirectoryPage } from "./pages/UserDirectoryPage.tsx";
 import { GeofencingPage } from "./pages/GeofencingPage.tsx";
+import { AdminEditPage } from "./pages/AdminEditPage.tsx";
 
 export const router = createBrowserRouter([
   {
@@ -19,7 +20,8 @@ export const router = createBrowserRouter([
       { path: "alert-map", Component: DroneMapPage },
       { path: "live-monitor/:droneId",Component: LiveMonitorPage},
       { path: "user-directory", Component: UserDirectoryPage },
-      { path: "geofencing", Component: GeofencingPage }
+      { path: "geofencing", Component: GeofencingPage },
+      {path:"admin-edit", Component: AdminEditPage}
     ],
   },
 ]);

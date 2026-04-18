@@ -1,10 +1,9 @@
-
 import { useState, useEffect, useMemo } from "react";
 import axios from "axios";
 import { useTheme } from "../context/ThemeContext.tsx";
 import {
   Search, UserPlus, Mail, Phone, MoreVertical, Loader2, AlertCircle,
-  RefreshCw, CheckCircle2, Edit2, Info, Trash2, Eye, EyeOff, Save, X
+  RefreshCw, CheckCircle2, Info, Trash2, X
 } from "lucide-react";
 import { PageHeader } from "../components/PageHeader";
 import { StatCard } from "../components/StatCard";
@@ -47,13 +46,6 @@ export function UserDirectoryPage() {
   const [deleteTarget, setDeleteTarget] = useState<UnifiedUser | null>(null);
   const [deleteLoading, setDeleteLoading] = useState(false);
 
-  // ── Edit Modal ──
-  const [editUser, setEditUser] = useState<UnifiedUser | null>(null);
-  const [editForm, setEditForm] = useState<any>({});
-  const [editErrors, setEditErrors] = useState<Record<string, string>>({});
-  const [editLoading, setEditLoading] = useState(false);
-  const [showEditPassword, setShowEditPassword] = useState(false);
-
   // ── Close dropdown on outside click/scroll ──
   useEffect(() => {
     const closeMenu = () => setActiveMenu(null);
@@ -81,7 +73,7 @@ export function UserDirectoryPage() {
       ]);
 
       const usersMapped: UnifiedUser[] = (userRes.data.data || []).map((u: any, index: number) => ({
-        adminId: u.AdminID || null,
+        adminId: u.adminID || null,
         id: u.email || `user-${index}`,
         displayName: u.name || "Unknown User",
         displayEmail: u.email || "No Email",
@@ -144,19 +136,21 @@ export function UserDirectoryPage() {
 
   const validateForm = (): boolean => {
     const newErrors: Record<string, string> = {};
-    if (!formData.name?.trim()) newErrors.name = "Full name is required.";
-    if (!formData.email?.trim()) newErrors.email = "Email is required.";
-    else if (!validateEmail(formData.email)) newErrors.email = "Enter a valid email address.";
-    if (!formData.password?.trim()) newErrors.password = "Password is required.";
-    else if (!validatePassword(formData.password)) newErrors.password = "Min 8 chars with uppercase, lowercase, number & special character.";
 
     if (userType === "Admin") {
+      if (!formData.name?.trim()) newErrors.name = "Full name is required.";
+      if (!formData.email?.trim()) newErrors.email = "Email is required.";
+      else if (!validateEmail(formData.email)) newErrors.email = "Enter a valid email address.";
+      if (!formData.password?.trim()) newErrors.password = "Password is required.";
+      else if (!validatePassword(formData.password)) newErrors.password = "Min 8 chars with uppercase, lowercase, number & special character.";
       if (!formData.username?.trim()) newErrors.username = "Username is required.";
       if (!formData.phone?.trim()) newErrors.phone = "Phone number is required.";
       else if (!validatePhoneNumber(formData.phone)) newErrors.phone = "Enter a valid 10-digit phone number.";
       if (!formData.adminid?.trim()) newErrors.adminid = "Admin ID is required.";
       else if (!validateAdminID(formData.adminid)) newErrors.adminid = "Format must be ADM-001.";
     } else {
+      // User — name, phone, category, identityId, assignedAdminId only
+      if (!formData.name?.trim()) newErrors.name = "Full name is required.";
       if (!formData.phone?.trim()) newErrors.phone = "Phone number is required.";
       else if (!validatePhoneNumber(formData.phone)) newErrors.phone = "Enter a valid 10-digit phone number.";
       if (!formData.userCategory) newErrors.userCategory = "Please select a user category.";
@@ -165,6 +159,7 @@ export function UserDirectoryPage() {
       if (!formData.assignedAdminId?.trim()) newErrors.assignedAdminId = "Assigned Admin ID is required.";
       else if (!validateAssignedAdmin(formData.assignedAdminId)) newErrors.assignedAdminId = "No admin found with this ID.";
     }
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -187,14 +182,30 @@ export function UserDirectoryPage() {
       const config = { headers: { Authorization: `Bearer ${token}` } };
       let endpoint = "";
       let payload = {};
+
       if (userType === "Admin") {
         endpoint = "http://localhost:8080/api/admin/newadmin";
-        payload = { username: formData.username, password: formData.password, email: formData.email, phone: formData.phone, adminid: formData.adminid, name: formData.name };
+        payload = {
+          username: formData.username,
+          password: formData.password,
+          email: formData.email,
+          phone: formData.phone,
+          adminid: formData.adminid,
+          name: formData.name,
+        };
       } else {
         endpoint = "http://localhost:8080/api/admin/createuser";
-        payload = { email: formData.email, password: formData.password, name: formData.name, phoneNumber: formData.phone, userCategory: formData.userCategory, IdentityID: formData.identityId, AdminID: formData.assignedAdminId };
+        payload = {
+          name: formData.name,
+          phoneNumber: formData.phone,
+          userCategory: formData.userCategory,
+          identityID: formData.identityId,
+          adminID: formData.assignedAdminId,
+        };
       }
-      console.log("Creating with payload:", payload);
+
+console.log(payload);
+
       const response = await axios.post(endpoint, payload, config);
       if (response.status === 201 || response.status === 200) {
         alert(`${userType} created successfully!`);
@@ -223,7 +234,7 @@ export function UserDirectoryPage() {
         payload = { adminId: deleteTarget.adminId };
       } else {
         endpoint = "http://localhost:8080/api/admin/deleteuser";
-        payload = { email: deleteTarget.displayEmail };
+        payload = { phoneNumber: deleteTarget.displayPhone };
       }
       const response = await axios.post(endpoint, payload, config);
       if (response.status === 200) {
@@ -237,116 +248,16 @@ export function UserDirectoryPage() {
     }
   };
 
-  // ─── Edit ────────────────────────────────────────────────────────────────────
-
-  const openEditModal = (user: UnifiedUser) => {
-    setEditUser(user);
-    setShowEditPassword(false);
-    if (user.role === "Admin") {
-      setEditForm({
-        username: user.id,
-        adminId: user.adminId || "",
-        email: user.displayEmail,
-        phone: user.displayPhone,
-        name: user.displayName,
-        password: "",
-      });
-    } else {
-      setEditForm({
-        email: user.displayEmail,
-        phone: user.displayPhone,
-        name: user.displayName,
-        password: "",
-      });
-    }
-    setEditErrors({});
-  };
-
-  const handleEditInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setEditForm((prev: any) => ({ ...prev, [name]: value }));
-    if (editErrors[name]) setEditErrors((prev) => ({ ...prev, [name]: "" }));
-  };
-
-  const validateEditForm = (): boolean => {
-    const newErrors: Record<string, string> = {};
-
-    if (!editForm.name?.trim()) newErrors.name = "Full name is required.";
-
-    // Admin-only fields
-    if (editUser?.role === "Admin") {
-      if (!editForm.email?.trim()) newErrors.email = "Email is required.";
-      else if (!validateEmail(editForm.email)) newErrors.email = "Enter a valid email address.";
-
-      if (!editForm.adminId?.trim()) newErrors.adminId = "Admin ID is required.";
-      else if (!validateAdminID(editForm.adminId)) newErrors.adminId = "Format must be ADM-001.";
-    }
-
-    if (!editForm.phone?.trim()) newErrors.phone = "Phone number is required.";
-    else if (!validatePhoneNumber(editForm.phone)) newErrors.phone = "Enter a valid 10-digit phone number.";
-
-    if (editForm.password && editForm.password.trim() !== "") {
-      if (!validatePassword(editForm.password)) {
-        newErrors.password = "Min 8 chars with uppercase, lowercase, number & special character.";
-      }
-    }
-
-    setEditErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-
-  const handleEditSave = async () => {
-    if (!validateEditForm() || !editUser) return;
-    try {
-      setEditLoading(true);
-      const token = localStorage.getItem("authToken") || "";
-      const config = { headers: { Authorization: `Bearer ${token}` } };
-
-      let endpoint = "";
-      let payload: any = {};
-
-      if (editUser.role === "Admin") {
-        endpoint = "http://localhost:8080/api/admin/updateadmin";
-        payload = {
-          adminId: editForm.adminId,
-          email: editForm.email,
-          phone: editForm.phone,
-          name: editForm.name,
-          username: editForm.username,
-        };
-        if (editForm.password?.trim()) payload.password = editForm.password;
-      } else {
-        endpoint = "http://localhost:8080/api/admin/updateuser";
-        payload = {
-          email: editForm.email,
-          phoneNumber: editForm.phone,
-          name: editForm.name,
-        };
-        if (editForm.password?.trim()) payload.password = editForm.password;
-      }
-
-      const response = await axios.post(endpoint, payload, config);
-      if (response.status === 200 || response.status === 201) {
-        setEditUser(null);
-        fetchAllData();
-      }
-    } catch (err: any) {
-      alert(err.response?.data?.message || "Failed to update member.");
-    } finally {
-      setEditLoading(false);
-    }
-  };
-
   // ─── Shared UI Helpers ───────────────────────────────────────────────────────
 
-  const FieldError = ({ name, errMap = errors }: { name: string; errMap?: Record<string, string> }) =>
-    errMap[name] ? (
-      <span className="text-red-400 text-[10px] mt-1 block">{errMap[name]}</span>
+  const FieldError = ({ name }: { name: string }) =>
+    errors[name] ? (
+      <span className="text-red-400 text-[10px] mt-1 block">{errors[name]}</span>
     ) : null;
 
-  const inputClass = (name: string, errMap = errors) =>
+  const inputClass = (name: string) =>
     `w-full px-4 py-2 rounded-xl border outline-none transition-all text-sm ${
-      errMap[name]
+      errors[name]
         ? "border-red-500/60 bg-red-500/5"
         : isDark
         ? "bg-white/5 border-white/10 text-white focus:border-blue-400"
@@ -354,8 +265,6 @@ export function UserDirectoryPage() {
     }`;
 
   const labelClass = "text-[10px] font-bold uppercase tracking-widest opacity-50";
-
-  // ─── Shared Info Grid used in View + Edit headers ────────────────────────────
 
   const InfoItem = ({ label, value, accent }: { label: string; value: string; accent?: boolean }) => (
     <div className={`p-3 rounded-xl border ${isDark ? "bg-white/[0.04] border-white/[0.06]" : "bg-gray-50 border-gray-100"}`}>
@@ -385,14 +294,22 @@ export function UserDirectoryPage() {
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[100] p-4 transition-all">
           <Card className={`w-full max-w-lg shadow-2xl border ${isDark ? "border-white/10" : "border-gray-200"}`}>
             <div className="p-6 space-y-6">
+
+              {/* Header */}
               <div className="flex items-center justify-between border-b pb-4 border-white/10">
                 <div>
                   <h2 className={`text-xl font-bold ${isDark ? "text-white" : "text-gray-900"}`}>Create Account</h2>
                   <p className="text-xs opacity-50 uppercase tracking-tighter mt-1">Registering a new {userType} to the system</p>
                 </div>
-                <Badge variant={userType === "Admin" ? "purple" : "neutral"}>{userType}</Badge>
+                <div className="flex items-center gap-2">
+                  <Badge variant={userType === "Admin" ? "purple" : "neutral"}>{userType}</Badge>
+                  <button onClick={closeModal} className={`p-1.5 rounded-lg transition-colors ${isDark ? "hover:bg-white/10 text-white/50" : "hover:bg-gray-100 text-gray-400"}`}>
+                    <X className="w-4 h-4" />
+                  </button>
+                </div>
               </div>
 
+              {/* Toggle */}
               <div className="flex bg-white/5 p-1 rounded-xl gap-1 border border-white/5">
                 {["User", "Admin"].map((type) => (
                   <button
@@ -407,32 +324,34 @@ export function UserDirectoryPage() {
                 ))}
               </div>
 
+              {/* Form Fields */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-h-[60vh] overflow-y-auto pr-2 custom-scrollbar">
-                <div className="space-y-1.5">
-                  <label className={labelClass}>Full Name</label>
-                  <input name="name" type="text" placeholder="John Doe" autoComplete="off" onChange={handleInputChange} value={formData.name || ""} className={inputClass("name")} />
-                  <FieldError name="name" />
-                </div>
-                <div className="space-y-1.5">
-                  <label className={labelClass}>Email Address</label>
-                  <input name="email" type="email" placeholder="name@example.com" autoComplete="off" onChange={handleInputChange} value={formData.email || ""} className={inputClass("email")} />
-                  <FieldError name="email" />
-                </div>
-                <div className="space-y-1.5">
-                  <label className={labelClass}>Password</label>
-                  <input name="password" type="password" placeholder="••••••••" autoComplete="off" onChange={handleInputChange} value={formData.password || ""} className={inputClass("password")} />
-                  <FieldError name="password" />
-                </div>
 
+                {/* ── ADMIN FIELDS ── */}
                 {userType === "Admin" && (
                   <>
+                    <div className="space-y-1.5">
+                      <label className={labelClass}>Full Name</label>
+                      <input name="name" type="text" placeholder="John Doe" autoComplete="off" onChange={handleInputChange} value={formData.name || ""} className={inputClass("name")} />
+                      <FieldError name="name" />
+                    </div>
+                    <div className="space-y-1.5">
+                      <label className={labelClass}>Email Address</label>
+                      <input name="email" type="email" placeholder="name@example.com" autoComplete="off" onChange={handleInputChange} value={formData.email || ""} className={inputClass("email")} />
+                      <FieldError name="email" />
+                    </div>
+                    <div className="space-y-1.5">
+                      <label className={labelClass}>Password</label>
+                      <input name="password" type="password" placeholder="••••••••" autoComplete="off" onChange={handleInputChange} value={formData.password || ""} className={inputClass("password")} />
+                      <FieldError name="password" />
+                    </div>
                     <div className="space-y-1.5">
                       <label className={labelClass}>Username</label>
                       <input name="username" type="text" placeholder="admin_user" autoComplete="none" onChange={handleInputChange} value={formData.username || ""} className={inputClass("username")} />
                       <FieldError name="username" />
                     </div>
                     <div className="space-y-1.5">
-                      <label className={labelClass}>Phone</label>
+                      <label className={labelClass}>Phone Number</label>
                       <input name="phone" type="text" placeholder="0770744305" maxLength={10} autoComplete="none" onChange={handleInputChange} value={formData.phone || ""} className={inputClass("phone")} />
                       <FieldError name="phone" />
                     </div>
@@ -444,8 +363,14 @@ export function UserDirectoryPage() {
                   </>
                 )}
 
+                {/* ── USER FIELDS — name, phone, category, identityId, assignedAdminId only ── */}
                 {userType === "User" && (
                   <>
+                    <div className="space-y-1.5">
+                      <label className={labelClass}>Full Name</label>
+                      <input name="name" type="text" placeholder="John Doe" autoComplete="off" onChange={handleInputChange} value={formData.name || ""} className={inputClass("name")} />
+                      <FieldError name="name" />
+                    </div>
                     <div className="space-y-1.5">
                       <label className={labelClass}>Phone Number</label>
                       <input name="phone" type="text" maxLength={10} placeholder="0770744305" autoComplete="none" onChange={handleInputChange} value={formData.phone || ""} className={inputClass("phone")} />
@@ -453,9 +378,18 @@ export function UserDirectoryPage() {
                     </div>
                     <div className="space-y-1.5">
                       <label className={labelClass}>User Category</label>
-                      <select name="userCategory" value={formData.userCategory || ""} onChange={handleInputChange}
+                      <select
+                        name="userCategory"
+                        value={formData.userCategory || ""}
+                        onChange={handleInputChange}
                         className={`${inputClass("userCategory")} cursor-pointer appearance-none`}
-                        style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='${isDark ? "white" : "black"}'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E")`, backgroundRepeat: "no-repeat", backgroundPosition: "right 1rem center", backgroundSize: "1em" }}>
+                        style={{
+                          backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='${isDark ? "white" : "black"}'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E")`,
+                          backgroundRepeat: "no-repeat",
+                          backgroundPosition: "right 1rem center",
+                          backgroundSize: "1em",
+                        }}
+                      >
                         <option value="" disabled>Select category</option>
                         <option className={isDark ? "bg-[#1a1a1a] text-white" : "bg-white text-black"} value="Civil">Civil</option>
                         <option className={isDark ? "bg-[#1a1a1a] text-white" : "bg-white text-black"} value="Guide">Guide</option>
@@ -468,7 +402,7 @@ export function UserDirectoryPage() {
                       <input name="identityId" type="text" placeholder="NIC / Passport" autoComplete="none" onChange={handleInputChange} value={formData.identityId || ""} className={inputClass("identityId")} />
                       <FieldError name="identityId" />
                     </div>
-                    <div className="space-y-1.5">
+                    <div className="space-y-1.5 md:col-span-2">
                       <label className={labelClass}>Assigned Admin ID</label>
                       <input name="assignedAdminId" type="text" placeholder="ADM-001" maxLength={7} autoComplete="none" onChange={handleInputChange} value={formData.assignedAdminId || ""} className={inputClass("assignedAdminId")} />
                       <FieldError name="assignedAdminId" />
@@ -477,6 +411,7 @@ export function UserDirectoryPage() {
                 )}
               </div>
 
+              {/* Action Buttons */}
               <div className="flex items-center gap-3 pt-4 border-t border-white/10">
                 <Button variant="outline" className="flex-1" onClick={closeModal}>Cancel</Button>
                 <Button variant="primary" onClick={handleCreateUserandAdmin} disabled={loading} className="flex-1 shadow-lg shadow-blue-500/20">
@@ -544,142 +479,6 @@ export function UserDirectoryPage() {
 
               <div className="flex gap-3 pt-2 border-t border-white/10">
                 <Button variant="outline" className="flex-1" onClick={() => setViewUser(null)}>Close</Button>
-                <Button variant="primary" className="flex-1" onClick={() => { openEditModal(viewUser); setViewUser(null); }}>
-                  <Edit2 className="w-4 h-4 mr-2" /> Edit Member
-                </Button>
-              </div>
-            </div>
-          </Card>
-        </div>
-      )}
-
-      {/* ══════════════════════════════════════════════════════════
-          EDIT MODAL
-      ══════════════════════════════════════════════════════════ */}
-      {editUser && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[100] p-4">
-          <Card className={`w-full max-w-lg shadow-2xl border ${isDark ? "border-white/10" : "border-gray-200"}`}>
-            <div className="p-6 space-y-6">
-              {/* Header */}
-              <div className="flex items-center justify-between border-b pb-4 border-white/10">
-                <div>
-                  <h2 className={`text-xl font-bold ${isDark ? "text-white" : "text-gray-900"}`}>Edit Member</h2>
-                  <p className="text-xs opacity-50 uppercase tracking-tighter mt-1">
-                    Updating {editUser.role === "Admin" ? "admin" : "user"} — {editUser.displayName}
-                  </p>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Badge variant={editUser.role === "Admin" ? "purple" : "neutral"}>{editUser.role}</Badge>
-                  <button onClick={() => setEditUser(null)} className={`p-1.5 rounded-lg transition-colors ${isDark ? "hover:bg-white/10 text-white/50" : "hover:bg-gray-100 text-gray-400"}`}>
-                    <X className="w-4 h-4" />
-                  </button>
-                </div>
-              </div>
-
-              {/* User identity hint */}
-              <div className={`flex items-center gap-3 p-3 rounded-xl border ${isDark ? "bg-white/[0.03] border-white/[0.06]" : "bg-gray-50 border-gray-100"}`}>
-                <div className={`w-9 h-9 rounded-full flex items-center justify-center text-white text-sm font-bold flex-shrink-0 ${editUser.role === "Admin" ? "bg-purple-600" : "bg-blue-600"}`}>
-                  {editUser.displayName.charAt(0).toUpperCase()}
-                </div>
-                <div className="min-w-0">
-                  <p className={`text-sm font-semibold truncate ${isDark ? "text-white" : "text-gray-900"}`}>{editUser.displayName}</p>
-                  <p className="text-[11px] opacity-40 truncate">{editUser.displayEmail}</p>
-                </div>
-                {editUser.role === "Admin" && editUser.adminId && (
-                  <span className={`ml-auto text-[10px] font-bold px-2 py-1 rounded-lg flex-shrink-0 ${isDark ? "bg-purple-500/10 text-purple-400" : "bg-purple-50 text-purple-600"}`}>
-                    {editUser.adminId}
-                  </span>
-                )}
-              </div>
-
-              {/* Form Fields */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-h-[55vh] overflow-y-auto pr-1 custom-scrollbar">
-
-                {/* Full Name */}
-                <div className="space-y-1.5">
-                  <label className={labelClass}>Full Name</label>
-                  <input name="name" type="text" placeholder="John Doe" autoComplete="off" onChange={handleEditInputChange} value={editForm.name || ""} className={inputClass("name", editErrors)} />
-                  <FieldError name="name" errMap={editErrors} />
-                </div>
-
-                {/* Email — Admin only */}
-                {editUser.role === "Admin" && (
-                  <div className="space-y-1.5">
-                    <label className={labelClass}>Email Address</label>
-                    <input name="email" type="email" placeholder="name@example.com" autoComplete="off" onChange={handleEditInputChange} value={editForm.email || ""} className={inputClass("email", editErrors)} />
-                    <FieldError name="email" errMap={editErrors} />
-                  </div>
-                )}
-
-                {/* Phone */}
-                <div className="space-y-1.5">
-                  <label className={labelClass}>Phone Number</label>
-                  <input name="phone" type="text" maxLength={10} placeholder="0770744305" autoComplete="off" onChange={handleEditInputChange} value={editForm.phone || ""} className={inputClass("phone", editErrors)} />
-                  <FieldError name="phone" errMap={editErrors} />
-                </div>
-
-                {/* Admin ID — only for admins */}
-                {editUser.role === "Admin" && (
-                  <div className="space-y-1.5">
-                    <label className={labelClass}>Admin ID</label>
-                    <input name="adminId" type="text" placeholder="ADM-001" autoComplete="off" onChange={handleEditInputChange} value={editForm.adminId || ""} className={inputClass("adminId", editErrors)} />
-                    <FieldError name="adminId" errMap={editErrors} />
-                  </div>
-                )}
-
-                {/* Password — optional, both roles */}
-                <div className="space-y-1.5">
-                  <label className={labelClass}>
-                    New Password{" "}
-                    <span className="normal-case text-[9px] opacity-40 ml-1">(leave blank to keep current)</span>
-                  </label>
-                  <div className="relative">
-                    <input
-                      name="password"
-                      type={showEditPassword ? "text" : "password"}
-                      placeholder="••••••••"
-                      autoComplete="new-password"
-                      onChange={handleEditInputChange}
-                      value={editForm.password || ""}
-                      className={`${inputClass("password", editErrors)} pr-10`}
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowEditPassword((v) => !v)}
-                      className={`absolute right-3 top-1/2 -translate-y-1/2 transition-colors ${isDark ? "text-white/30 hover:text-white/60" : "text-gray-400 hover:text-gray-600"}`}
-                    >
-                      {showEditPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                    </button>
-                  </div>
-                  <FieldError name="password" errMap={editErrors} />
-                </div>
-
-                {/* Password strength hint */}
-                {editForm.password && editForm.password.length > 0 && (
-                  <div className={`md:col-span-2 text-[10px] px-3 py-2 rounded-lg border flex items-start gap-2 ${
-                    validatePassword(editForm.password)
-                      ? isDark ? "bg-green-500/8 border-green-500/20 text-green-400" : "bg-green-50 border-green-200 text-green-600"
-                      : isDark ? "bg-amber-500/8 border-amber-500/20 text-amber-400" : "bg-amber-50 border-amber-200 text-amber-600"
-                  }`}>
-                    <span className="mt-0.5">
-                      {validatePassword(editForm.password) ? "✓" : "!"}
-                    </span>
-                    {validatePassword(editForm.password)
-                      ? "Password meets all requirements."
-                      : "Min 8 chars — needs uppercase, lowercase, number & special character."}
-                  </div>
-                )}
-              </div>
-
-              {/* Action Buttons */}
-              <div className="flex items-center gap-3 pt-4 border-t border-white/10">
-                <Button variant="outline" className="flex-1" onClick={() => setEditUser(null)}>
-                  <X className="w-4 h-4 mr-2" /> Cancel
-                </Button>
-                <Button variant="primary" onClick={handleEditSave} disabled={editLoading} className="flex-1 shadow-lg shadow-blue-500/20">
-                  {editLoading ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Save className="w-4 h-4 mr-2" />}
-                  Save Changes
-                </Button>
               </div>
             </div>
           </Card>
@@ -802,7 +601,6 @@ export function UserDirectoryPage() {
                           <span className="font-semibold text-[15px]">{user.displayName}</span>
                         </div>
                       </td>
-
                       <td className="px-6 py-4">
                         <div className="flex flex-col gap-1">
                           <span className="flex items-center gap-1.5 text-xs opacity-70 lowercase">
@@ -813,11 +611,9 @@ export function UserDirectoryPage() {
                           </span>
                         </div>
                       </td>
-
                       <td className="px-6 py-4">
                         <Badge variant={user.role === "Admin" ? "purple" : "neutral"}>{user.role}</Badge>
                       </td>
-
                       <td className="px-6 py-4">
                         <div className="flex items-center justify-center gap-2">
                           <span className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-green-500/10 text-green-600 dark:text-green-400 text-[10px] font-bold uppercase">
@@ -826,8 +622,6 @@ export function UserDirectoryPage() {
                           </span>
                         </div>
                       </td>
-
-                      {/* Actions Dropdown */}
                       <td className="px-6 py-4 text-right relative">
                         <button
                           onClick={(e) => { e.stopPropagation(); setActiveMenu(activeMenu === user.id ? null : user.id); }}
@@ -844,23 +638,13 @@ export function UserDirectoryPage() {
                             onClick={(e) => e.stopPropagation()}
                           >
                             <button
-                              onClick={() => { openEditModal(user); setActiveMenu(null); }}
-                              className={`w-full text-left px-4 py-2.5 text-[11px] font-semibold transition-all flex items-center gap-2 ${isDark ? "hover:bg-white/5 hover:text-white" : "hover:bg-gray-200/50"}`}
-                            >
-                              <Edit2 className="w-3.5 h-3.5 opacity-60" />
-                              Edit Member
-                            </button>
-
-                            <button
                               onClick={() => { setViewUser(user); setActiveMenu(null); }}
                               className={`w-full text-left px-4 py-2.5 text-[11px] font-semibold transition-all flex items-center gap-2 ${isDark ? "hover:bg-white/5 hover:text-white" : "hover:bg-gray-200/50"}`}
                             >
                               <Info className="w-3.5 h-3.5 opacity-60" />
                               View Full Info
                             </button>
-
                             <div className={`border-t my-1.5 ${isDark ? "border-white/5" : "border-gray-200/50"}`} />
-
                             <button
                               onClick={() => { setDeleteTarget(user); setActiveMenu(null); }}
                               className="w-full text-left px-4 py-2.5 text-[11px] font-bold text-red-500/80 hover:text-red-500 hover:bg-red-500/10 transition-all flex items-center gap-2"

@@ -1,41 +1,73 @@
+
 package com.example.jumbowatch.model;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+//import jakarta.validation.constraints.Size;
 
 @Entity
 @Table(name = "users")
 public class User {
 
     @Id
-    private String email;
-    private String password;
-    private String name;
-    private String phoneNumber;
-    private String userCategory;
-    private String IdentityID;
-    private String AdminID;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
+    @Column(unique=true)
+    private String email;
+    
+    private String password;
+    
+    @Column(unique=true)
+    private String name;
+
+    @Column(length = 10, unique=true) // Database level limit
+   // @Size(min = 10, max = 10, message = "Phone number must be 10 characters") // Validation level limit
+    private String phoneNumber;
+
+    private String userCategory;
+
+    @Column(unique = true) // IdentityID එක unique කිරීමට
+    private String identityID;
+
+    @Column(length = 7)
+    //@Size(min = 7, max = 7, message = "Admin ID must be 7 characters")
+    private String adminID;
+
+    // Default Constructor
     public User() {
     }
 
-    public User(String email, String password, String name, String phoneNumber, String IdentityID, String AdminID,
-            String userCategory) {
-
+    // Parametrized Constructor
+    public User(String email, String password, String name, String phoneNumber, String identityID, String adminID, String userCategory) {
         this.email = email;
         this.password = password;
         this.name = name;
         this.phoneNumber = phoneNumber;
+        this.identityID = identityID;
+        this.adminID = adminID;
         this.userCategory = userCategory;
-        this.IdentityID = IdentityID;
-        this.AdminID = AdminID;
-
     }
 
-    // Getters and Setters...
+    // Getters and Setters
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
     public String getEmail() {
         return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
     }
 
     public String getPassword() {
@@ -50,44 +82,39 @@ public class User {
         return name;
     }
 
-    public String getPhoneNumber() {
-        return phoneNumber;
-    }
-
-    public String getIdentityID() {
-        return IdentityID;
-    }
-
-    public String getUserCategory() {
-        return userCategory;
-    }
-
-    public String getAdminID() {
-        return AdminID;
-    }
-
-
-    public void setAdminID(String adminID) {
-        AdminID = adminID;
-    }
-
-    public void setIdentityID(String identityID) {
-        IdentityID = identityID;
-    }
-
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String getPhoneNumber() {
+        return phoneNumber;
     }
 
     public void setPhoneNumber(String phoneNumber) {
         this.phoneNumber = phoneNumber;
     }
 
-    public void setUserCategory(String userCategory) {
-        this.userCategory = userCategory;   
+    public String getUserCategory() {
+        return userCategory;
     }
 
-    
+    public void setUserCategory(String userCategory) {
+        this.userCategory = userCategory;
+    }
 
+    public String getIdentityID() {
+        return identityID;
+    }
 
+    public void setIdentityID(String identityID) {
+        this.identityID = identityID;
+    }
+
+    public String getAdminID() {
+        return adminID;
+    }
+
+    public void setAdminID(String adminID) {
+        this.adminID = adminID;
+    }
 }
