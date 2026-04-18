@@ -118,6 +118,7 @@ public class AdminController {
                 response.put("message", "Login successful!");
                 response.put("status", HttpStatus.OK.value());
                 response.put("token", token);
+                response.put("role","admin");
                 response.put("data", admin);
                
                 return new ResponseEntity<>(response, HttpStatus.OK);
