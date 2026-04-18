@@ -31,8 +31,8 @@ public class User {
 
     private String userCategory;
 
-    @Column(unique = true) // IdentityID එක unique කිරීමට
-    private String identityID;
+    @Column(unique = true)
+    private String NIC;
 
     @Column(length = 7)
     //@Size(min = 7, max = 7, message = "Admin ID must be 7 characters")
@@ -43,12 +43,12 @@ public class User {
     }
 
     // Parametrized Constructor
-    public User(String email, String password, String name, String phoneNumber, String identityID, String adminID, String userCategory) {
+    public User(String email, String password, String name, String phoneNumber, String NIC, String adminID, String userCategory) {
         this.email = email;
         this.password = password;
         this.name = name;
         this.phoneNumber = phoneNumber;
-        this.identityID = identityID;
+        this.NIC = NIC;
         this.adminID = adminID;
         this.userCategory = userCategory;
     }
@@ -102,12 +102,12 @@ public class User {
         this.userCategory = userCategory;
     }
 
-    public String getIdentityID() {
-        return identityID;
+    public String getNIC() {
+        return NIC;
     }
 
-    public void setIdentityID(String identityID) {
-        this.identityID = identityID;
+    public void setNIC(String NIC) {
+        this.NIC = NIC;
     }
 
     public String getAdminID() {

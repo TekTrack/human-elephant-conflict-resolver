@@ -25,7 +25,6 @@ import tools.jackson.databind.ObjectMapper;
 
 @RestController
 @RequestMapping("/api/admin")
-@CrossOrigin(origins = "*")
 public class AdminController {
 
     @Autowired
@@ -206,7 +205,7 @@ public class AdminController {
             }
 
             //Identity ID Check
-            if (userRepository.existsByIdentityID(user.getIdentityID())) {
+            if (userRepository.existsByNIC(user.getNIC())) {
                 return ResponseEntity.status(409).body(Map.of("message", "User with this Identity ID already exists"));
             }
 
