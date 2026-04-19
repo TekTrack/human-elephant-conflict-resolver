@@ -7,6 +7,7 @@ import {
   DrawerContentScrollView,
   DrawerItemList,
 } from "@react-navigation/drawer";
+import { Ionicons } from "@expo/vector-icons";
 
 function CustomDrawerContent(props: any) {
 
@@ -56,12 +57,67 @@ export default function AdminLayout() {
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <Drawer drawerContent={(props) => <CustomDrawerContent {...props} />}>
-        <Drawer.Screen name="overview" />
-        <Drawer.Screen name="sighting-alerts" />
-        <Drawer.Screen name="geofencing" />
-        <Drawer.Screen name="users-list" />
-        <Drawer.Screen name="upload-image" />
-        <Drawer.Screen name="Instructions" />
+
+        <Drawer.Screen
+          name="overview"
+          options={{
+            title: "Overview",
+            drawerIcon: ({ color, size }) => (
+              <Ionicons name="home" size={size} color={color} />
+            ),
+          }}
+        />
+
+        <Drawer.Screen
+          name="sighting-alerts"
+          options={{
+            title: "Sightings",
+            drawerIcon: ({ color, size }) => (
+              <Ionicons name="warning" size={size} color={color} />
+            ),
+          }}
+        />
+
+        <Drawer.Screen
+          name="geofencing"
+          options={{
+            title: "Geofencing",
+            drawerIcon: ({ color, size }) => (
+              <Ionicons name="map" size={size} color={color} />
+            ),
+          }}
+        />
+
+        <Drawer.Screen
+          name="users-list"
+          options={{
+            title: "Users",
+            drawerIcon: ({ color, size }) => (
+              <Ionicons name="people" size={size} color={color} />
+            ),
+          }}
+        />
+
+        <Drawer.Screen
+          name="upload-image"
+          options={{
+            title: "Upload",
+            drawerIcon: ({ color, size }) => (
+              <Ionicons name="camera" size={size} color={color} />
+            ),
+          }}
+        />
+
+        <Drawer.Screen
+          name="Instructions"
+          options={{
+            title: "Guide",
+            drawerIcon: ({ color, size }) => (
+              <Ionicons name="book" size={size} color={color} />
+            ),
+          }}
+        />
+
       </Drawer>
     </GestureHandlerRootView>
   );
