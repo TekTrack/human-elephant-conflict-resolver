@@ -1,52 +1,89 @@
-import { View, Text, ScrollView } from "react-native";
+import { View, Text, TouchableOpacity, ScrollView } from "react-native";
+import { router } from "expo-router";
 
-export default function OverviewScreen() {
-  const stats = [
-    { label: "Active Drones", value: "12/16", color: "bg-blue-100" },
-    { label: "Total Zones", value: "-", color: "bg-purple-100" },
-    { label: "Users", value: "256", color: "bg-sky-100" },
-    { label: "Total Sightings", value: "2,318", color: "bg-slate-100" },
-  ];
-
-  const activity = [
-    "Drone A is now active",
-    "New sighting detected",
-    "Zone updated successfully",
-  ];
-
+export default function Home() {
   return (
-    <ScrollView className="flex-1 bg-[#FFF8E7] px-5 pt-6">
+    <ScrollView className="flex-1 bg-[#FFF8E7]">
 
       {/* Header */}
-      <Text className="text-3xl font-bold mb-6">Overview</Text>
+      <View className="px-5 pt-16 pb-6">
+        <Text className="text-3xl font-bold">
+          Home Page for User 👋
+        </Text>
 
-      {/* Stats */}
-      <View className="flex-row flex-wrap justify-between">
-        {stats.map((item, index) => (
-          <View
-            key={index}
-            className={`w-[48%] p-4 rounded-xl mb-4 ${item.color}`}
-          >
-            <Text className="text-gray-600 text-sm">{item.label}</Text>
-            <Text className="text-xl font-bold mt-2">{item.value}</Text>
-          </View>
-        ))}
+        <Text className="text-gray-500 mt-1">
+          Welcome back, user
+        </Text>
       </View>
 
-      {/* Recent Activity */}
-      <View className="bg-white p-4 rounded-xl mt-4">
-        <Text className="text-lg font-bold mb-3">Recent Activity</Text>
-
-        {activity.map((item, index) => (
-          <View
-            key={index}
-            className="py-3 border-b border-gray-200 last:border-0"
-          >
-            <Text className="text-gray-700">{item}</Text>
-          </View>
-        ))}
+      {/* Quick Info Card */}
+      <View className="px-5">
+        <View className="bg-white p-5 rounded-xl shadow mb-5">
+          <Text className="text-lg font-bold mb-2">
+            🌿 Safety Status
+          </Text>
+          <Text className="text-gray-600">
+            All systems are normal. No alerts detected in your area.
+          </Text>
+        </View>
       </View>
 
+      {/* Actions */}
+      <View className="px-5 space-y-4">
+
+        {/* View Alerts */}
+        <TouchableOpacity
+          onPress={() => router.push("/admin/sighting-alerts")}
+          className="bg-white p-4 rounded-xl shadow"
+        >
+          <Text className="text-lg font-bold mb-1">
+            🐘 View Alerts
+          </Text>
+          <Text className="text-gray-600">
+            Check nearby elephant sightings
+          </Text>
+        </TouchableOpacity>
+
+        {/* Map */}
+        <TouchableOpacity
+          onPress={() => router.push("/admin/geofencing")}
+          className="bg-white p-4 rounded-xl shadow"
+        >
+          <Text className="text-lg font-bold mb-1">
+            🗺 View Map
+          </Text>
+          <Text className="text-gray-600">
+            See monitored areas near you
+          </Text>
+        </TouchableOpacity>
+
+        {/* Geofencing Info */}
+        <TouchableOpacity
+          onPress={() => router.push("/admin/upload-image")}
+          className="bg-white p-4 rounded-xl shadow"
+        >
+          <Text className="text-lg font-bold mb-1">
+            Upload Sighting
+          </Text>
+          <Text className="text-gray-600">
+            Upload Image of Elephant Sighting
+          </Text>
+        </TouchableOpacity>
+
+        {/* Profile */}
+        <TouchableOpacity
+          onPress={() => router.push("/admin/users-list")}
+          className="bg-white p-4 rounded-xl shadow mb-10"
+        >
+          <Text className="text-lg font-bold mb-1">
+            👤 Profile
+          </Text>
+          <Text className="text-gray-600">
+            Manage your accoun
+          </Text>
+        </TouchableOpacity>
+
+      </View>
     </ScrollView>
   );
 }

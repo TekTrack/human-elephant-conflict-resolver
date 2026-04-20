@@ -6,7 +6,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export default function LoginScreen() {
 
-  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -14,36 +14,31 @@ export default function LoginScreen() {
   try {
     setLoading(true);
 
-    const res = await fetch("http://10.17.66.70:8080/api/admin/login", {
+    const res = await fetch("http://10.17.66.70:8080/api/user/login", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ username, password }),
+      body: JSON.stringify({
+        email,
+        password,
+      }),
     });
 
     const data = await res.json();
 
-    console.log("Login Response:", data);
-
     if (!res.ok) {
-      Alert.alert("Login Failed", data.message || "Invalid Credentials!");
+      Alert.alert("Login Failed", data.message || "Invalid credentials");
       return;
     }
 
-    console.log("TOKEN:", data.token);
-
     await AsyncStorage.setItem("authToken", data.token);
 
-    if (data.role?.toLowerCase() === "admin") {
-      router.replace("/admin/overview");
-    } else {
-      Alert.alert("Access Denied", "You are not allowed to access this app");
-    }
+    // direct login success
+    router.replace("/admin/overview");
 
   } catch (error) {
-    console.log("Login error:", error);
-    Alert.alert("Error", "Cannot connect to server.");
+    Alert.alert("Error", "Cannot connect to server");
   } finally {
     setLoading(false);
   }
@@ -60,10 +55,11 @@ export default function LoginScreen() {
         <Text style={styles.title}>Login</Text>
 
         <TextInput
-          placeholder="Username"
-          value={username}
-          onChangeText={setUsername}
+          placeholder="Email"
+          value={email}
+          onChangeText={setEmail}
           style={styles.input}
+          keyboardType="email-address"
         />
 
         <TextInput
@@ -84,6 +80,14 @@ export default function LoginScreen() {
           </Text>
         </TouchableOpacity>
 
+        <TouchableOpacity onPress={() => router.push("/auth/register")}
+          style={{ marginTop: 15 }}
+        >
+          <Text style={{ textAlign: "center", color: "white", fontWeight: "bold",opacity: 0.8 }}>
+            {`Don't have an account? Register`}
+          </Text>
+        </TouchableOpacity>
+
       </View>
     </View>
   );
@@ -92,7 +96,7 @@ export default function LoginScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#FFF8E7",
+    backgroundColor: "black",
   },
 
   glow: {
@@ -100,8 +104,8 @@ const styles = StyleSheet.create({
     width: 350,
     height: 350,
     borderRadius: 175,
-    backgroundColor: "#FF9F1C",
-    opacity: 0.2,
+    backgroundColor: "#0FFF50",
+    opacity: 0.4,
     top: "30%",
     left: "20%",
     transform: [{ scale: 2 }],
@@ -118,6 +122,7 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     marginBottom: 30,
     textAlign: "center",
+    color: "#ffffff",
   },
 
   input: {
@@ -130,14 +135,14 @@ const styles = StyleSheet.create({
   },
 
   button: {
-    backgroundColor: "#FF9F1C",
+    backgroundColor: "#0FFF50",
     padding: 15,
     borderRadius: 10,
     alignItems: "center",
   },
 
   buttonText: {
-    color: "white",
+    color: "black",
     fontWeight: "bold",
   },
 });
