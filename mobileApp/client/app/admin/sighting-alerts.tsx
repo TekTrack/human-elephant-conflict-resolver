@@ -12,6 +12,7 @@ import {
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
 import { Ionicons } from "@expo/vector-icons";
+import API_BASE_URL from "@/config/app";
 
 interface Sighting {
   id: number;
@@ -29,7 +30,7 @@ export default function SightingAlertsScreen() {
   const [selected, setSelected] = useState<Sighting | null>(null);
   const [refreshing, setRefreshing] = useState(false);
 
-  const BASE_URL = "http://10.17.66.70:8080";
+  const BASE_URL = API_BASE_URL;
 
   useEffect(() => {
     fetchAlerts();

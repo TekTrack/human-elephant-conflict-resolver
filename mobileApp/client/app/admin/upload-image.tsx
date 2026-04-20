@@ -3,6 +3,7 @@ import { View, Text, Button, Image, Alert, ActivityIndicator } from "react-nativ
 import * as ImagePicker from "expo-image-picker";
 import * as Location from "expo-location";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import API_BASE_URL from "@/config/app"; // Adjust the path as needed
 
 export default function UserReportPage() {
   const [image, setImage] = useState<any>(null);
@@ -73,7 +74,7 @@ export default function UserReportPage() {
         type: "image/jpeg",
       } as any);
 
-      const res = await fetch("http://10.17.66.70:8080/alert", {
+      const res = await fetch(`${API_BASE_URL}/alert`, {
         method: "POST",
         body: formData,
         headers: {

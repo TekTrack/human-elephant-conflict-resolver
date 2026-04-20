@@ -11,6 +11,7 @@ import {
   StatusBar,
 } from "react-native";
 import { router } from "expo-router";
+import API_BASE_URL from "@/config/app";
 
 export default function RegisterScreen() {
   const [name, setName] = useState("");
@@ -36,7 +37,7 @@ export default function RegisterScreen() {
 
     try {
       setLoading(true);
-      const res = await fetch("http://10.255.223.22:8080/api/user/register", {
+      const res = await fetch(`${API_BASE_URL}/api/user/register`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

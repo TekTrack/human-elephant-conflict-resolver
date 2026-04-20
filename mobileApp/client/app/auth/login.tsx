@@ -11,6 +11,7 @@ import {
 } from "react-native";
 import { router } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import API_BASE_URL from "@/config/app";
 
 export default function LoginScreen() {
   const [email, setEmail] = useState("");
@@ -21,7 +22,7 @@ export default function LoginScreen() {
   const login = async () => {
     try {
       setLoading(true);
-      const res = await fetch("http://10.255.223.22:8080/api/user/login", {
+      const res = await fetch(`${API_BASE_URL}/api/user/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),

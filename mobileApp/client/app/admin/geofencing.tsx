@@ -4,8 +4,9 @@ import MapView, { Marker, Polygon, LatLng } from "react-native-maps";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
 import { Ionicons } from "@expo/vector-icons";
+import API_BASE_URL from "@/config/app"; // Adjust the path as needed
 
-const BASE_URL = "http://10.17.66.70:8080/api/admin";
+const BASE_URL = `${API_BASE_URL}/api/admin`;
 
 type GeofenceType = "Caution" | "Monitored" | "Danger";
 
