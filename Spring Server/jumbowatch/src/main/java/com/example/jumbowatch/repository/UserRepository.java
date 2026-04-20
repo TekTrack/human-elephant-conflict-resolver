@@ -33,4 +33,8 @@ public interface UserRepository extends JpaRepository<User, Long> {
     //get the Id of the User
     @Query("SELECT u FROM User u WHERE u.phoneNumber = :phoneNumber")
     Optional<User> getuserfomPhone(@Param("phoneNumber") String phoneNumber);
+
+    @Query("SELECT u FROM User u WHERE u.email = :email")
+    Optional<User> userFindbyEmail(@Param("email") String email); 
+
 }

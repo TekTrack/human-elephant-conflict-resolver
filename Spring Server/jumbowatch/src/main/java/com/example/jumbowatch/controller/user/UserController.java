@@ -2,22 +2,21 @@ package com.example.jumbowatch.controller.user;
 
 import java.util.HashMap;
 import java.util.Map;
-import com.example.jumbowatch.model.User;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
-import com.example.jumbowatch.repository.UserRepository;
 import com.example.jumbowatch.model.JwtUtil;
+import com.example.jumbowatch.model.User;
+import com.example.jumbowatch.repository.UserRepository;
 
 import tools.jackson.databind.ObjectMapper;
-
-import org.springframework.web.bind.annotation.RequestMapping;
 
 @RestController
 @RequestMapping("/api/user")
@@ -116,6 +115,43 @@ public class UserController {
         } catch (Exception e) {
             Map<String, Object> errorResponse = new HashMap<>();
             errorResponse.put("message", "Login failed");
+            errorResponse.put("error", e.getMessage());
+            return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
+        }
+    }
+
+
+    //User Updates
+    @PostMapping("/updateuser")
+    public ResponseEntity<Object> updateUser(@RequestBody User user){
+        try {
+            
+            User existUser = userRepository.userFindbyEmail(user.getEmail())
+                .orElseThrow(() -> new RuntimeException("User not Found"));
+
+        
+                
+            existUser.setName(user.getName());
+            existUser.setAdminID(user.getAdminID());
+            existUser.setPhoneNumber(user.getPhoneNumber());
+            existUser.setUserCategory(user.getUserCategory());
+
+            if (user.getPassword() != null && !user.getPassword().isEmpty()) {
+                existUser.setPassword(passwordEncoder.encode(user.getPassword()));
+            }
+
+
+            User updatedUser = userRepository.save(existUser);
+
+            Map<String, Object> response = new HashMap<>();
+             response.put("message", "User updated successfully!");
+            response.put("status", HttpStatus.OK.value());
+            response.put("data", updatedUser);
+            return new ResponseEntity<>(response, HttpStatus.OK);
+
+        } catch (Exception e) {
+             Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("message", "Failed to update User");
             errorResponse.put("error", e.getMessage());
             return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
         }
