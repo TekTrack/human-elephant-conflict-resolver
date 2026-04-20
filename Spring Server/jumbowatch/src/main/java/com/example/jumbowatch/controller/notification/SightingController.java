@@ -1,4 +1,4 @@
-package com.example.jumbowatch.controller; // Keep your package name!
+package com.example.jumbowatch.controller.notification; // Keep your package name!
 
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -11,7 +11,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.MediaType;
 
-import com.example.jumbowatch.admin.AdminNotification;
 import com.example.jumbowatch.model.Sighting;
 import com.example.jumbowatch.model.Zone;
 import com.example.jumbowatch.repository.SightingRepository;

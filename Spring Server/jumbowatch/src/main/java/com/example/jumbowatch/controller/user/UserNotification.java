@@ -1,9 +1,9 @@
-package com.example.jumbowatch.user;
+package com.example.jumbowatch.controller.user;
 
 import java.util.HashMap;
 import java.util.Map;
 import org.springframework.web.bind.annotation.*;
-import com.example.jumbowatch.controller.NotificationController;
+import com.example.jumbowatch.controller.notification.NotificationController;
 
 @RestController
 @CrossOrigin(origins = "*")

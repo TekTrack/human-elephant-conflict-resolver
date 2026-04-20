@@ -1,12 +1,10 @@
-package com.example.jumbowatch.admin;
+package com.example.jumbowatch.controller.admin;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
-import com.example.jumbowatch.controller.NotificationController;
+import com.example.jumbowatch.controller.notification.NotificationController;
 import com.example.jumbowatch.model.Notification;
 import com.example.jumbowatch.service.NotificationService;
 
@@ -14,7 +12,6 @@ import com.example.jumbowatch.service.NotificationService;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 
 
 @RestController

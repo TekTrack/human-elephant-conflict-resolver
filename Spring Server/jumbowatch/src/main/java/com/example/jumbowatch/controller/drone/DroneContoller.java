@@ -1,6 +1,5 @@
-package com.example.jumbowatch.admin;
+package com.example.jumbowatch.controller.drone;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,8 +9,6 @@ import org.springframework.web.bind.annotation.PostMapping;                     
 import org.springframework.web.bind.annotation.RequestBody;                         //            //
 import org.springframework.web.bind.annotation.RequestMapping;                      //A////////////D 
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 
 import com.example.jumbowatch.model.Drone;
 import com.example.jumbowatch.repository.DroneRepository;

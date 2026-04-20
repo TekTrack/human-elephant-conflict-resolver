@@ -1,4 +1,4 @@
-package com.example.jumbowatch.user;
+package com.example.jumbowatch.controller.user;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -18,7 +18,6 @@ import com.example.jumbowatch.model.JwtUtil;
 import tools.jackson.databind.ObjectMapper;
 
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 
 @RestController
 @RequestMapping("/api/user")

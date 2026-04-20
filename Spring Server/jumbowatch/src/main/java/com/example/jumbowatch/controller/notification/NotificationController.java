@@ -1,4 +1,4 @@
-package com.example.jumbowatch.controller;
+package com.example.jumbowatch.controller.notification;
 
 import java.util.Map;
 

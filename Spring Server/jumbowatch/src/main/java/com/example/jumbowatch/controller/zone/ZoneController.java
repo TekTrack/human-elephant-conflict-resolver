@@ -1,6 +1,5 @@
-package com.example.jumbowatch.admin;
+package com.example.jumbowatch.controller.zone;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,7 +14,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 
 import com.example.jumbowatch.model.Zone;
 import com.example.jumbowatch.repository.ZoneRepository;
-import com.example.jumbowatch.model.Sighting;
 
 @RestController
 @RequestMapping("/api/admin/zones")
