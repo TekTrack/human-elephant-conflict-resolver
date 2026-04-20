@@ -28,7 +28,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     //Chek if user with same Phone Number is exist
     @Query("SELECT COUNT(u) > 0 FROM User u WHERE u.phoneNumber = :phoneNumber" )
-    boolean existByphoneNumber(@Param("phoneNumber") String phoneNumber);
+    boolean existsByPhoneNumber(@Param("phoneNumber") String phoneNumber);
 
     //get the Id of the User
     @Query("SELECT u FROM User u WHERE u.phoneNumber = :phoneNumber")

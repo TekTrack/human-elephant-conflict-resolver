@@ -43,7 +43,7 @@ public class UserController {
                 payload.get("userCategory")
             );
             
-            System.out.println("Received user registration request: " + user.getName()); 
+            System.out.println("Received user registration request: " + user.toString()); 
 
             //Check if user with the same username already exists
             if (userRepository.existsByName(user.getName())) {
@@ -56,6 +56,16 @@ public class UserController {
             if (userRepository.existsByEmail(user.getEmail())) {
                 Map<String, Object> errorResponse = new HashMap<>();
                 errorResponse.put("message", "User with this email already exists");
+                return new ResponseEntity<>(errorResponse, HttpStatus.CONFLICT);
+            }
+            if (userRepository.existsByNIC(user.getNIC())) {
+                Map<String, Object> errorResponse = new HashMap<>();
+                errorResponse.put("message", "User with this NIC already exists");
+                return new ResponseEntity<>(errorResponse, HttpStatus.CONFLICT);
+            }
+            if (userRepository.existsByPhoneNumber(user.getPhoneNumber())) {
+                Map<String, Object> errorResponse = new HashMap<>();
+                errorResponse.put("message", "User with this phone number already exists");
                 return new ResponseEntity<>(errorResponse, HttpStatus.CONFLICT);
             }
 
@@ -80,7 +90,7 @@ public class UserController {
 
         } catch (Exception e) {
             Map<String, Object> errorResponse = new HashMap<>();
-            errorResponse.put("message", "Failed to create admin");
+            errorResponse.put("message", "Failed to create user");
             errorResponse.put("error", e.getMessage());
 
             return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);

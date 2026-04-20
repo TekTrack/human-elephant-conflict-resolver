@@ -199,7 +199,7 @@ public class AdminController {
             System.out.println("I am Hit");
 
             //Phone number Check
-            if(userRepository.existByphoneNumber(user.getPhoneNumber())){
+            if(userRepository.existsByPhoneNumber(user.getPhoneNumber())){
                 return ResponseEntity.status(409).body(Map.of("message", "User with this Phone Number already exists"));
             }
 
