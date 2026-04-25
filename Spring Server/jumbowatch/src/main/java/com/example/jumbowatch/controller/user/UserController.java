@@ -18,6 +18,9 @@ import com.example.jumbowatch.repository.UserRepository;
 
 import tools.jackson.databind.ObjectMapper;
 
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+
 @RestController
 @RequestMapping("/api/user")
 
@@ -105,6 +108,7 @@ public class UserController {
                 response.put("token", token);
                 response.put("role","user");
                 response.put("data", user);
+                 
                
                 return new ResponseEntity<>(response, HttpStatus.OK);
             } else {
@@ -156,5 +160,29 @@ public class UserController {
             return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
         }
     }
+
+    @GetMapping("/getuser/{email}")
+public ResponseEntity<Object> getUser(@PathVariable String email) {
+    try {
+
+        User user = userRepository.findByEmail(email)
+            .orElseThrow(() -> new RuntimeException("User not found"));
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("message", "User fetched successfully");
+        response.put("status", HttpStatus.OK.value());
+        response.put("data", user);
+
+        return new ResponseEntity<>(response, HttpStatus.OK);
+
+    } catch (Exception e) {
+
+        Map<String, Object> errorResponse = new HashMap<>();
+        errorResponse.put("message", "Failed to fetch user");
+        errorResponse.put("error", e.getMessage());
+
+        return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
+    }
+}
 
 }

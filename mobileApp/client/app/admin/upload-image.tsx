@@ -1,15 +1,16 @@
 import React, { useState } from "react";
-import { View, Text, Button, Image, Alert, ActivityIndicator } from "react-native";
+import { View, Text, Image, Alert, ActivityIndicator, TouchableOpacity } from "react-native";
 import * as ImagePicker from "expo-image-picker";
 import * as Location from "expo-location";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import API_BASE_URL from "@/config/app"; // Adjust the path as needed
+import API_BASE_URL from "@/config/app";
+import { Ionicons } from "@expo/vector-icons";
 
 export default function UserReportPage() {
   const [image, setImage] = useState<any>(null);
   const [loading, setLoading] = useState(false);
 
-  // 📷 Take photo
+  // 📷 Camera
   const takePhoto = async () => {
     const result = await ImagePicker.launchCameraAsync({
       allowsEditing: true,
@@ -21,12 +22,12 @@ export default function UserReportPage() {
     }
   };
 
-  // 📍 Get location
+  // 📍 Location
   const getLocation = async () => {
     let { status } = await Location.requestForegroundPermissionsAsync();
 
     if (status !== "granted") {
-      Alert.alert("Permission denied", "Location permission is required");
+      Alert.alert("Permission denied", "Location permission required");
       return null;
     }
 
@@ -34,12 +35,8 @@ export default function UserReportPage() {
     return location.coords;
   };
 
-  // ⬆ Upload to backend
+  // ⬆ Upload
   const uploadReport = async () => {
-
-     
-   
-    
     if (!image) {
       Alert.alert("Error", "Please take a photo first");
       return;
@@ -48,14 +45,8 @@ export default function UserReportPage() {
     setLoading(true);
 
     try {
+      const token = await AsyncStorage.getItem("authToken");
 
-       const token = await AsyncStorage.getItem("authToken");
-
-    if (!token) {
-      console.log("No token found");
-      return;
-    }
-    
       const coords = await getLocation();
       if (!coords) return;
 
@@ -74,18 +65,16 @@ export default function UserReportPage() {
         type: "image/jpeg",
       } as any);
 
-      const res = await fetch(`${API_BASE_URL}/alert`, {
+      await fetch(`${API_BASE_URL}/alert`, {
         method: "POST",
         body: formData,
         headers: {
-           Authorization: `Bearer ${token}`
+          Authorization: `Bearer ${token}`,
         },
       });
 
-      const text = await res.text();
-
-      console.log(text);
       Alert.alert("Success", "Report uploaded!");
+      setImage(null);
     } catch (err) {
       console.log(err);
       Alert.alert("Error", "Upload failed");
@@ -95,29 +84,60 @@ export default function UserReportPage() {
   };
 
   return (
-    <View style={{ padding: 20, flex: 1, justifyContent: "center" }}>
+    <View className="flex-1 bg-[#FFF8E7] px-5 pt-10">
 
-      <Text style={{ fontSize: 20, fontWeight: "bold", marginBottom: 20 }}>
-        Report Elephant Sighting
+      {/* TITLE */}
+      <Text className="text-2xl font-bold text-black text-center mb-2">
+        Upload Sighting Report
       </Text>
 
-      {image && (
-        <Image
-          source={{ uri: image.uri }}
-          style={{ width: "100%", height: 250, marginBottom: 20 }}
-        />
-      )}
+      <Text className="text-gray-600 text-center mb-6">
+        Take a photo and report elephant activity
+      </Text>
 
-      <Button title="📷 Take Photo" onPress={takePhoto} />
+      {/* IMAGE PREVIEW CARD */}
+      <View className="bg-white rounded-2xl p-4 shadow-md items-center mb-6">
 
-      <View style={{ height: 10 }} />
+        {image ? (
+          <Image
+            source={{ uri: image.uri }}
+            className="w-full h-64 rounded-xl"
+          />
+        ) : (
+          <View className="w-full h-64 rounded-xl bg-gray-100 items-center justify-center">
+            <Ionicons name="camera-outline" size={50} color="#999" />
+            <Text className="text-gray-500 mt-2">No image selected</Text>
+          </View>
+        )}
 
-      <Button
-        title={loading ? "Uploading..." : "⬆ Upload Report"}
+      </View>
+
+      {/* BUTTONS */}
+      <TouchableOpacity
+        onPress={takePhoto}
+        className="bg-[#FF9F1C] py-4 rounded-xl items-center mb-4 shadow"
+      >
+        <Text className="text-black font-bold text-lg">
+          📷 Take Photo
+        </Text>
+      </TouchableOpacity>
+
+      <TouchableOpacity
         onPress={uploadReport}
-      />
+        disabled={loading}
+        className={`py-4 rounded-xl items-center shadow ${
+          loading ? "bg-gray-400" : "bg-black"
+        }`}
+      >
+        {loading ? (
+          <ActivityIndicator color="#fff" />
+        ) : (
+          <Text className="text-white font-bold text-lg">
+            ⬆ Upload Report
+          </Text>
+        )}
+      </TouchableOpacity>
 
-      {loading && <ActivityIndicator size="large" />}
     </View>
   );
 }

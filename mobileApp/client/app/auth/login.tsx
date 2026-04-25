@@ -35,7 +35,10 @@ export default function LoginScreen() {
         return;
       }
 
+      console.log("token",data.token);
+
       await AsyncStorage.setItem("authToken", data.token);
+      await AsyncStorage.setItem("email", data.data.email);
       router.replace("/admin/overview");
     } catch (error) {
       Alert.alert("Error", "Cannot connect to server");
@@ -64,9 +67,9 @@ export default function LoginScreen() {
 
         {/* Email Input */}
         <View style={styles.inputWrapper}>
-          <Text style={styles.inputIcon}>✉</Text>
+           
           <TextInput
-            placeholder="956"
+            placeholder="Enter email"
             value={email}
             onChangeText={setEmail}
             style={styles.input}
@@ -77,7 +80,7 @@ export default function LoginScreen() {
 
         {/* Password Input */}
         <View style={styles.inputWrapper}>
-          <Text style={styles.inputIcon}>🔒</Text>
+           
           <TextInput
             placeholder="Enter your password"
             secureTextEntry={secureText}
@@ -206,8 +209,8 @@ const styles = StyleSheet.create({
     height: 55,
     backgroundColor: "#FF9F1C",
     borderRadius: 20,
-    borderWidth: 2,
-    borderColor: "#000",
+    //borderWidth: 2,
+    //borderColor: "#000",
     justifyContent: "center",
     alignItems: "center",
     marginBottom: 20,

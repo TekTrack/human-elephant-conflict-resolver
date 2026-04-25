@@ -56,12 +56,32 @@ function CustomDrawerContent(props: any) {
 export default function AdminLayout() {
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
-      <Drawer drawerContent={(props) => <CustomDrawerContent {...props} />}>
+      <Drawer
+        drawerContent={(props) => <CustomDrawerContent {...props} />}
+        screenOptions={{
+          drawerStyle: {
+            backgroundColor: "#F8BD00",
+          },
+          drawerActiveTintColor: "#000",
+          drawerInactiveTintColor: "#333",
+
+          drawerLabelStyle: {
+              fontSize: 23,
+              fontWeight: "600",
+            },
+            drawerItemStyle: {
+              marginVertical: 17,
+            },
+        }}
+      >
 
         <Drawer.Screen
           name="overview"
           options={{
-            title: "Overview",
+            title: "Home",
+            drawerItemStyle: {
+      marginTop: 80,
+    },
             drawerIcon: ({ color, size }) => (
               <Ionicons name="home" size={size} color={color} />
             ),
@@ -81,22 +101,14 @@ export default function AdminLayout() {
         <Drawer.Screen
           name="geofencing"
           options={{
-            title: "Geofencing",
+            title: "Map",
             drawerIcon: ({ color, size }) => (
               <Ionicons name="map" size={size} color={color} />
             ),
           }}
         />
 
-        <Drawer.Screen
-          name="users-list"
-          options={{
-            title: "Users",
-            drawerIcon: ({ color, size }) => (
-              <Ionicons name="people" size={size} color={color} />
-            ),
-          }}
-        />
+        
 
         <Drawer.Screen
           name="upload-image"
@@ -114,6 +126,18 @@ export default function AdminLayout() {
             title: "Guide",
             drawerIcon: ({ color, size }) => (
               <Ionicons name="book" size={size} color={color} />
+            ),
+          }}
+        />
+
+        
+
+        <Drawer.Screen
+          name="my-profile"
+          options={{
+            title: "My Profile",
+            drawerIcon: ({ color, size }) => (
+              <Ionicons name="people" size={size} color={color} />
             ),
           }}
         />
