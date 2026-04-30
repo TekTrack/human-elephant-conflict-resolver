@@ -26,6 +26,9 @@ public interface UserRepository extends JpaRepository<User, Long> {
     @Query("SELECT u FROM User u WHERE u.adminID = :adminId")
     List<User> findUsersByAdminId(@Param("adminId") String adminId);
 
+    @Query("SELECT u FROM User u WHERE u.zoneId = :zoneId")
+    List<User> findUsersByZoneId(@Param("zoneId") Long zoneId);
+
     //Chek if user with same Phone Number is exist
     @Query("SELECT COUNT(u) > 0 FROM User u WHERE u.phoneNumber = :phoneNumber" )
     boolean existsByPhoneNumber(@Param("phoneNumber") String phoneNumber);

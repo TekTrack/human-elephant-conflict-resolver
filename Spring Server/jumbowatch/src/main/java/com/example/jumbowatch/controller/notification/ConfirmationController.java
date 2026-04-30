@@ -27,9 +27,9 @@ public class ConfirmationController {
             Sighting sighting = sightingBox.get();
             sighting.setVerified(true);
             sightingRepo.save(sighting);
-            return "✅ Sighting " + id + " verified by admin!";
+            return "Sighting " + id + " verified by admin!";
         }
-        return "❌ Sighting not found!";
+        return "Sighting not found!";
     }
 }
 
