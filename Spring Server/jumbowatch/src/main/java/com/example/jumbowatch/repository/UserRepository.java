@@ -38,6 +38,6 @@ public interface UserRepository extends JpaRepository<User, Long> {
     Optional<User> getuserfomPhone(@Param("phoneNumber") String phoneNumber);
 
     @Query("SELECT u FROM User u WHERE u.email = :email")
-    Optional<User> userFindbyEmail(@Param("email") String email); 
-
+    Optional<User> userFindbyEmail(@Param("email") String email);
+    
 }

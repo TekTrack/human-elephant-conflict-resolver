@@ -32,6 +32,8 @@ public class SecurityConfig {
                 .requestMatchers("/api/user/login").permitAll()
                 .requestMatchers("/api/user/register").permitAll()
                 .requestMatchers("/api/admin/newadmin").authenticated()
+                .requestMatchers("/api/sms/send-otp").permitAll()
+                .requestMatchers("/api/sms/verify-otp").permitAll()
                 .requestMatchers("/alert").permitAll()
                 .requestMatchers("/api/admin/**").authenticated()
                 .requestMatchers("/error").permitAll()
