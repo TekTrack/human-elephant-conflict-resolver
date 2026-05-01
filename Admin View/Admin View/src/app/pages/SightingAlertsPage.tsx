@@ -412,9 +412,21 @@ export function SightingAlertsPage() {
                     isDark={isDark}
                     action={
                       <button
-                        onClick={() => alert("Navigate to Geofencing Map page")}
-                        className={`p-1.5 rounded-lg transition-colors border ${isDark ? "bg-blue-500/10 border-blue-500/20 hover:bg-blue-500/20 text-blue-400 hover:text-blue-300" : "bg-blue-50 border-blue-200 hover:bg-blue-100 text-blue-600 hover:text-blue-700"}`}
+                        onClick={(e) => {
+                          e.stopPropagation(); // Prevents click from bubbling up
+                          if (selectedAlert.sighting.latitude && selectedAlert.sighting.longitude) {
+                            // 👇 Added sightingId to the URL so the map page knows to isolate this pin!
+                            navigate(`/geofencing?lat=${selectedAlert.sighting.latitude}&lng=${selectedAlert.sighting.longitude}&sightingId=${selectedAlert.sighting.id}`);
+                          }
+                        }}
+                        className={`p-1.5 rounded-lg transition-colors border disabled:opacity-50 disabled:cursor-not-allowed ${
+                          isDark 
+                            ? "bg-blue-500/10 border-blue-500/20 hover:bg-blue-500/20 text-blue-400 hover:text-blue-300" 
+                            : "bg-blue-50 border-blue-200 hover:bg-blue-100 text-blue-600 hover:text-blue-700"
+                        }`}
                         title="View on Map"
+                        aria-label="View location on map"
+                        disabled={!selectedAlert.sighting.latitude || !selectedAlert.sighting.longitude}
                       >
                         <MapPin className="w-4 h-4" />
                       </button>
