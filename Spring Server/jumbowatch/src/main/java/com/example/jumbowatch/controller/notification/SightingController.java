@@ -128,11 +128,11 @@ public class SightingController {
 
             // 5. Print the terminal notification
             System.out.println("\n========================================");
-            System.out.println("🚨 ALERT RECEIVED!");
-            System.out.println("🐘 Count: " + count);
-            System.out.println("📍 GPS:   " + lat + ", " + lon);
-            System.out.println("⏰ Time:  " + time);
-            System.out.println("📁 Photo: " + filename);
+            System.out.println("ALERT RECEIVED!");
+            System.out.println("Count: " + count);
+            System.out.println("GPS:   " + lat + ", " + lon);
+            System.out.println("Time:  " + time);
+            System.out.println("Photo: " + filename);
             System.out.println("Drone ID: " + droneId);
             System.out.println("========================================");
 
@@ -165,7 +165,7 @@ public class SightingController {
         try {
 
             if (breachedZone != null) {
-                List<String> phoneNumbers = userRepo.findUsersByZoneId(breachedZone.getId()).stream() // Replace null with breachedZone.getId() when you have zoneId in User
+                List<String> phoneNumbers = userRepo.findUsersByZoneId(breachedZone.getId()).stream()
                     .map(user -> user.getPhoneNumber())
                     .collect(Collectors.toList());
                 return smsService.sendSms(phoneNumbers, "Elephant Alert! A new sighting has been reported in your area. Stay safe and stay alert!"); 
