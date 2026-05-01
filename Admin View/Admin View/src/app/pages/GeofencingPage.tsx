@@ -1,10 +1,11 @@
 import { useState, useRef, useCallback, useEffect } from "react";
 import { useTheme } from "../context/ThemeContext";
 import { useMapTrigger } from "../context/MapTriggerContext";
-import { MapPin, Plus, Edit, Trash2, X, RefreshCw, Check } from "lucide-react";// @ts-ignore
+import { MapPin, Plus, Edit, Trash2, X, RefreshCw, Check } from "lucide-react";
+// @ts-ignore
 import Map, { Source, Layer, Marker, Popup, NavigationControl } from "react-map-gl/maplibre";
 import type { MapRef, MapLayerMouseEvent, MapMouseEvent } from "react-map-gl/maplibre";
-import { useNavigate,useParams } from "react-router";
+import { useNavigate, useSearchParams } from "react-router"; // <-- ADDED useSearchParams
 
 import { PageHeader } from "../components/PageHeader";
 import { StatCard } from "../components/StatCard";
@@ -37,7 +38,7 @@ interface Geofence {
 interface Sighting {
     id: number;
     photoFilename: string;
-    verified: boolean;
+    status: string;
     latitude: number;
     longitude: number;
     timestamp: string;
@@ -65,12 +66,6 @@ const MAP_STYLE = "https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.j
 const MAP_STYLE_LIGHT = "https://basemaps.cartocdn.com/gl/positron-gl-style/style.json";
 
 const defaultForm: NewZoneForm = { name: "", type: "Monitored", minLat: 0, maxLat: 0, minLon: 0, maxLon: 0 };
-
-// const DUMMY_SIGHTINGS: Sighting[] = [
-//     {latitude: 40.714, longitude: -74.006, timestamp: new Date().toISOString(), type: "user"},
-//     {latitude: 40.712, longitude: -74.008, timestamp: new Date(Date.now() - 3_600_000).toISOString(), type: "drone"},
-//     {latitude: 40.716, longitude: -74.003, timestamp: new Date(Date.now() - 86_400_000).toISOString(), type: "user"},
-// ];
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 function getZoneColor(type: GeofenceType): string {
@@ -114,6 +109,9 @@ export function GeofencingPage() {
     const mapRef = useRef<MapRef>(null);
     const { mapTrigger, BASE_URL } = useMapTrigger();
     const navigate = useNavigate(); 
+    
+    // 👇 ADDED: URL search params hook
+    const [searchParams] = useSearchParams();
 
     // ── State ───────────────────────────────────────────────────────────────────
     const [geofences, setGeofences] = useState<Geofence[]>([]);
@@ -122,7 +120,7 @@ export function GeofencingPage() {
     const [errors, setErrors] = useState<Partial<Record<keyof NewZoneForm, string>>>({});
 
     const [filter, setFilter] = useState<FilterValue>("all");
-    const [sightings, setSightings] = useState<Sighting[]>();
+    const [sightings, setSightings] = useState<Sighting[]>([]);
     const [popupInfo, setPopupInfo] = useState<PopupInfo | null>(null);
 
     const [isDrawing, setIsDrawing] = useState(false);
@@ -133,17 +131,41 @@ export function GeofencingPage() {
     const [showUserSightings, setShowUserSightings] = useState(true);
     const [showDroneSightings, setShowDroneSightings] = useState(true);
 
+    // 👇 ADDED: Map View State specifically to allow dynamic panning/zooming
+    const [viewState, setViewState] = useState({
+        longitude: 80.7718,
+        latitude: 7.8731,
+        zoom: 8
+    });
+
+    // 👇 ADDED: URL Parameter Effect 
+    useEffect(() => {
+        const lat = searchParams.get("lat");
+        const lng = searchParams.get("lng");
+        const sightingIdStr = searchParams.get("sightingId");
+
+        if (lat && lng) {
+            const latitude = parseFloat(lat);
+            const longitude = parseFloat(lng);
+            
+            // Pan and zoom the map
+            setViewState({
+                longitude,
+                latitude,
+                zoom: 12 // Tight zoom level
+            });
+
+            // Optional: If you want to automatically open a popup or filter, 
+            // you can use the sightingIdStr here once sightings are fetched.
+            if (sightingIdStr && sightings) {
+                 const id = Number(sightingIdStr);
+                 // We could potentially set a specific state here to HIGHLIGHT just this sighting
+                 // For now, zooming to it is sufficient.
+            }
+        }
+    }, [searchParams, sightings]);
+
     // ── Logic Functions ────────────────────────────────────────────────────────
-    // const fetchSightings = useCallback((f: FilterValue) => {
-    //     const now = Date.now();
-    //     const cutoffs: Record<FilterValue, number> = {
-    //         all: 0,
-    //         hour: now - 3_600_000,
-    //         day: now - 86_400_000,
-    //         week: now - 604_800_000
-    //     };
-    //     setSightings(DUMMY_SIGHTINGS.filter((s) => new Date(s.timestamp).getTime() >= cutoffs[f]));
-    // }, []);
 
     const fetchSightings = async (filter: FilterValue) => {
         const token = localStorage.getItem('authToken'); // Grab the saved token
@@ -155,7 +177,14 @@ export function GeofencingPage() {
             }
         });
         const data = await res.json();
-        setSightings(data);
+        
+        // 👇 ADDED: If a specific sightingId is in the URL, filter the results to ONLY show that one
+        const targetSightingId = searchParams.get("sightingId");
+        if (targetSightingId) {
+            setSightings(data.filter((s: Sighting) => s.id === Number(targetSightingId)));
+        } else {
+            setSightings(data);
+        }
     };
 
     const checkZoneBreached = (zones: Geofence[]) => {
@@ -179,7 +208,6 @@ export function GeofencingPage() {
     const completeFetchZones = (data: Geofence[]) => {
         const formattedZones = data.map((zone) => ({
             ...zone,
-            //radius: zone.radius || "0m", 
             status: zone.status || "Active",
             coordinates: `${((zone.minLat + zone.maxLat) / 2).toFixed(4)}, ${((zone.minLon + zone.maxLon) / 2).toFixed(4)}`
         }));
@@ -211,7 +239,8 @@ export function GeofencingPage() {
     useEffect(() => {
         fetchSightings(filter);
         fetchZones();
-    }, [filter, mapTrigger]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [filter, mapTrigger, searchParams]); // Added searchParams as dependency
 
     const handleMapMouseDown = useCallback((e: MapMouseEvent) => {
         if (!drawMode) return;
@@ -266,13 +295,6 @@ export function GeofencingPage() {
         return Object.keys(next).length === 0;
     };
 
-    // const deriveRadius = (): string => {
-    //     const latDiff = Math.abs(newZone.maxLat - newZone.minLat);
-    //     const lonDiff = Math.abs(newZone.maxLon - newZone.minLon);
-    //     const metres = Math.round(((latDiff + lonDiff) / 2) * 111_000);
-    //     return metres >= 1000 ? `${(metres / 1000).toFixed(1)}km` : `${metres}m`;
-    // };
-
     const saveZoneToDatabase = async (newZone: Geofence) => {
         try {
             const zoneData = {
@@ -309,7 +331,6 @@ export function GeofencingPage() {
             id: Date.now(),
             name: newZone.name.trim(),
             type: newZone.type,
-            // radius: deriveRadius(),
             alerts: 0,
             status: "Active",
             coordinates: `${centreLatStr}, ${centreLonStr}`,
@@ -342,7 +363,6 @@ export function GeofencingPage() {
         }
     };    
 
-
     const handleCloseModal = (): void => {
         setShowModal(false);
         setNewZone(defaultForm);
@@ -371,6 +391,13 @@ export function GeofencingPage() {
         }],
     } : null;
 
+    // 👇 ADDED: Helper to clear URL parameters and return to normal map view
+    const clearFocus = () => {
+        navigate('/geofencing', { replace: true });
+        // Resetting viewstate so it looks normal again
+        setViewState({ longitude: 80.7718, latitude: 7.8731, zoom: 8 });
+    }
+
     return (
         <div className="p-8 space-y-6">
             <PageHeader
@@ -395,15 +422,25 @@ export function GeofencingPage() {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <StatCard label="Total Zones" value={geofences.length}
                     icon={<MapPin className="w-5 h-5 text-blue-600" />} iconBgClass="bg-blue-100" />
-                <StatCard label="New User Sightings" value={geofences.filter((g) => g.status === "Active").length}
+                <StatCard label="New User Sightings" value={sightings.filter((g) => g.source === "user").length}
                     icon={<MapPin className="w-5 h-5 text-green-600" />} iconBgClass="bg-green-100"
                     valueColorClass="text-green-500" />
-                <StatCard label="New Drone Sightings" value={geofences.filter((g) => g.type === "Danger").length}
+                <StatCard label="New Drone Sightings" value={sightings.filter((g) => g.source === "drone").length}
                     icon={<MapPin className="w-5 h-5 text-red-600" />} iconBgClass="bg-red-100" />
             </div>
 
             {/* Interactive Map Wrapper */}
-            <Card noPadding className="overflow-hidden flex flex-col">
+            <Card noPadding className="overflow-hidden flex flex-col relative">
+                {/* 👇 ADDED: Clear focus button when a specific sighting is targeted */}
+                {searchParams.get("sightingId") && (
+                     <div className="absolute top-4 left-1/2 transform -translate-x-1/2 z-10">
+                        <Button variant="primary" className="shadow-lg" onClick={clearFocus}>
+                            <X className="w-4 h-4 mr-2" />
+                            Clear Filter (Show All Sightings)
+                        </Button>
+                     </div>
+                )}
+                
                 {/* Toolbar */}
                 <div className={`flex items-center w-full gap-20 px-4 py-4 border-b overflow-x- no-scrollbar ${isDark ? "border-[rgba(255,255,255,0.08)]" : "border-gray-200"}`}>
 
@@ -417,6 +454,7 @@ export function GeofencingPage() {
                         className="w-px-1 pl-5 pr-6 py-1.5 text-xs font-medium shrink-0"
                         value={filter}
                         onChange={(e) => { const v = e.target.value as FilterValue; setFilter(v); fetchSightings(v); }}
+                        disabled={!!searchParams.get("sightingId")} // Disabled when filtering specific ID
                     >
                         <option value="all">All Time</option>
                         <option value="hour">Last Hour</option>
@@ -425,7 +463,7 @@ export function GeofencingPage() {
                     </Select>
 
                     {/* User Sightings */}
-                    <label className="flex items-center gap-2.5 text-xs cursor-pointer select-none group shrink-0">
+                    <label className={`flex items-center gap-2.5 text-xs cursor-pointer select-none group shrink-0 ${searchParams.get("sightingId") ? 'opacity-50 pointer-events-none' : ''}`}>
                         <input
                             type="checkbox"
                             className="hidden"
@@ -449,7 +487,7 @@ export function GeofencingPage() {
                     </label>
 
                     {/* Drone Sightings */}
-                    <label className="flex items-center gap-2.5 text-xs cursor-pointer select-none group shrink-0">
+                    <label className={`flex items-center gap-2.5 text-xs cursor-pointer select-none group shrink-0 ${searchParams.get("sightingId") ? 'opacity-50 pointer-events-none' : ''}`}>
                         <input
                             type="checkbox"
                             className="hidden"
@@ -472,13 +510,13 @@ export function GeofencingPage() {
                         </span>
                     </label>
 
-                    {/* Refresh Button (ml-auto pushes it all the way to the right) */}
+                    {/* Refresh Button */}
                     <Button variant="secondary" className="py-1.5 px-3 text-xs ml-auto shrink-0" onClick={fetchZones}>
                         <RefreshCw className="w-3 h-3" /> Refresh Map
                     </Button>
                 </div>
 
-                {/* Draw Mode Banner (Moved outside the flex row so it doesn't mess up the layout) */}
+                {/* Draw Mode Banner */}
                 {drawMode && (
                     <div className={`w-full px-4 py-2 border-b ${isDark ? "bg-[rgba(59,130,246,0.1)] border-[rgba(59,130,246,0.2)]" : "bg-blue-50 border-blue-100"}`}>
                         <span className="text-xs text-blue-500 font-medium">✏️ Click &amp; drag on the map to draw a rectangle</span>
@@ -489,7 +527,9 @@ export function GeofencingPage() {
                 <div style={{ height: "600px", width: "100%" }}>
                     <Map
                         ref={mapRef}
-                        initialViewState={{ longitude: 80.7718, latitude: 7.8731, zoom: 8 }}
+                        // 👇 CHANGED: using viewState state object to allow dynamic changes
+                        {...viewState}
+                        onMove={evt => setViewState(evt.viewState)}
                         mapStyle={isDark ? MAP_STYLE : MAP_STYLE_LIGHT}
                         style={{ width: "100%", height: "100%" }}
                         interactiveLayerIds={["zones-fill"]}
@@ -517,11 +557,8 @@ export function GeofencingPage() {
                         )}
                         {(sightings || [])
                             .filter((s) => {
-                                // Filter out if it's a user sighting and the user box is unchecked
                                 if (s.source === "user" && !showUserSightings) return false;
-                                // Filter out if it's a drone sighting and the drone box is unchecked
                                 if (s.source === "drone" && !showDroneSightings) return false;
-                                // Otherwise, show it
                                 return true;
                             })
                             .map((s, i) => (
@@ -548,7 +585,6 @@ export function GeofencingPage() {
                                             <Badge
                                                 variant={getVariant(popupInfo.geofence.status) as any}>{popupInfo.geofence.status}</Badge>
                                         </div>
-                                        {/* <div className="mt-2">🔵 Radius: {popupInfo.geofence.radius}</div> */}
                                         <div>🔔 Alerts: {popupInfo.geofence.alerts}</div>
                                         <div>📍 {popupInfo.geofence.coordinates}</div>
                                     </div>
@@ -584,8 +620,6 @@ export function GeofencingPage() {
                                 </div>
                                 <div className="flex items-center gap-6 text-sm">
                                     <span className="text-black dark:text-white">📍 {geofence.coordinates}</span>
-                                    {/* <span
-                                            // className="text-gray-600 dark:text-[rgba(255,255,255,0.6)]">🔵 Radius: {geofence.radius}</span> */}
                                     <span
                                         className="text-gray-600 dark:text-[rgba(255,255,255,0.6)]">🔔 {geofence.alerts} alerts</span>
                                 </div>

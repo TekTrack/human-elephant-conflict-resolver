@@ -54,7 +54,6 @@ export default function GeofencingScreen() {
   const getToken = async () => {
     return await AsyncStorage.getItem("authToken");
   };
-
   const fetchZones = async () => {
     const token = await getToken();
     const res = await axios.get(`${BASE_URL}/zones`, {

@@ -15,7 +15,7 @@ public class Sighting {
     private double latitude;
     private double longitude;
     private String photoFilename;
-    private boolean verified = false;
+    private String status = "new"; // new, verified, neglected
     private String source;
     private Long droneId; 
 
@@ -38,20 +38,20 @@ public class Sighting {
     public double getLatitude() { return latitude; }
     public double getLongitude() { return longitude; }
     public String getPhotoFilename() { return photoFilename; }
-    public boolean isVerified() { return verified; }
+    public String getStatus() { return status; }
     public String getSource() { return source; }
     public Long getId() { return id; }
     public Long getDroneId(){ return droneId; }
 
     // Keep your old methods like verifySighting() here...
-    public void setVerified(boolean verified) {
-        this.verified = verified;
+    public void setStatus(String status) {
+        this.status = status;
     }
 
     @Override
     public String toString() {
         return "Sighting [id=" + id + ", elephantCount=" + elephantCount + ", timestamp=" + timestamp + ", latitude="
-                + latitude + ", longitude=" + longitude + ", photoFilename=" + photoFilename + ", verified=" + verified
+                + latitude + ", longitude=" + longitude + ", photoFilename=" + photoFilename + ", status=" + status
                 + ", source=" + source + ", droneId=" + droneId + "]";
     }
 }

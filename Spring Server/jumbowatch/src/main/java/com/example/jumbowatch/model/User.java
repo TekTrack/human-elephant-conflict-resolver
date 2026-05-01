@@ -38,12 +38,23 @@ public class User {
     //@Size(min = 7, max = 7, message = "Admin ID must be 7 characters")
     private String adminID;
 
+    @Column
+    private Long zoneId; // New field to link user to a zone)
+
+    public Long getZoneId() {
+        return zoneId;
+    }
+
+    public void setZoneId(Long zoneId) {
+        this.zoneId = zoneId;
+    }
+
     // Default Constructor
     public User() {
     }
 
     // Parametrized Constructor
-    public User(String email, String password, String name, String phoneNumber, String NIC, String adminID, String userCategory) {
+    public User(String email, String password, String name, String phoneNumber, String NIC, String adminID, String userCategory, Long zoneId) {
         this.email = email;
         this.password = password;
         this.name = name;
@@ -51,6 +62,7 @@ public class User {
         this.NIC = NIC;
         this.adminID = adminID;
         this.userCategory = userCategory;
+        this.zoneId = zoneId; // Initialize zoneId with the provided value
     }
 
     // Getters and Setters

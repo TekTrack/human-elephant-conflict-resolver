@@ -6,16 +6,21 @@ import java.nio.file.*;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.MediaType;
 
 import com.example.jumbowatch.model.Sighting;
 import com.example.jumbowatch.model.Zone;
 import com.example.jumbowatch.repository.SightingRepository;
+import com.example.jumbowatch.repository.UserRepository;
 import com.example.jumbowatch.repository.ZoneRepository;
 import com.example.jumbowatch.service.NotificationService;
+import com.example.jumbowatch.service.SmsService;
 
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -30,6 +35,8 @@ public class SightingController {
     private SightingRepository sightingRepo;
     @Autowired
     private ZoneRepository zoneRepo;
+    @Autowired
+    private UserRepository userRepo;
 
     @GetMapping("/api/admin/sightings/filter")
     public List<Sighting> getFilteredSightings(@RequestParam(defaultValue = "all") String timeframe) {
@@ -49,6 +56,8 @@ public class SightingController {
 
      @Autowired
     private NotificationService nfs;
+    @Autowired
+    private SmsService smsService;
 
     @PostMapping("/alert")
     public String receiveAlert(
@@ -112,17 +121,18 @@ public class SightingController {
                     zoneRepo.save(breachedZone);
                 }
 
+                sendSmsToZoneResidents(breachedZone);
 
                 System.out.println("✅ Saved directly to Supabase!");
             }
 
             // 5. Print the terminal notification
             System.out.println("\n========================================");
-            System.out.println("🚨 ALERT RECEIVED!");
-            System.out.println("🐘 Count: " + count);
-            System.out.println("📍 GPS:   " + lat + ", " + lon);
-            System.out.println("⏰ Time:  " + time);
-            System.out.println("📁 Photo: " + filename);
+            System.out.println("ALERT RECEIVED!");
+            System.out.println("Count: " + count);
+            System.out.println("GPS:   " + lat + ", " + lon);
+            System.out.println("Time:  " + time);
+            System.out.println("Photo: " + filename);
             System.out.println("Drone ID: " + droneId);
             System.out.println("========================================");
 
@@ -149,5 +159,22 @@ public class SightingController {
 
         // Return a 404 if the drone hasn't sent anything yet
         return ResponseEntity.notFound().build();
+    }
+
+    public String sendSmsToZoneResidents(Zone breachedZone) {
+        try {
+
+            if (breachedZone != null) {
+                List<String> phoneNumbers = userRepo.findUsersByZoneId(breachedZone.getId()).stream()
+                    .map(user -> user.getPhoneNumber())
+                    .collect(Collectors.toList());
+                return smsService.sendSms(phoneNumbers, "Elephant Alert! A new sighting has been reported in your area. Stay safe and stay alert!"); 
+            }
+            return "No breached zone found.";
+        } catch (Exception e) {
+            e.printStackTrace();
+            return "Error occurred while sending SMS.";
+        }
+       
     }
 }

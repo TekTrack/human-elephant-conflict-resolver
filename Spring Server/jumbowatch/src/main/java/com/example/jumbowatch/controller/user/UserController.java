@@ -43,7 +43,8 @@ public class UserController {
                 payload.get("phoneNumber"), 
                 payload.get("NIC"), 
                 payload.get("adminID"), // Matches your JSON exactly
-                payload.get("userCategory")
+                payload.get("userCategory"),
+                payload.get("zoneId") != null ? Long.valueOf(payload.get("zoneId").toString()) : null
             );
             
             System.out.println("Received user registration request: " + user.toString()); 
