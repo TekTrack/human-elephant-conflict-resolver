@@ -11,29 +11,28 @@ import {
   MapPin,
   ScanEye,
   CheckLine,
-  ClockPlus, Drone, DroneIcon, Radio, Plus
+  ClockPlus, Drone
 } from "lucide-react";
 import { useMapTrigger } from "../context/MapTriggerContext.tsx";
 import { Card } from "../components/Card";
 import { Button } from "../components/Button";
-import { Navigate, useNavigate } from "react-router";
-import {StatCard} from "../components/StatCard.tsx";
-import {PageHeader} from "../components/PageHeader.tsx";
-import { useParams } from "react-router";
-
+import { useNavigate, useParams } from "react-router";
+import { StatCard } from "../components/StatCard.tsx";
+import { PageHeader } from "../components/PageHeader.tsx";
 
 type FilterValue = "all" | "hour" | "day" | "week";
 
 interface Sighting {
   id: number;
   photoFilename: string;
-  verified: boolean;
+  status: string;
   latitude: number;
   longitude: number;
   timestamp: string;
   source: "user" | "drone";
   droneId: number;
 }
+
 interface Alert {
   id: number;
   title: string;
@@ -50,17 +49,20 @@ export function SightingAlertsPage() {
   const isDark = theme === "dark";
   const [sightings, setSightings] = useState<Sighting[]>();
   const [filter, setFilter] = useState("all");
+  const [processingId, setProcessingId] = useState<number | null>(null);
+  
+  const [activeTab, setActiveTab] = useState<"user" | "drone">("user");
 
-  const { BASE_URL, mapTrigger, setMapTrigger } = useMapTrigger();
+  const { BASE_URL, mapTrigger } = useMapTrigger();
 
   const [selectedAlert, setSelectedAlert] = useState<Alert | null>(null);
   const [alerts, setAlerts] = useState<Alert[]>([]);
 
   const navigate = useNavigate();
-  const { sightingId } = useParams<{sightingId:string}>();
+  const { sightingId } = useParams<{ sightingId: string }>();
 
   const fetchSightings = async (filter: FilterValue) => {
-    const token = localStorage.getItem('authToken'); // Grab the saved token
+    const token = localStorage.getItem('authToken');
     const res = await fetch(`${BASE_URL}/sightings/filter?timeframe=${filter}`, {
       method: 'GET',
       headers: {
@@ -73,10 +75,10 @@ export function SightingAlertsPage() {
     showSightings(data);
   };
 
-  useEffect(()=>{
-    const currentSighting= alerts.find(s=>s.id===Number(sightingId));
-    setSelectedAlert(currentSighting||null);
-  },[sightingId,alerts])
+  useEffect(() => {
+    const currentSighting = alerts.find(s => s.id === Number(sightingId));
+    setSelectedAlert(currentSighting || null);
+  }, [sightingId, alerts]);
 
   useEffect(() => {
     fetchSightings(filter as FilterValue);
@@ -99,44 +101,109 @@ export function SightingAlertsPage() {
     const alertSet = sightings.map((sighting) => ({
       id: sighting.id,
       time: formatSmartTime(sighting.timestamp),
-      title: `ELEPHANT Sighting!`,
-      description: (() => { if (sighting.source === "drone") { return "Critical: Drone No: " + sighting.droneId + " has idenfied an elephant!"; } else { return "Warning: There is a elephant sighting by an app user. Check Details!" } })(),
-      status: (() => { if (sighting.source === "drone" || sighting.verified) { return "critical"; } else { return "warning"; } })(),
+      title: sighting.source === "drone" ? `DRONE Sighting!` : `USER Sighting!`,
+      description: sighting.source === "drone" 
+        ? `Critical: Drone No: ${sighting.droneId} has identified an elephant!` 
+        : `Warning: Elephant sighting by an app user. Check Details!`,
+      status: sighting.status || "new",
       location: `Latitude : ${sighting.latitude} , Longitude : ${sighting.longitude} `,
       rawTime: sighting.timestamp,
       sighting: sighting
-
     }));
     setAlerts(alertSet);
   };
 
   const getStatusIcon = (status: string) => {
-    switch (status) {
-      case "critical":
+    switch (status?.toLowerCase()) {
+      case "verified":
         return <XCircle className="w-5 h-5 text-red-500" />;
-      case "warning":
-        return <AlertTriangle className="w-5 h-5 text-yellow-500" />;
+      case "new":
+        return <ClockPlus className="w-5 h-5 text-orange-500" />;
       case "info":
         return <Clock className="w-5 h-5 text-blue-500" />;
-      case "resolved":
-        return <CheckCircle className="w-5 h-5 text-green-500" />;
+      case "neglected":
+        return <CheckLine className="w-5 h-5 text-green-500" />;
       default:
-        return null;
+        return <ClockPlus className="w-5 h-5 text-orange-500" />;
     }
   };
 
   const getStatusBadge = (status: string) => {
-    const styles = {
+    const normalizedStatus = status?.toLowerCase() || "new";
+    const styles: Record<string, string> = {
       critical: "bg-red-100 text-red-700",
       warning: "bg-yellow-100 text-yellow-700",
+      new: "bg-orange-100 text-orange-700",
       info: "bg-blue-100 text-blue-700",
-      resolved: "bg-green-100 text-green-700",
+      neglected: "bg-green-100 text-green-700",
+      verified: "bg-red-100 text-red-700",
     };
-    return styles[status as keyof typeof styles] || "";
+    return styles[normalizedStatus] || "bg-gray-100 text-gray-700";
   };
 
-  const getAlertCount = (stausType: string) => {
-    return alerts.filter(a => a.status === stausType).length;
+  const getAlertCount = (type: string, source: "user" | "drone") => {
+    const sourceAlerts = alerts.filter(a => a.sighting.source === source);
+    if (type === "total") return sourceAlerts.length;
+    if (type === "new") return sourceAlerts.filter(a => a.status === "new").length;
+    if (type === "verified") return sourceAlerts.filter(a => a.status === "verified").length;
+    if (type === "neglected") return sourceAlerts.filter(a => a.status === "neglected").length;
+    return 0;
+  };
+
+  const verifySighting = async (id: number) => {
+    if (!window.confirm("Are you sure you want to VERIFY this sighting?")) return;
+    
+    setProcessingId(id);
+    try {
+      const token = localStorage.getItem('authToken');
+      const response = await fetch(`${BASE_URL}/sightings/verify/${id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      if (response.ok) {
+        alert("Sighting verified successfully!");
+        setSelectedAlert(null);
+        fetchSightings(filter as FilterValue); 
+      } else {
+        console.error("Failed to verify sighting. Status:", response.status);
+      }
+    } catch (error) {
+      console.error("Error verifying sighting:", error);
+    } finally {
+      setProcessingId(null);
+    }
+  };
+
+  const neglectSighting = async (id: number) => {
+    if (!window.confirm("Are you sure you want to NEGLECT and resolve this sighting?")) return;
+    
+    setProcessingId(id);
+    try {
+      const token = localStorage.getItem('authToken');
+      const response = await fetch(`${BASE_URL}/sightings/neglect/${id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      if (response.ok) {
+        alert("Sighting neglected and resolved!");
+        setSelectedAlert(null);
+        fetchSightings(filter as FilterValue); 
+      } else {
+        console.error("Failed to neglect sighting. Status:", response.status);
+      }
+    } catch (error) {
+      console.error("Error neglecting sighting:", error);
+    } finally {
+      setProcessingId(null);
+    }
   };
 
   const InfoItem = ({ label, value, isDark, action }: { label: string; value: React.ReactNode; isDark: boolean; action?: React.ReactNode }) => (
@@ -153,142 +220,151 @@ export function SightingAlertsPage() {
     </div>
   );
 
+  const userAlerts = alerts.filter(a => a.sighting.source === "user");
+  const droneAlerts = alerts.filter(a => a.sighting.source === "drone");
+
   return (
     <div className="p-8 space-y-6">
 
       <PageHeader
-          title="User Sighting Alerts"
-          description="Elephants sightings captured by users"
+        title="Sighting Alerts"
+        description="Monitor real-time elephant sightings from all sources"
       />
 
-      {/* Stats Summary */}
-
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-
-        <StatCard
-            label={"Total User Sightings"}
-            value={getAlertCount("critical")}
-            icon={<ScanEye/>}
-            iconBgClass=" bg-blue-500 text-white "
+      {/* HIGHLIGHTED TABS SWITCHER */}
+      <div className={`flex p-1.5 space-x-2 rounded-xl w-fit ${isDark ? "bg-white/5" : "bg-gray-100"}`}>
+        <button
+          onClick={() => setActiveTab("user")}
+          className={`px-6 py-2.5 rounded-lg text-sm font-semibold transition-all duration-300 flex items-center gap-2 ${activeTab === "user"
+              ? "bg-blue-500 text-white shadow-md transform scale-[1.02]"
+              : isDark ? "text-white/50 hover:text-white hover:bg-white/10" : "text-gray-500 hover:text-gray-900 hover:bg-gray-200/80"
+            }`}
         >
-        </StatCard>
-
-        <StatCard
-            label={"Resolved User Sightings"}
-            value={getAlertCount("resolved")}
-            icon={<CheckLine/>}
-            iconBgClass="pr bg-green-500 text-white  "
+          <ScanEye className="w-4 h-4" />
+          User Sightings
+        </button>
+        <button
+          onClick={() => setActiveTab("drone")}
+          className={`px-6 py-2.5 rounded-lg text-sm font-semibold transition-all duration-300 flex items-center gap-2 ${activeTab === "drone"
+              ? "bg-blue-500 text-white shadow-md transform scale-[1.02]"
+              : isDark ? "text-white/50 hover:text-white hover:bg-white/10" : "text-gray-500 hover:text-gray-900 hover:bg-gray-200/80"
+            }`}
         >
-        </StatCard>
-
-        <StatCard
-            label={"Unresolved User Sightings"}
-            value={getAlertCount("unresolved")}
-            icon={<X/>}
-            iconBgClass="pr bg-red-500 text-white  "
-        >
-        </StatCard>
-
-        <StatCard
-            label={"New User Sightings"}
-            value={getAlertCount("new")}
-            icon={<ClockPlus />}
-            iconBgClass="pr bg-orange-500 text-white  "
-        >
-        </StatCard>
-
-
-
-
-
-
-        {/*<div className={`p-4 rounded-xl ${isDark ? "bg-[rgba(255,255,255,0.05)]" : "bg-gray-100"}`}>*/}
-        {/*  <div className="flex items-center gap-3">*/}
-        {/*    <div className="p-2 rounded-lg bg-red-100">*/}
-        {/*      <XCircle className="w-5 h-5 text-red-600" />*/}
-        {/*    </div>*/}
-        {/*    <div>*/}
-        {/*      <p className={`text-sm ${isDark ? "text-[rgba(255,255,255,0.6)]" : "text-gray-600"}`}>Critical</p>*/}
-        {/*      <p className="text-xl font-semibold">{getAlertCount("critical")}</p>*/}
-        {/*    </div>*/}
-        {/*  </div>*/}
-        {/*</div>*/}
-
-        {/*<div className={`p-4 rounded-xl ${isDark ? "bg-[rgba(255,255,255,0.05)]" : "bg-gray-100"}`}>*/}
-        {/*  <div className="flex items-center gap-3">*/}
-        {/*    <div className="p-2 rounded-lg bg-yellow-100">*/}
-        {/*      <AlertTriangle className="w-5 h-5 text-yellow-600" />*/}
-        {/*    </div>*/}
-        {/*    <div>*/}
-        {/*      <p className={`text-sm ${isDark ? "text-[rgba(255,255,255,0.6)]" : "text-gray-600"}`}>Warning</p>*/}
-        {/*      <p className="text-xl font-semibold">{getAlertCount("warning")}</p>*/}
-        {/*    </div>*/}
-        {/*  </div>*/}
-        {/*</div>*/}
-
-        {/*<div className={`p-4 rounded-xl ${isDark ? "bg-[rgba(255,255,255,0.05)]" : "bg-gray-100"}`}>*/}
-        {/*  <div className="flex items-center gap-3">*/}
-        {/*    <div className="p-2 rounded-lg bg-blue-100">*/}
-        {/*      <Clock className="w-5 h-5 text-blue-600" />*/}
-        {/*    </div>*/}
-        {/*    <div>*/}
-        {/*      <p className={`text-sm ${isDark ? "text-[rgba(255,255,255,0.6)]" : "text-gray-600"}`}>Info</p>*/}
-        {/*      <p className="text-xl font-semibold">{getAlertCount("info")}</p>*/}
-        {/*    </div>*/}
-        {/*  </div>*/}
-        {/*</div>*/}
-
-        {/*<div className={`p-4 rounded-xl ${isDark ? "bg-[rgba(255,255,255,0.05)]" : "bg-gray-100"}`}>*/}
-        {/*  <div className="flex items-center gap-3">*/}
-        {/*    <div className="p-2 rounded-lg bg-green-100">*/}
-        {/*      <CheckCircle className="w-5 h-5 text-green-600" />*/}
-        {/*    </div>*/}
-        {/*    <div>*/}
-        {/*      <p className={`text-sm ${isDark ? "text-[rgba(255,255,255,0.6)]" : "text-gray-600"}`}>Resolved</p>*/}
-        {/*      <p className="text-xl font-semibold">{getAlertCount("resolved")}</p>*/}
-        {/*    </div>*/}
-        {/*  </div>*/}
-        {/*</div>*/}
+          <Drone className="w-4 h-4" />
+          Drone Alerts
+        </button>
       </div>
 
-      {/* Alerts List */}
-      <div className="space-y-3">
-        {alerts
-          .sort((a, b) => new Date(b.rawTime).getTime() - new Date(a.rawTime).getTime())
-          .map((alert) => (
-            <div
-              key={alert.id}
-              onClick={() => setSelectedAlert(alert)}
-              className={`p-5 rounded-xl border ${isDark
-                ? "bg-[rgba(255,255,255,0.03)] border-[rgba(255,255,255,0.1)] hover:bg-[rgba(255,255,255,0.05)]"
-                : "bg-white border-gray-200 hover:bg-gray-50"
-                } transition-colors cursor-pointer`}
-            >
-              <div className="flex items-start gap-4">
-                {getStatusIcon(alert.status)}
-                <div className="flex-1">
-                  <div className="flex items-start justify-between mb-2">
-                    <h3 className="font-semibold">{alert.title}</h3>
-                    <span className={`text-xs px-2 py-1 rounded ${getStatusBadge(alert.status)}`}>
-                      {alert.status.toUpperCase()}
-                    </span>
+      {/* ================= USER TAB CONTENT ================= */}
+      {activeTab === "user" && (
+        <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <StatCard label={"Total User Sightings"} value={getAlertCount("total", "user")} icon={<ScanEye />} iconBgClass="bg-blue-500 text-white" />
+            <StatCard label={"Resolved User Sightings"} value={getAlertCount("neglected", "user")} icon={<CheckLine />} iconBgClass="bg-green-500 text-white" />
+            <StatCard label={"Verified User Sightings"} value={getAlertCount("verified", "user")} icon={<X />} iconBgClass="bg-red-500 text-white" />
+            <StatCard label={"New User Sightings"} value={getAlertCount("new", "user")} icon={<ClockPlus />} iconBgClass="bg-orange-500 text-white" />
+          </div>
+
+          <div className="space-y-3">
+            {userAlerts.length > 0 ? (
+              userAlerts
+                .sort((a, b) => new Date(b.rawTime).getTime() - new Date(a.rawTime).getTime())
+                .map((alert) => (
+                  <div
+                    key={alert.id}
+                    onClick={() => setSelectedAlert(alert)}
+                    className={`p-5 rounded-xl border ${isDark
+                        ? "bg-[rgba(255,255,255,0.03)] border-[rgba(255,255,255,0.1)] hover:bg-[rgba(255,255,255,0.05)]"
+                        : "bg-white border-gray-200 hover:bg-gray-50"
+                      } transition-colors cursor-pointer`}
+                  >
+                    <div className="flex items-start gap-4">
+                      {getStatusIcon(alert.status)}
+                      <div className="flex-1">
+                        <div className="flex items-start justify-between mb-2">
+                          <h3 className="font-semibold">{alert.title}</h3>
+                          <span className={`text-xs px-2 py-1 rounded ${getStatusBadge(alert.status)}`}>
+                            {alert.status.toUpperCase()}
+                          </span>
+                        </div>
+                        <p className={`text-sm mb-2 ${isDark ? "text-[rgba(255,255,255,0.6)]" : "text-gray-600"}`}>
+                          {alert.description}
+                        </p>
+                        <div className="flex items-center gap-4 text-xs">
+                          <span className={isDark ? "text-[rgba(255,255,255,0.4)]" : "text-gray-500"}>
+                            {alert.time}
+                          </span>
+                          <span className={isDark ? "text-[rgba(255,255,255,0.4)]" : "text-gray-500"}>
+                            📍 {alert.location}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
                   </div>
-                  <p className={`text-sm mb-2 ${isDark ? "text-[rgba(255,255,255,0.6)]" : "text-gray-600"}`}>
-                    {alert.description}
-                  </p>
-                  <div className="flex items-center gap-4 text-xs">
-                    <span className={isDark ? "text-[rgba(255,255,255,0.4)]" : "text-gray-500"}>
-                      {alert.time}
-                    </span>
-                    <span className={isDark ? "text-[rgba(255,255,255,0.4)]" : "text-gray-500"}>
-                      📍 {alert.location}
-                    </span>
-                  </div>
-                </div>
+                ))
+            ) : (
+              <div className={`p-8 text-center rounded-xl border border-dashed ${isDark ? "border-white/10 text-white/40" : "border-gray-200 text-gray-500"}`}>
+                No user sightings found.
               </div>
-            </div>
-          ))}
-      </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* ================= DRONE TAB CONTENT ================= */}
+      {activeTab === "drone" && (
+        <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <StatCard label={"Total Drone Sightings"} value={getAlertCount("total", "drone")} icon={<Drone />} iconBgClass="bg-blue-500 text-white" />
+            <StatCard label={"Checked Drone Sightings"} value={getAlertCount("neglected", "drone")} icon={<CheckLine />} iconBgClass="bg-green-500 text-white" />
+            <StatCard label={"New Drone Sightings"} value={getAlertCount("new", "drone")} icon={<ClockPlus />} iconBgClass="bg-orange-500 text-white" />
+          </div>
+
+          <div className="space-y-3">
+            {droneAlerts.length > 0 ? (
+              droneAlerts
+                .sort((a, b) => new Date(b.rawTime).getTime() - new Date(a.rawTime).getTime())
+                .map((alert) => (
+                  <div
+                    key={alert.id}
+                    onClick={() => setSelectedAlert(alert)}
+                    className={`p-5 rounded-xl border ${isDark
+                        ? "bg-[rgba(255,255,255,0.03)] border-[rgba(255,255,255,0.1)] hover:bg-[rgba(255,255,255,0.05)]"
+                        : "bg-white border-gray-200 hover:bg-gray-50"
+                      } transition-colors cursor-pointer`}
+                  >
+                    <div className="flex items-start gap-4">
+                      {getStatusIcon(alert.status)}
+                      <div className="flex-1">
+                        <div className="flex items-start justify-between mb-2">
+                          <h3 className="font-semibold">{alert.title}</h3>
+                          <span className={`text-xs px-2 py-1 rounded ${getStatusBadge(alert.status)}`}>
+                            {alert.status.toUpperCase()}
+                          </span>
+                        </div>
+                        <p className={`text-sm mb-2 ${isDark ? "text-[rgba(255,255,255,0.6)]" : "text-gray-600"}`}>
+                          {alert.description}
+                        </p>
+                        <div className="flex items-center gap-4 text-xs">
+                          <span className={isDark ? "text-[rgba(255,255,255,0.4)]" : "text-gray-500"}>
+                            {alert.time}
+                          </span>
+                          <span className={isDark ? "text-[rgba(255,255,255,0.4)]" : "text-gray-500"}>
+                            📍 {alert.location}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))
+            ) : (
+              <div className={`p-8 text-center rounded-xl border border-dashed ${isDark ? "border-white/10 text-white/40" : "border-gray-200 text-gray-500"}`}>
+                No drone sightings found.
+              </div>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* Sighting Details Modal */}
       {selectedAlert && (
@@ -352,7 +428,7 @@ export function SightingAlertsPage() {
                     action={
                       selectedAlert.sighting.source === "drone" && (
                         <button
-                          onClick={() =>navigate(`/live-monitor/${selectedAlert.sighting.droneId}`)}
+                          onClick={() => navigate(`/live-monitor/${selectedAlert.sighting.droneId}`)}
                           className={`p-1.5 rounded-lg transition-colors border ${isDark ? "bg-red-500/10 border-red-500/20 hover:bg-red-500/20 text-red-400 hover:text-red-300" : "bg-red-50 border-red-200 hover:bg-red-100 text-red-600 hover:text-red-700"}`}
                           title="View Live Feed"
                         >
@@ -361,12 +437,11 @@ export function SightingAlertsPage() {
                       )
                     }
                   />
-                  <InfoItem label="Verified" value={selectedAlert.sighting.verified ? "Yes" : "Pending or No"} isDark={isDark} />
+                  <InfoItem label="Status" value={selectedAlert.sighting.status ? selectedAlert.sighting.status.toUpperCase() : "NEW"} isDark={isDark} />
                 </div>
               </div>
 
               <div className={`w-full rounded-xl flex items-center justify-center overflow-hidden min-h-[300px] border ${isDark ? "bg-black/20 border-white/5" : "bg-gray-50 border-gray-200"}`}>
-                {/* Image Placeholder pending API */}
                 <img
                   src={`${BASE_URL}/sightings/images/${selectedAlert.sighting.photoFilename}`}
                   alt="Sighting Image"
@@ -386,57 +461,78 @@ export function SightingAlertsPage() {
 
               <div className={`flex items-center gap-3 pt-4 border-t ${isDark ? "border-white/10" : "border-gray-200"}`}>
                 <Button variant="secondary" className="flex-1" onClick={() => setSelectedAlert(null)}>
-                  <X className="w-4 h-4 mr-2" /> Close
+                  <X className="w-4 h-4 mr-2 inline" /> Close
                 </Button>
 
                 {selectedAlert.sighting.source === "drone" ? (
-                  <Button variant="primary" className="flex-1 shadow-lg shadow-blue-500/20" onClick={() => navigate(`/live-monitor/${selectedAlert.sighting.droneId}`)}>
-                    <Video className="w-4 h-4 mr-2 inline" /> View Drone
-                  </Button>
+                  <>
+                    {/* DRONE TAB: NEGLECT BUTTON (Green) */}
+                    <Button 
+                      variant="secondary" 
+                      className={`flex-1 transition-all disabled:cursor-not-allowed disabled:shadow-none disabled:!border-transparent ${
+                        isDark 
+                          ? "enabled:bg-green-500/10 enabled:text-green-400 enabled:hover:bg-green-500/20 disabled:!bg-white/5 disabled:!text-white/30" 
+                          : "enabled:bg-green-50 enabled:text-green-600 enabled:hover:bg-green-100 disabled:!bg-gray-100 disabled:!text-gray-400"
+                      }`}
+                      onClick={() => neglectSighting(selectedAlert.sighting.id)}
+                      disabled={processingId === selectedAlert.sighting.id || selectedAlert.status === "neglected" || selectedAlert.status === "verified"}
+                    >
+                      <XCircle className="w-4 h-4 mr-2 inline" /> 
+                      {processingId === selectedAlert.sighting.id ? "Processing..." : "Neglect"}
+                    </Button>
+
+                    {/* DRONE TAB: VIEW DRONE BUTTON (Red style) */}
+                    <Button 
+                      variant="secondary" 
+                      className={`flex-1 transition-all disabled:cursor-not-allowed disabled:shadow-none disabled:!border-transparent ${
+                        isDark 
+                          ? "enabled:bg-red-500/10 enabled:text-red-400 enabled:hover:bg-red-500/20 disabled:!bg-white/5 disabled:!text-white/30" 
+                          : "enabled:bg-red-50 enabled:text-red-600 enabled:hover:bg-red-100 disabled:!bg-gray-100 disabled:!text-gray-400"
+                      }`}
+                      onClick={() => navigate(`/live-monitor/${selectedAlert.sighting.droneId}`)}
+                    >
+                      <Video className="w-4 h-4 mr-2 inline" /> 
+                      View Drone
+                    </Button>
+                  </>
                 ) : (
-                  <Button variant="primary" className="flex-1 shadow-lg shadow-blue-500/20" onClick={() => alert("Verification API logic here to verify sighting ID: " + selectedAlert.sighting.id)}>
-                    <Check className="w-4 h-4 mr-2 inline" /> Verify Sighting
-                  </Button>
+                  <>
+                    {/* USER TAB: NEGLECT BUTTON (Green) */}
+                    <Button 
+                      variant="secondary" 
+                      className={`flex-1 transition-all disabled:cursor-not-allowed disabled:shadow-none disabled:!border-transparent ${
+                        isDark 
+                          ? "enabled:bg-green-500/10 enabled:text-green-400 enabled:hover:bg-green-500/20 disabled:!bg-white/5 disabled:!text-white/30" 
+                          : "enabled:bg-green-50 enabled:text-green-600 enabled:hover:bg-green-100 disabled:!bg-gray-100 disabled:!text-gray-400"
+                      }`}
+                      onClick={() => neglectSighting(selectedAlert.sighting.id)}
+                      disabled={processingId === selectedAlert.sighting.id || selectedAlert.status === "neglected" || selectedAlert.status === "verified"}
+                    >
+                      <XCircle className="w-4 h-4 mr-2 inline" /> 
+                      {processingId === selectedAlert.sighting.id ? "Processing..." : "Neglect"}
+                    </Button>
+                    
+                    {/* USER TAB: VERIFY BUTTON (Red) */}
+                    <Button 
+                      variant="secondary" 
+                      className={`flex-1 transition-all disabled:cursor-not-allowed disabled:shadow-none disabled:!border-transparent ${
+                        isDark 
+                          ? "enabled:bg-red-500/10 enabled:text-red-400 enabled:hover:bg-red-500/20 disabled:!bg-white/5 disabled:!text-white/30" 
+                          : "enabled:bg-red-50 enabled:text-red-600 enabled:hover:bg-red-100 disabled:!bg-gray-100 disabled:!text-gray-400"
+                      }`}
+                      onClick={() => verifySighting(selectedAlert.sighting.id)}
+                      disabled={processingId === selectedAlert.sighting.id || selectedAlert.status === "neglected" || selectedAlert.status === "verified"}
+                    >
+                      <Check className="w-4 h-4 mr-2 inline" /> 
+                      {processingId === selectedAlert.sighting.id ? "Processing..." : "Verify"}
+                    </Button>
+                  </>
                 )}
               </div>
             </div>
           </Card>
         </div>
       )}
-      <PageHeader
-          title="Drone Sighting Alerts"
-          description="Real-time Drone Sightings"
-      />
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <StatCard
-            label={"Total Drone Sightings"}
-            value={getAlertCount("Drones")}
-            icon={<Drone />}
-            iconBgClass="pr bg-yellow-500 text-white  "
-        >
-        </StatCard>
-        <StatCard
-            label={"Checked Drone Sightings"}
-            value={getAlertCount("checked-drones")}
-            icon={<CheckLine />}
-            iconBgClass="pr bg-green-500 text-white  "
-        >
-        </StatCard>
-        <StatCard
-            label={"New Drone Sightings"}
-            value={getAlertCount("unchecked-drones")}
-            icon={<ClockPlus/>}
-            iconBgClass="pr bg-orange-500 text-white  "
-        >
-        </StatCard>
-
-      </div>
-
-
-
-
     </div>
-
-
   );
 }

@@ -19,15 +19,28 @@ public class ConfirmationController {
         this.sightingRepo = sightingRepo;
     }
 
-    @PutMapping("/{id}/verify")
+    @PutMapping("/verify/{id}")
     public String verifySighting(@PathVariable Long id) {
         Optional<Sighting> sightingBox = sightingRepo.findById(id);
 
         if (sightingBox.isPresent()) {
             Sighting sighting = sightingBox.get();
-            sighting.setVerified(true);
+            sighting.setStatus("verified");
             sightingRepo.save(sighting);
             return "Sighting " + id + " verified by admin!";
+        }
+        return "Sighting not found!";
+    }
+
+    @PutMapping("/neglect/{id}")
+    public String neglectSighting(@PathVariable Long id) {
+        Optional<Sighting> sightingBox = sightingRepo.findById(id);
+
+        if (sightingBox.isPresent()) {
+            Sighting sighting = sightingBox.get();
+            sighting.setStatus("neglected");
+            sightingRepo.save(sighting);
+            return "Sighting " + id + " neglected by admin!";
         }
         return "Sighting not found!";
     }
