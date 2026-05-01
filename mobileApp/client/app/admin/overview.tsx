@@ -1,89 +1,152 @@
-import { View, Text, TouchableOpacity, ScrollView } from "react-native";
+import { View, Text, ScrollView, TouchableOpacity, Image } from "react-native";
 import { router } from "expo-router";
 
-export default function Home() {
+export default function Overview() {
   return (
     <ScrollView className="flex-1 bg-[#FFF8E7]">
 
-      {/* Header */}
-      <View className="px-5 pt-16 pb-6">
-        <Text className="text-3xl font-bold">
-          Home Page for User 👋
-        </Text>
+      <View className="px-6 pt-16 pb-6 bg-[#FFF8E7]">
 
-        <Text className="text-gray-500 mt-1">
-          Welcome back, user
+  {/* Top Row */}
+  <View className="flex-row items-center justify-between">
+
+    {/* App Identity */}
+    <View>
+      <Text className="text-2xl font-extrabold text-black tracking-wide">
+        Jumbo Watch
+      </Text>
+
+      <View className="flex-row items-center mt-1">
+        <View className="w-2 h-2 bg-green-500 rounded-full mr-2" />
+        <Text className="text-gray-600 text-sm">
+          System Active
         </Text>
       </View>
+    </View>
 
-      {/* Quick Info Card */}
-      <View className="px-5">
-        <View className="bg-white p-5 rounded-xl shadow mb-5">
-          <Text className="text-lg font-bold mb-2">
-            🌿 Safety Status
-          </Text>
-          <Text className="text-gray-600">
-            All systems are normal. No alerts detected in your area.
-          </Text>
+    {/* Icon Badge */}
+    <View className="w-11 h-11 rounded-full bg-black/10 items-center justify-center">
+      <Text className="text-lg">🐘</Text>
+    </View>
+
+  </View>
+
+  {/* Subtitle Card Style */}
+  <View className="mt-5 bg-white/60 p-3 rounded-xl">
+    <Text className="text-gray-700 text-sm font-medium">
+      Real-time elephant monitoring & safety intelligence
+    </Text>
+  </View>
+
+</View>
+
+      {/* HERO IMAGE */}
+      <View className="px-6 mb-6">
+        <View className="rounded-2xl overflow-hidden h-48">
+          <Image
+            source={{
+              uri: "https://images.unsplash.com/photo-1557050543-4d5f4e07ef46"
+            }}
+            className="w-full h-full"
+            resizeMode="cover"
+          />
         </View>
       </View>
 
-      {/* Actions */}
-      <View className="px-5 space-y-4">
+      {/* LARGE NAV CARDS */}
 
-        {/* View Alerts */}
+      {/* Sightings */}
+      <View className="px-6 mb-5">
         <TouchableOpacity
           onPress={() => router.push("/admin/sighting-alerts")}
-          className="bg-white p-4 rounded-xl shadow"
+          className="rounded-2xl overflow-hidden"
         >
-          <Text className="text-lg font-bold mb-1">
-            🐘 View Alerts
-          </Text>
-          <Text className="text-gray-600">
-            Check nearby elephant sightings
-          </Text>
+          <Image
+            source={{
+              uri: "https://images.unsplash.com/photo-1500534314209-a25ddb2bd429"
+            }}
+            className="w-full h-40"
+          />
+          <View className="absolute bottom-0 bg-black/50 w-full p-4">
+            <Text className="text-white text-xl font-bold">
+              Sightings
+            </Text>
+            <Text className="text-gray-200 text-sm">
+              View latest elephant alerts
+            </Text>
+          </View>
         </TouchableOpacity>
+      </View>
 
-        {/* Map */}
+      {/* Map */}
+      <View className="px-6 mb-5">
         <TouchableOpacity
           onPress={() => router.push("/admin/geofencing")}
-          className="bg-white p-4 rounded-xl shadow"
+          className="rounded-2xl overflow-hidden"
         >
-          <Text className="text-lg font-bold mb-1">
-            🗺 View Map
-          </Text>
-          <Text className="text-gray-600">
-            See monitored areas near you
-          </Text>
+          <Image
+            source={{
+              uri: "https://images.unsplash.com/photo-1526779259212-939e64788e3c"
+            }}
+            className="w-full h-40"
+          />
+          <View className="absolute bottom-0 bg-black/50 w-full p-4">
+            <Text className="text-white text-xl font-bold">
+              Map
+            </Text>
+            <Text className="text-gray-200 text-sm">
+              View safe zones & tracking
+            </Text>
+          </View>
         </TouchableOpacity>
+      </View>
 
-        {/* Geofencing Info */}
+      {/* Upload */}
+      <View className="px-6 mb-5">
         <TouchableOpacity
           onPress={() => router.push("/admin/upload-image")}
-          className="bg-white p-4 rounded-xl shadow"
+          className="rounded-2xl overflow-hidden"
         >
-          <Text className="text-lg font-bold mb-1">
-            Upload Sighting
-          </Text>
-          <Text className="text-gray-600">
-            Upload Image of Elephant Sighting
-          </Text>
+          <Image
+            source={{
+              uri: "https://images.unsplash.com/photo-1520975922284-9c9a7b8e0a45"
+            }}
+            className="w-full h-40"
+          />
+          <View className="absolute bottom-0 bg-black/50 w-full p-4">
+            <Text className="text-white text-xl font-bold">
+              Report
+            </Text>
+            <Text className="text-gray-200 text-sm">
+              Upload sighting images
+            </Text>
+          </View>
         </TouchableOpacity>
-
-        {/* Profile */}
-        <TouchableOpacity
-          onPress={() => router.push("/admin/users-list")}
-          className="bg-white p-4 rounded-xl shadow mb-10"
-        >
-          <Text className="text-lg font-bold mb-1">
-            👤 Profile
-          </Text>
-          <Text className="text-gray-600">
-            Manage your accoun
-          </Text>
-        </TouchableOpacity>
-
       </View>
+
+      {/* Profile */}
+      <View className="px-6 mb-10">
+        <TouchableOpacity
+          onPress={() => router.push("/admin/my-profile")}
+          className="rounded-2xl overflow-hidden"
+        >
+          <Image
+            source={{
+              uri: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e"
+            }}
+            className="w-full h-40"
+          />
+          <View className="absolute bottom-0 bg-black/50 w-full p-4">
+            <Text className="text-white text-xl font-bold">
+              My Profile
+            </Text>
+            <Text className="text-gray-200 text-sm">
+              Manage your account
+            </Text>
+          </View>
+        </TouchableOpacity>
+      </View>
+
     </ScrollView>
   );
 }
