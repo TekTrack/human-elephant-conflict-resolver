@@ -135,7 +135,7 @@ export default function UserReportPage() {
           </View>
         )}
         <TouchableOpacity onPress={handleImagePick} className="bg-[#FF9F1C] py-3 px-6 rounded-xl shadow w-full items-center">
-          <Text className="text-black font-bold text-lg">📷 Select Photo</Text>
+          <Text className="text-black font-bold text-lg">Select Photo</Text>
         </TouchableOpacity>
       </View>
 
@@ -159,13 +159,13 @@ export default function UserReportPage() {
           onPress={() => setLocationMode("current")} 
           className={`flex-1 p-4 rounded-xl mr-2 items-center shadow-sm ${locationMode === "current" ? "bg-black" : "bg-white"}`}
         >
-          <Text className={`font-bold ${locationMode === "current" ? "text-white" : "text-black"}`}>📍 My Location</Text>
+          <Text className={`font-bold ${locationMode === "current" ? "text-white" : "text-black"}`}>My Location</Text>
         </TouchableOpacity>
         <TouchableOpacity 
           onPress={() => { setLocationMode("map"); setShowMapModal(true); }} 
           className={`flex-1 p-4 rounded-xl ml-2 items-center shadow-sm ${locationMode === "map" ? "bg-black" : "bg-white"}`}
         >
-          <Text className={`font-bold ${locationMode === "map" ? "text-white" : "text-black"}`}>🗺️ Pick on Map</Text>
+          <Text className={`font-bold ${locationMode === "map" ? "text-white" : "text-black"}`}>Pick on Map</Text>
         </TouchableOpacity>
       </View>
 
