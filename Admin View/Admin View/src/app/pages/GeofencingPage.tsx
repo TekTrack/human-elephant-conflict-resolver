@@ -38,7 +38,7 @@ interface Geofence {
 interface Sighting {
     id: number;
     photoFilename: string;
-    verified: boolean;
+    status: string;
     latitude: number;
     longitude: number;
     timestamp: string;
@@ -120,7 +120,7 @@ export function GeofencingPage() {
     const [errors, setErrors] = useState<Partial<Record<keyof NewZoneForm, string>>>({});
 
     const [filter, setFilter] = useState<FilterValue>("all");
-    const [sightings, setSightings] = useState<Sighting[]>();
+    const [sightings, setSightings] = useState<Sighting[]>([]);
     const [popupInfo, setPopupInfo] = useState<PopupInfo | null>(null);
 
     const [isDrawing, setIsDrawing] = useState(false);
@@ -422,10 +422,10 @@ export function GeofencingPage() {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <StatCard label="Total Zones" value={geofences.length}
                     icon={<MapPin className="w-5 h-5 text-blue-600" />} iconBgClass="bg-blue-100" />
-                <StatCard label="New User Sightings" value={geofences.filter((g) => g.status === "Active").length}
+                <StatCard label="New User Sightings" value={sightings.filter((g) => g.source === "user").length}
                     icon={<MapPin className="w-5 h-5 text-green-600" />} iconBgClass="bg-green-100"
                     valueColorClass="text-green-500" />
-                <StatCard label="New Drone Sightings" value={geofences.filter((g) => g.type === "Danger").length}
+                <StatCard label="New Drone Sightings" value={sightings.filter((g) => g.source === "drone").length}
                     icon={<MapPin className="w-5 h-5 text-red-600" />} iconBgClass="bg-red-100" />
             </div>
 
