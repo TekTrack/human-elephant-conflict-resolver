@@ -26,7 +26,7 @@ export default function VerifyOTPScreen() {
 
     try {
       setLoading(true);
-      const res = await fetch(`${API_BASE_URL}/api/user/verify-otp`, {
+      const res = await fetch(`${API_BASE_URL}/api/sms/verify-otp`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ phone, otp }),
@@ -39,7 +39,7 @@ export default function VerifyOTPScreen() {
         return;
       }
 
-      
+      console.log("OTP verification successful:", data);
       await AsyncStorage.setItem("authToken", data.token);
       router.replace("/admin/overview");
 
@@ -95,7 +95,7 @@ export default function VerifyOTPScreen() {
 
         {/* Resend Option */}
         <View style={styles.resendContainer}>
-          <Text style={styles.resendText}>Didn't receive the code?</Text>
+          <Text style={styles.resendText}>Did not receive the code?</Text>
           <TouchableOpacity>
             <Text style={styles.resendLink}>Resend Code</Text>
           </TouchableOpacity>
