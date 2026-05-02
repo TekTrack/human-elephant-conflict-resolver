@@ -136,7 +136,7 @@ public ResponseEntity<?> verifyOTP(@RequestBody Map<String, String> request) {
                 .orElseThrow(() -> new RuntimeException("User not found for this phone number"));
 
         otpStorage.remove(phoneNumber);
-        String token = jwtUtil.generateToken(user.getPhoneNumber()); 
+        String token = jwtUtil.generateToken(user.getEmail()); 
 
          Map<String, Object> response = new HashMap<>();
                 response.put("message", "Login successful!");
@@ -155,6 +155,7 @@ public ResponseEntity<?> verifyOTP(@RequestBody Map<String, String> request) {
                              .body(Map.of("message", "An error occurred during verification"));
     }
 }
+
 }
     
 
