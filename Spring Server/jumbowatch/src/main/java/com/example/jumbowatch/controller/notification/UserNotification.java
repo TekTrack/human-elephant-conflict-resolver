@@ -6,33 +6,25 @@ import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-import com.example.jumbowatch.model.Notification;
 import com.example.jumbowatch.service.NotificationService;
 
 @RestController
 @CrossOrigin(origins = "*")
-public class UserNotification extends NotificationController {
+public class UserNotification {
 
     @Autowired
     private NotificationService nfs;
 
-    public UserNotification(String message, String type, Long sightingId) {
-        nfs.setNotification(message, type, sightingId);
-    }
-
     public UserNotification() {} 
 
-    @Override
     @GetMapping("/api/user/notifications")
-    public Map<String, String> sendNotification() {
+    public Map<String, String> sendNotification(String message, String type, Long sightingId) {
+        nfs.createAndSave(message, type, sightingId); // Save to DB and get the fresh object back
         Map<String, String> response = new HashMap<>();
-        Notification notification = nfs.getNotification();
-        nfs.saveNotification();
-        
-        response.put("message", notification.getMessage());
-        response.put("type", notification.getType());
-        response.put("sightingId", String.valueOf(notification.getSightingId()));
-        notification.clear(); // Clear after sending. (Making values null)
-        return response;
+        response.put("message", message);
+        response.put("type", type);
+        response.put("sightingId", sightingId.toString());
+        return response; // Return the data to be sent via SSE
     }
+
 }

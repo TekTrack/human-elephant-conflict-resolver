@@ -2,41 +2,27 @@ package com.example.jumbowatch.controller.sighting; // Keep your package name!
 
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import java.nio.file.*;
-import java.io.IOException;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.Collectors;
+
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.MediaType;
 
-import com.example.jumbowatch.controller.notification.AdminNotification;
 import com.example.jumbowatch.model.Sighting;
-import com.example.jumbowatch.model.Zone;
 import com.example.jumbowatch.repository.SightingRepository;
-import com.example.jumbowatch.repository.UserRepository;
-import com.example.jumbowatch.repository.ZoneRepository;
-import com.example.jumbowatch.service.NotificationService;
-import com.example.jumbowatch.service.SmsService;
+import com.example.jumbowatch.service.SightingService;
 
 import org.springframework.beans.factory.annotation.Autowired;
 
 @RestController
 @CrossOrigin(origins = "http://localhost:5173")// Allows the web app to connect to this controller
 public class SightingController {
-    private long lastSaveTime = 0;
-    private final long COOLDOWN_MS = 60000; // 60 seconds
-    private final ConcurrentHashMap<Long, byte[]> latestImages = new ConcurrentHashMap<>();
-
+    public ConcurrentHashMap<Long, byte[]> latestImages = new ConcurrentHashMap<>();
+    
     @Autowired
     private SightingRepository sightingRepo;
-    @Autowired
-    private ZoneRepository zoneRepo;
-    @Autowired
-    private UserRepository userRepo;
 
     @GetMapping("/api/admin/sightings/filter")
     public List<Sighting> getFilteredSightings(@RequestParam(defaultValue = "all") String timeframe) {
@@ -55,9 +41,7 @@ public class SightingController {
     }
 
     @Autowired
-    private AdminNotification adminNotification;
-    @Autowired
-    private SmsService smsService;
+    private SightingService sightingService;
 
     @PostMapping("/alert")
     public String receiveAlert(
@@ -70,79 +54,8 @@ public class SightingController {
             @RequestParam("droneId") Long droneId
         ) {
 
-        try {
-            // 1. Force absolute path for the folder
-            Path saveFolder = Paths.get("elephant_alerts/"+droneId.toString()).toAbsolutePath();
-            Files.createDirectories(saveFolder);
-
-            // 2. Format time for filename
-            LocalDateTime nowTime = LocalDateTime.now();
-            String timestamp = nowTime.format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss"));
-            String filename = "alert_" + timestamp + ".jpg";
-            //Path filePath = saveFolder.resolve(filename);
-
-            // 3. Save using Files.copy (Bulletproof method 🛡️)
-            //Files.copy(photo.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
-
-            latestImages.put(droneId, photo.getBytes());
-            
-            Sighting newSighting = new Sighting(Integer.parseInt(count), nowTime, Double.parseDouble(lat), Double.parseDouble(lon), filename, source,droneId);
-
-            // 4. Save data to supabase (with cooldown to prevent spamming). Also admin notifications are sent immediately, while user reports wait for verification.
-            long now = System.currentTimeMillis();
-            if (now - lastSaveTime > COOLDOWN_MS) {
-                sightingRepo.save(newSighting);
-
-                if ("drone".equals(newSighting.getSource())) {
-                    adminNotification.setNotification(
-                        "New drone alert! Count: " + newSighting.getElephantCount(),
-                        "DroneAlert",
-                        newSighting.getId()// sightingId is 0 for drone alerts
-                    );
-                    
-                } else {
-                    adminNotification.setNotification(
-                        "New user report! Count: " + newSighting.getElephantCount(),
-                        "UserReport",
-                        newSighting.getId() // sightingId is >0 for user reports
-                    );
-                }
-
-
-                lastSaveTime = now;
-                
-                // Inside your save sighting method:
-                Zone breachedZone = zoneRepo.findAll().stream()
-                    .filter(z -> z.containsSighting(newSighting))
-                    .findFirst().orElse(null);
-
-                if (breachedZone != null) {
-                    breachedZone.setLastSightingDate(LocalDateTime.now());
-                    zoneRepo.save(breachedZone);
-                }
-
-                sendSmsToZoneResidents(breachedZone);
-
-                System.out.println("✅ Saved directly to Supabase!");
-            }
-
-            // 5. Print the terminal notification
-            System.out.println("\n========================================");
-            System.out.println("ALERT RECEIVED!");
-            System.out.println("Count: " + count);
-            System.out.println("GPS:   " + lat + ", " + lon);
-            System.out.println("Time:  " + time);
-            System.out.println("Photo: " + filename);
-            System.out.println("Drone ID: " + droneId);
-            System.out.println("========================================");
-
-            return "Alert Received";
-
-        } catch (IOException e) {
-            System.out.println("❌ Error saving file: " + e.getMessage());
-            e.printStackTrace(); // This prints the exact error in the terminal if it fails again
-            return "Failed to process alert.";
-        }
+            sightingService.processSighting(count, time, lat, lon, photo, source, droneId, latestImages);
+        return "Alert received and processed!";
     }
 
     @GetMapping(value = "/api/admin/liveDroneFeed/{id}", produces = MediaType.IMAGE_JPEG_VALUE)
@@ -161,20 +74,4 @@ public class SightingController {
         return ResponseEntity.notFound().build();
     }
 
-    public String sendSmsToZoneResidents(Zone breachedZone) {
-        try {
-
-            if (breachedZone != null) {
-                List<String> phoneNumbers = userRepo.findUsersByZoneId(breachedZone.getId()).stream()
-                    .map(user -> user.getPhoneNumber())
-                    .collect(Collectors.toList());
-                return smsService.sendSms(phoneNumbers, "Elephant Alert! A new sighting has been reported in your area. Stay safe and stay alert!"); 
-            }
-            return "No breached zone found.";
-        } catch (Exception e) {
-            e.printStackTrace();
-            return "Error occurred while sending SMS.";
-        }
-       
-    }
 }
