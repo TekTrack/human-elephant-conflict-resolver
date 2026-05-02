@@ -34,18 +34,11 @@ export default function MyProfileScreen() {
 
   const loadProfile = async () => {
   try {
-    const email = await AsyncStorage.getItem("email");
+  
     const token = await AsyncStorage.getItem("authToken");
 
-    
-
-    if (!email) {
-      Alert.alert("Error", "No saved login found");
-      return;
-}
-
     const res = await axios.get(
-      `${API_BASE_URL}/api/user/getuser/${email}`,
+      `${API_BASE_URL}/api/user/getuser`,
       {
     headers: {
       Authorization: `Bearer ${token}`,
@@ -54,6 +47,7 @@ export default function MyProfileScreen() {
     );
 
     const user = res.data.data;
+    console.log("Fetched user profile:", user); // Debug log
 
     setName(user.name);
     setEmail(user.email);

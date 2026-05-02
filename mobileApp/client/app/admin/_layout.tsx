@@ -8,23 +8,49 @@ import {
   DrawerItemList,
 } from "@react-navigation/drawer";
 import { Ionicons } from "@expo/vector-icons";
+import API_BASE_URL from "@/config/app";
+import { useState } from "react";
+import axios from "axios";
 
 function CustomDrawerContent(props: any) {
 
-  const router = useRouter();
-  
-  const handleLogout = async () => {
-   try {
-     await AsyncStorage.removeItem("authToken");
-      router.replace("/auth/login");
-       
-      console.log("Logged out successfully");
+  const [loading, setLoading] = useState(false);
 
-   } catch (error) {
-    console.error("Logout Error:", error);
-     Alert.alert("Error", "Failed to logout. Please try again.");
-   }
-  };
+  const router = useRouter();
+const handleLogout = async () => {
+  
+  try{
+    setLoading(true);
+  const token = await AsyncStorage.getItem("authToken");
+
+    const res = await axios.post(
+      `${API_BASE_URL}/api/user/logout`,
+      {},
+      {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  }
+    );
+
+    if (res.status !== 200) {
+      setLoading(false);
+      Alert.alert("Logout Failed", res.data.message || "Failed to logout");
+      return;
+    }
+
+
+    await AsyncStorage.removeItem("authToken");
+    router.replace("/auth/login");
+    console.log("Logged out successfully");
+
+
+
+  } catch (error) {
+    setLoading(false);
+    Alert.alert("Error", "Failed to logout. Please try again.");
+  }
+};
 
   return (
     <View className="flex-1">
@@ -43,11 +69,10 @@ function CustomDrawerContent(props: any) {
         onPress={handleLogout}
         className="bg-red-100 py-3 rounded-xl items-center"
       >
-        <Text className="text-red-600 font-bold">
-          Logout
-        </Text>
+        <Text className="text-red-600 font-bold">{loading ? "Logging out..." : "Logout"}</Text>
       </TouchableOpacity>
     </View>
+         
 
   </View>
   );
