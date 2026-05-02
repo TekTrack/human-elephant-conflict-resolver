@@ -1,8 +1,15 @@
 package com.example.jumbowatch.controller.notification;
 
-import java.util.Map;
+import org.springframework.stereotype.Service;
 
+@Service
 public abstract class NotificationController {
-    // This method will be called to send a notification
-    public abstract Map<String, String> sendNotification();
+    public NotificationController() {}
+
+    public NotificationController(String message, String type,Long sightingId) {
+        // This constructor can be used by AdminNotification to set the notification details
+    }
+    
+
+    public abstract java.util.Map<String, String> sendNotification();
 }

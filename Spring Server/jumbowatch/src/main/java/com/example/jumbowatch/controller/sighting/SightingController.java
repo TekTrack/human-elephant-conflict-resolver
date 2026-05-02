@@ -1,4 +1,4 @@
-package com.example.jumbowatch.controller.notification; // Keep your package name!
+package com.example.jumbowatch.controller.sighting; // Keep your package name!
 
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -6,7 +6,6 @@ import java.nio.file.*;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
@@ -14,6 +13,7 @@ import java.util.stream.Collectors;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.MediaType;
 
+import com.example.jumbowatch.controller.notification.AdminNotification;
 import com.example.jumbowatch.model.Sighting;
 import com.example.jumbowatch.model.Zone;
 import com.example.jumbowatch.repository.SightingRepository;
@@ -54,8 +54,8 @@ public class SightingController {
         return sightingRepo.findByTimestampAfter(cutoff);
     }
 
-     @Autowired
-    private NotificationService nfs;
+    @Autowired
+    private AdminNotification adminNotification;
     @Autowired
     private SmsService smsService;
 
@@ -94,14 +94,14 @@ public class SightingController {
                 sightingRepo.save(newSighting);
 
                 if ("drone".equals(newSighting.getSource())) {
-                    nfs.setNotification(
+                    adminNotification.setNotification(
                         "New drone alert! Count: " + newSighting.getElephantCount(),
                         "DroneAlert",
                         newSighting.getId()// sightingId is 0 for drone alerts
                     );
                     
                 } else {
-                    nfs.setNotification(
+                    adminNotification.setNotification(
                         "New user report! Count: " + newSighting.getElephantCount(),
                         "UserReport",
                         newSighting.getId() // sightingId is >0 for user reports
