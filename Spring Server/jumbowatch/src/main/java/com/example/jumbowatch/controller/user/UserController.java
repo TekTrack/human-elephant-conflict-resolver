@@ -18,9 +18,6 @@ import com.example.jumbowatch.repository.UserRepository;
 
 import tools.jackson.databind.ObjectMapper;
 
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-
 @RestController
 @RequestMapping("/api/user")
 
@@ -134,7 +131,6 @@ public class UserController {
             return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
         }
     }
-
 
     //User Updates
     @PostMapping("/updateuser")
