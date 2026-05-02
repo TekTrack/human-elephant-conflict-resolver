@@ -5,6 +5,7 @@ import * as Location from "expo-location";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import API_BASE_URL from "@/config/app";
 import { Ionicons } from "@expo/vector-icons";
+import MapView, { Marker } from "react-native-maps";
 
 export default function UserReportPage() {
   const [image, setImage] = useState<any>(null);
@@ -188,7 +189,7 @@ export default function UserReportPage() {
         {loading ? (
           <ActivityIndicator color="#fff" />
         ) : (
-          <Text className="text-white font-bold text-lg">⬆ Upload Report</Text>
+          <Text className="text-white font-bold text-lg">Upload Report</Text>
         )}
       </TouchableOpacity>
 
@@ -198,20 +199,53 @@ export default function UserReportPage() {
           <View className="bg-white w-full p-5 rounded-2xl">
             <Text className="text-lg font-bold mb-4">Select Location</Text>
             
-            {/* TODO: Insert react-native-maps <MapView> here! */}
-            <View className="w-full h-64 bg-gray-200 items-center justify-center rounded-xl mb-4">
-               <Text className="text-gray-500 text-center">Map Component Goes Here 🗺️</Text>
-               <Text className="text-xs text-gray-400 mt-2">(Simulating selection for now)</Text>
+            {/* 🗺️ ACTUAL MAP COMPONENT */}
+            <View className="w-full h-80 rounded-xl overflow-hidden mb-2">
+              <MapView
+                style={{ flex: 1 }}
+                showsUserLocation={true}
+                initialRegion={{
+                  latitude: mapCoords?.latitude || 6.9271, // Defaults to Colombo if null
+                  longitude: mapCoords?.longitude || 79.8612,
+                  latitudeDelta: 0.05,
+                  longitudeDelta: 0.05,
+                }}
+                onPress={(e) => setMapCoords(e.nativeEvent.coordinate)}
+              >
+                {mapCoords && (
+                  <Marker
+                    coordinate={mapCoords}
+                    title="Sighting Location"
+                    description="Elephant spotted here"
+                  />
+                )}
+              </MapView>
             </View>
+            
+            <Text className="text-xs text-gray-500 text-center mb-4">
+              Tap anywhere on the map to drop a pin 📍
+            </Text>
 
+            {/* CONFIRM BUTTON */}
             <TouchableOpacity 
               onPress={() => {
-                setMapCoords({ latitude: 6.9271, longitude: 79.8612 }); // Dummy data until Map is wired
+                if (!mapCoords) {
+                  Alert.alert("No Location", "Please tap the map to drop a pin first.");
+                  return;
+                }
                 setShowMapModal(false);
               }} 
               className="bg-[#FF9F1C] py-3 rounded-xl items-center"
             >
               <Text className="text-black font-bold text-lg">Confirm Location</Text>
+            </TouchableOpacity>
+            
+            {/* CANCEL BUTTON */}
+            <TouchableOpacity 
+              onPress={() => setShowMapModal(false)} 
+              className="mt-3 py-2 items-center"
+            >
+              <Text className="text-gray-500 font-bold">Cancel</Text>
             </TouchableOpacity>
           </View>
         </View>
