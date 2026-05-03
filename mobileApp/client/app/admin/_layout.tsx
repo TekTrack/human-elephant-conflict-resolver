@@ -161,6 +161,17 @@ export default function AdminLayout() {
           }}
         />
 
+        {/* TRACKING */}
+        <Drawer.Screen
+          name="tracking"
+          options={{
+            title: "Tracking",
+            drawerIcon: ({ color, size }) => (
+              <Ionicons name="radio-outline" size={size} color={color} />
+            ),
+          }}
+        />
+
         {/* UPLOAD */}
         <Drawer.Screen
           name="upload-image"
