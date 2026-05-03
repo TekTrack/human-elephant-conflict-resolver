@@ -190,7 +190,7 @@ export default function SightingAlertsScreen() {
 
             <Image
               source={{
-                uri: `${BASE_URL}/api/sightings/images/${selected.photoFilename}`,
+                uri: `${selected.photoFilename}`,
               }}
               className="w-full h-72 rounded-2xl"
               resizeMode="cover"

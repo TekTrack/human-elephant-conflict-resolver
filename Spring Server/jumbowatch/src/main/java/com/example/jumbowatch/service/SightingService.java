@@ -1,16 +1,19 @@
 package com.example.jumbowatch.service;
 
 import org.springframework.web.multipart.MultipartFile;
-import java.nio.file.*;
+// import java.nio.file.*;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 
+import com.cloudinary.Cloudinary;
+import com.cloudinary.utils.ObjectUtils;
 import com.example.jumbowatch.controller.notification.SseNotificationController;
 import com.example.jumbowatch.model.Notification;
 import com.example.jumbowatch.model.Sighting;
@@ -18,7 +21,6 @@ import com.example.jumbowatch.model.Zone;
 import com.example.jumbowatch.repository.SightingRepository;
 import com.example.jumbowatch.repository.UserRepository;
 import com.example.jumbowatch.repository.ZoneRepository;
-import com.example.jumbowatch.service.SightingService;
 
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,21 +47,23 @@ public class SightingService {
     public String processSighting(String count, String time, String lat, String lon, MultipartFile photo, String source, Long droneId, ConcurrentHashMap<Long, byte[]> latestImages) {
          try {
             // 1. Force absolute path for the folder
-            Path saveFolder = Paths.get("elephant_alerts/"+droneId.toString()).toAbsolutePath();
-            Files.createDirectories(saveFolder);
+            // Path saveFolder = Paths.get("elephant_alerts/"+droneId.toString()).toAbsolutePath();
+            // Files.createDirectories(saveFolder);
 
             // 2. Format time for filename
             LocalDateTime nowTime = LocalDateTime.now();
-            String timestamp = nowTime.format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss"));
-            String filename = "alert_" + timestamp + ".jpg";
+            // String timestamp = nowTime.format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss"));
+            // String filename = "alert_" + timestamp + ".jpg";
             //Path filePath = saveFolder.resolve(filename);
 
             // 3. Save using Files.copy (Bulletproof method 🛡️)
             //Files.copy(photo.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
 
+            String imageUrl = uploadImage(photo);
+
             latestImages.put(droneId, photo.getBytes());
             
-            Sighting newSighting = new Sighting(Integer.parseInt(count), nowTime, Double.parseDouble(lat), Double.parseDouble(lon), filename, source,droneId);
+            Sighting newSighting = new Sighting(Integer.parseInt(count), nowTime, Double.parseDouble(lat), Double.parseDouble(lon), imageUrl, source,droneId);
 
             // 4. Save data to supabase (with cooldown to prevent spamming). Also admin notifications are sent immediately, while user reports wait for verification.
             long now = System.currentTimeMillis();
@@ -109,13 +113,13 @@ public class SightingService {
             System.out.println("Count: " + count);
             System.out.println("GPS:   " + lat + ", " + lon);
             System.out.println("Time:  " + time);
-            System.out.println("Photo: " + filename);
+            System.out.println("Photo: " + imageUrl);
             System.out.println("Drone ID: " + droneId);
             System.out.println("========================================");
 
             return "Alert Received";
 
-        } catch (IOException e) {
+        } catch (Exception e) {
             System.out.println("❌ Error saving file: " + e.getMessage());
             e.printStackTrace(); // This prints the exact error in the terminal if it fails again
             return "Failed to process alert.";
@@ -139,5 +143,16 @@ public class SightingService {
             return "Error occurred while sending SMS.";
         }
        
+    }
+
+    @Autowired
+    private Cloudinary cloudinary;
+
+    public String uploadImage(MultipartFile file) throws Exception {
+        // Upload the file to Cloudinary
+        Map uploadResult = cloudinary.uploader().upload(file.getBytes(), ObjectUtils.emptyMap());
+        
+        // Extract and return the secure live URL
+        return uploadResult.get("secure_url").toString();
     }
 }

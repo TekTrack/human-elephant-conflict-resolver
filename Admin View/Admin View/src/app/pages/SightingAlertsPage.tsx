@@ -455,7 +455,7 @@ export function SightingAlertsPage() {
 
               <div className={`w-full rounded-xl flex items-center justify-center overflow-hidden min-h-[300px] border ${isDark ? "bg-black/20 border-white/5" : "bg-gray-50 border-gray-200"}`}>
                 <img
-                  src={`${BASE_URL}/sightings/images/${selectedAlert.sighting.photoFilename}`}
+                  src={`${selectedAlert.sighting.photoFilename}`}
                   alt="Sighting Image"
                   className="w-full h-auto object-contain max-h-[400px]"
                   onError={(e) => {
