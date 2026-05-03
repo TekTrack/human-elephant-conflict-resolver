@@ -9,7 +9,7 @@ export default function Index() {
     const token = await AsyncStorage.getItem("authToken");
 
     if (token) {
-      router.replace("/admin/overview");
+      router.replace("/admin/home");
     } else {
       router.replace("/auth/login");
     }
