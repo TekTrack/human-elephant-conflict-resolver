@@ -61,34 +61,25 @@ export default function NotificationHandler({onNewAlert}) {
   };
 
   useEffect(() => {
-    const fetchNotification = async () => {
-      try {
-        const res = await fetch(`${BASE_URL}/notifications`,
-          {
-            method: 'GET',
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': `Bearer ${localStorage.getItem('authToken')}`
-            }
-          }
-        );
-        if (res.ok) {
-          const data = await res.json();
-          // 🛠️ THE FIX: This forces the single JSON object into an array!
-          if(data.message) {
-            setNotification([data.message,data.type]);
-            onNewAlert(); // Notify parent component of new alert
-          }else{
-            return null; // No new notifications, don't update statet
-          }
-        }
-      } catch (nullErr) {
+    const token = localStorage.getItem('authToken');
+
+    const eventSource = new EventSource(`${BASE_URL}/notification?token=${token}`);
+
+    eventSource.onmessage = (event) => {
+      const data = JSON.parse(event.data);
+      if (data && data.message) {
+        setNotification([data.message, data.type, data.sightingId]); 
+        onNewAlert();
       }
     };
 
-    fetchNotification();
-    const intervalId = setInterval(fetchNotification, 5000);
-    return () => clearInterval(intervalId);
+    eventSource.onerror = (error) => {
+      console.error("SSE connection lost. Reconnecting...");
+    };
+
+    return () => {
+      eventSource.close(); 
+    };
   }, []);
 
   if (!notification) return null; // Don't render anything if there's no notification

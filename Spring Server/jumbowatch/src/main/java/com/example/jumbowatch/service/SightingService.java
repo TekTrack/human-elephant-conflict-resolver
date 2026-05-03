@@ -1,76 +1,49 @@
-package com.example.jumbowatch.controller.notification; // Keep your package name!
+package com.example.jumbowatch.service;
 
-import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import java.nio.file.*;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
-import org.springframework.http.ResponseEntity;
-import org.springframework.http.MediaType;
+import org.springframework.stereotype.Service;
 
+import com.example.jumbowatch.controller.notification.SseNotificationController;
+import com.example.jumbowatch.model.Notification;
 import com.example.jumbowatch.model.Sighting;
 import com.example.jumbowatch.model.Zone;
 import com.example.jumbowatch.repository.SightingRepository;
 import com.example.jumbowatch.repository.UserRepository;
 import com.example.jumbowatch.repository.ZoneRepository;
-import com.example.jumbowatch.service.NotificationService;
-import com.example.jumbowatch.service.SmsService;
+import com.example.jumbowatch.service.SightingService;
+
 
 import org.springframework.beans.factory.annotation.Autowired;
 
-@RestController
-@CrossOrigin(origins = "http://localhost:5173")// Allows the web app to connect to this controller
-public class SightingController {
+
+@Service
+public class SightingService {
     private long lastSaveTime = 0;
     private final long COOLDOWN_MS = 60000; // 60 seconds
-    private final ConcurrentHashMap<Long, byte[]> latestImages = new ConcurrentHashMap<>();
 
+    @Autowired
+    private SseNotificationController sseController;
     @Autowired
     private SightingRepository sightingRepo;
     @Autowired
     private ZoneRepository zoneRepo;
     @Autowired
     private UserRepository userRepo;
-
-    @GetMapping("/api/admin/sightings/filter")
-    public List<Sighting> getFilteredSightings(@RequestParam(defaultValue = "all") String timeframe) {
-        LocalDateTime cutoff = LocalDateTime.now();
-        
-        switch(timeframe.toLowerCase()) {
-            case "hour": cutoff = cutoff.minusHours(1); break;
-            case "day": cutoff = cutoff.minusDays(1); break;
-            case "week": cutoff = cutoff.minusWeeks(1); break;
-            case "month": cutoff = cutoff.minusMonths(1); break;
-            case "year": cutoff = cutoff.minusYears(1); break;
-            default: return sightingRepo.findAll(); // All time
-        }
-        
-        return sightingRepo.findByTimestampAfter(cutoff);
-    }
-
-     @Autowired
+    @Autowired 
     private NotificationService nfs;
     @Autowired
     private SmsService smsService;
 
-    @PostMapping("/alert")
-    public String receiveAlert(
-            @RequestParam("count") String count,
-            @RequestParam("time") String time,
-            @RequestParam("latitude") String lat,
-            @RequestParam("longitude") String lon,
-            @RequestParam("photo") MultipartFile photo,
-            @RequestParam("source") String source,
-            @RequestParam("droneId") Long droneId
-        ) {
-
-        try {
+    public String processSighting(String count, String time, String lat, String lon, MultipartFile photo, String source, Long droneId, ConcurrentHashMap<Long, byte[]> latestImages) {
+         try {
             // 1. Force absolute path for the folder
             Path saveFolder = Paths.get("elephant_alerts/"+droneId.toString()).toAbsolutePath();
             Files.createDirectories(saveFolder);
@@ -90,24 +63,26 @@ public class SightingController {
 
             // 4. Save data to supabase (with cooldown to prevent spamming). Also admin notifications are sent immediately, while user reports wait for verification.
             long now = System.currentTimeMillis();
+
+            
             if (now - lastSaveTime > COOLDOWN_MS) {
                 sightingRepo.save(newSighting);
 
+                Notification savedNotification;
+
                 if ("drone".equals(newSighting.getSource())) {
-                    nfs.setNotification(
+                    savedNotification = nfs.createAndSave(
                         "New drone alert! Count: " + newSighting.getElephantCount(),
                         "DroneAlert",
-                        newSighting.getId()// sightingId is 0 for drone alerts
+                        newSighting.getId()
                     );
-                    
                 } else {
-                    nfs.setNotification(
+                    savedNotification = nfs.createAndSave(
                         "New user report! Count: " + newSighting.getElephantCount(),
                         "UserReport",
-                        newSighting.getId() // sightingId is >0 for user reports
+                        newSighting.getId()
                     );
                 }
-
 
                 lastSaveTime = now;
                 
@@ -115,6 +90,8 @@ public class SightingController {
                 Zone breachedZone = zoneRepo.findAll().stream()
                     .filter(z -> z.containsSighting(newSighting))
                     .findFirst().orElse(null);
+
+                sseController.pushAlert(savedNotification);
 
                 if (breachedZone != null) {
                     breachedZone.setLastSightingDate(LocalDateTime.now());
@@ -143,22 +120,8 @@ public class SightingController {
             e.printStackTrace(); // This prints the exact error in the terminal if it fails again
             return "Failed to process alert.";
         }
-    }
-
-    @GetMapping(value = "/api/admin/liveDroneFeed/{id}", produces = MediaType.IMAGE_JPEG_VALUE)
-    public ResponseEntity<byte[]> getLatestImage(@PathVariable Long id) {
         
-        // Grab the bytes from our map
-        byte[] imageBytes = latestImages.get(id);
-
-        if (imageBytes != null) {
-            return ResponseEntity.ok()
-                    .contentType(MediaType.IMAGE_JPEG)
-                    .body(imageBytes);
-        }
-
-        // Return a 404 if the drone hasn't sent anything yet
-        return ResponseEntity.notFound().build();
+    
     }
 
     public String sendSmsToZoneResidents(Zone breachedZone) {

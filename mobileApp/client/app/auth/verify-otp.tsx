@@ -17,6 +17,7 @@ export default function VerifyOTPScreen() {
   const { phone } = useLocalSearchParams(); 
   const [otp, setOtp] = useState("");
   const [loading, setLoading] = useState(false);
+  const [loadingOTP, setLoadingOTP] = useState(false);
 
   const verifyOTP = async () => {
     if (otp.length < 4) {
@@ -26,7 +27,7 @@ export default function VerifyOTPScreen() {
 
     try {
       setLoading(true);
-      const res = await fetch(`${API_BASE_URL}/api/user/verify-otp`, {
+      const res = await fetch(`${API_BASE_URL}/api/sms/verify-otp`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ phone, otp }),
@@ -39,7 +40,7 @@ export default function VerifyOTPScreen() {
         return;
       }
 
-      
+      console.log("OTP verification successful:", data);
       await AsyncStorage.setItem("authToken", data.token);
       router.replace("/admin/overview");
 
@@ -47,6 +48,33 @@ export default function VerifyOTPScreen() {
       Alert.alert("error", "Cannot connect to server.");
     } finally {
       setLoading(false);
+    }
+  };
+
+   const sendOTP = async () => {
+
+    try {
+      setLoadingOTP(true);
+      const res = await fetch(`${API_BASE_URL}/api/sms/send-otp`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({phone}),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        Alert.alert("error", data.message || "Failed to send OTP.");
+        return;
+      }
+
+      Alert.alert("success", "OTP sent successfully. Please check your phone.");
+      
+
+    } catch (error) {
+      Alert.alert("error", "cannot connect to server");
+    } finally {
+      setLoadingOTP(false);
     }
   };
 
@@ -95,9 +123,11 @@ export default function VerifyOTPScreen() {
 
         {/* Resend Option */}
         <View style={styles.resendContainer}>
-          <Text style={styles.resendText}>Didn't receive the code?</Text>
-          <TouchableOpacity>
-            <Text style={styles.resendLink}>Resend Code</Text>
+          <Text style={styles.resendText}>Did not receive the code?</Text>
+          <TouchableOpacity
+          onPress={sendOTP}
+          >
+            <Text style={styles.resendLink}>{loadingOTP ? "Sending..." : "Resend Code"}</Text>
           </TouchableOpacity>
         </View>
 

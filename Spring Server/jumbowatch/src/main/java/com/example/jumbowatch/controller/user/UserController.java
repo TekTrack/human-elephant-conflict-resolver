@@ -1,5 +1,6 @@
 package com.example.jumbowatch.controller.user;
 
+import java.security.Principal;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -7,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -16,10 +18,8 @@ import com.example.jumbowatch.model.JwtUtil;
 import com.example.jumbowatch.model.User;
 import com.example.jumbowatch.repository.UserRepository;
 
-import tools.jackson.databind.ObjectMapper;
 
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
+import tools.jackson.databind.ObjectMapper;
 
 @RestController
 @RequestMapping("/api/user")
@@ -135,7 +135,6 @@ public class UserController {
         }
     }
 
-
     //User Updates
     @PostMapping("/updateuser")
     public ResponseEntity<Object> updateUser(@RequestBody User user){
@@ -172,9 +171,12 @@ public class UserController {
         }
     }
 
-    @GetMapping("/getuser/{email}")
-public ResponseEntity<Object> getUser(@PathVariable String email) {
+    @GetMapping("/getuser")
+public ResponseEntity<Object> getUser(Principal principal) {
     try {
+
+        String email = principal.getName();
+        System.err.println("Fetching user with email: " + email); // Debug log
 
         User user = userRepository.findByEmail(email)
             .orElseThrow(() -> new RuntimeException("User not found"));
@@ -195,5 +197,23 @@ public ResponseEntity<Object> getUser(@PathVariable String email) {
         return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
     }
 }
+
+    //Logout Endpoint
+ @PostMapping("/logout")
+    public ResponseEntity<Object> logoutAdmin(Principal principal) {
+        try {
+            String email = principal.getName();
+            jwtUtil.invalidateToken(email);
+            Map<String, Object> response = new HashMap<>();
+            response.put("message", "Logout successful!");
+            response.put("status", HttpStatus.OK.value());
+            return new ResponseEntity<>(response, HttpStatus.OK);
+        } catch (Exception e) {
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("message", "Logout failed");
+            errorResponse.put("error", e.getMessage());
+            return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
+        }
+    }
 
 }

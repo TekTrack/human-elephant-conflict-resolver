@@ -1,4 +1,4 @@
-package com.example.jumbowatch.controller.notification;
+package com.example.jumbowatch.controller.sighting;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
