@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+ import { useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -43,9 +43,7 @@ export default function SightingAlertsScreen() {
       const res = await axios.get(
         `${BASE_URL}/api/admin/sightings/filter?timeframe=all`,
         {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+          headers: { Authorization: `Bearer ${token}` },
         }
       );
 
@@ -62,103 +60,143 @@ export default function SightingAlertsScreen() {
   };
 
   const getTimeAgo = (date: string) => {
-    const now = new Date().getTime();
-    const past = new Date(date).getTime();
-
-    const mins = Math.floor((now - past) / 60000);
-
+    const mins = Math.floor((Date.now() - new Date(date).getTime()) / 60000);
     if (mins < 1) return "Just now";
     if (mins < 60) return `${mins} mins ago`;
-
     const hrs = Math.floor(mins / 60);
     if (hrs < 24) return `${hrs} hrs ago`;
-
     return new Date(date).toLocaleDateString();
   };
 
+  // 🔥 CARD UI (NEW)
   const renderCard = ({ item }: { item: Sighting }) => (
     <TouchableOpacity
       onPress={() => setSelected(item)}
-      className="bg-white rounded-2xl p-4 mb-3 border border-gray-200"
+      className="bg-white rounded-2xl mb-5 overflow-hidden border border-gray-200"
     >
-      <View className="flex-row justify-between">
-        <View className="flex-row items-center">
+      {/* IMAGE */}
+      {item.photoFilename && (
+        <View className="h-48">
+          <Image
+            source={{
+              uri: `${BASE_URL}/api/sightings/images/${item.photoFilename}`,
+            }}
+            className="w-full h-full"
+          />
+
+          {/* BADGE */}
           <View
-            className={`w-10 h-10 rounded-full items-center justify-center ${
+            className={`absolute top-3 left-3 px-3 py-1 rounded-full flex-row items-center ${
               item.source === "drone" ? "bg-red-500" : "bg-orange-500"
             }`}
           >
-            <Ionicons name="warning-outline" size={20} color="white" />
-          </View>
-
-          <View className="ml-3">
-            <Text className="font-bold text-black text-base">
-              Elephant Sighting
-            </Text>
-
-            <Text className="text-gray-500 text-xs">
-              {getTimeAgo(item.timestamp)}
+            <Ionicons
+              name={item.source === "drone" ? "videocam" : "person"}
+              size={14}
+              color="white"
+            />
+            <Text className="text-white text-xs font-bold ml-1">
+              {item.source.toUpperCase()}
             </Text>
           </View>
         </View>
+      )}
 
-        <View
-          className={`px-3 py-1 rounded-full ${
-            item.source === "drone" ? "bg-red-100" : "bg-yellow-100"
-          }`}
-        >
-          <Text
-            className={`text-xs font-bold ${
-              item.source === "drone" ? "text-red-600" : "text-yellow-700"
-            }`}
-          >
-            {item.source.toUpperCase()}
+      {/* CONTENT */}
+      <View className="p-4">
+        <View className="flex-row justify-between mb-2">
+          <Text className="text-lg font-bold text-green-900">
+            Elephant Sighting
+          </Text>
+          <Text className="text-xs text-gray-500">
+            {getTimeAgo(item.timestamp)}
           </Text>
         </View>
+
+        <View className="flex-row items-center mb-2">
+          <Ionicons name="location" size={16} color="gray" />
+          <Text className="text-gray-600 ml-1 text-sm">
+            {item.latitude}, {item.longitude}
+          </Text>
+        </View>
+
+        <Text className="text-gray-700 mb-3 text-sm">
+          {item.source === "drone"
+            ? `Drone ${item.droneId} detected elephant movement`
+            : "User reported elephant sighting"}
+        </Text>
+
+        {/* ACTIONS */}
+        <View className="flex-row gap-2">
+          <TouchableOpacity className="flex-1 bg-green-900 py-2 rounded-lg">
+            <Text className="text-white text-center font-semibold">
+              View Map
+            </Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity className="px-4 py-2 border border-gray-300 rounded-lg">
+            <Text className="text-gray-600 font-semibold">
+              Details
+            </Text>
+          </TouchableOpacity>
+        </View>
       </View>
-
-      <Text className="text-sm text-gray-600 mt-3">
-        {item.source === "drone"
-          ? `Drone ${item.droneId} detected elephant`
-          : "User reported elephant sighting"}
-      </Text>
-
-      <Text className="text-xs text-gray-400 mt-2">
-        📍 {item.latitude}, {item.longitude}
-      </Text>
     </TouchableOpacity>
   );
 
   return (
-    <View className="flex-1 bg-gray-100 px-4 pt-4">
-      {/* Header */}
-      <Text className="text-2xl font-bold mb-4 text-black">
-        Sighting Alerts
-      </Text>
+    <View className="flex-1 bg-gray-50 px-4 pt-4">
 
-      {/* Stats */}
+      {/* TITLE */}
+      <View className="mb-4">
+        <Text className="text-2xl font-bold text-green-900">
+          Sighting Alerts
+        </Text>
+        <Text className="text-gray-500 text-sm">
+          Real-time wildlife updates
+        </Text>
+      </View>
+
+      {/* STATS */}
       <View className="flex-row justify-between mb-4">
-        <View className="bg-white p-3 rounded-xl w-[31%]">
+        <View className="bg-white p-3 rounded-xl w-[31%] items-center">
+          <Text className="text-lg font-bold text-green-900">
+            {alerts.length}
+          </Text>
           <Text className="text-xs text-gray-500">Total</Text>
-          <Text className="text-xl font-bold">{alerts.length}</Text>
         </View>
 
-        <View className="bg-white p-3 rounded-xl w-[31%]">
-          <Text className="text-xs text-gray-500">Drone</Text>
-          <Text className="text-xl font-bold text-red-500">
+        <View className="bg-white p-3 rounded-xl w-[31%] items-center">
+          <Text className="text-lg font-bold text-red-500">
             {alerts.filter((a) => a.source === "drone").length}
           </Text>
+          <Text className="text-xs text-gray-500">Drone</Text>
         </View>
 
-        <View className="bg-white p-3 rounded-xl w-[31%]">
-          <Text className="text-xs text-gray-500">Users</Text>
-          <Text className="text-xl font-bold text-orange-500">
+        <View className="bg-white p-3 rounded-xl w-[31%] items-center">
+          <Text className="text-lg font-bold text-orange-500">
             {alerts.filter((a) => a.source === "user").length}
           </Text>
+          <Text className="text-xs text-gray-500">Users</Text>
         </View>
       </View>
 
-      {/* List */}
+      {/* FILTER CHIPS */}
+      <ScrollView horizontal showsHorizontalScrollIndicator={false} className="mb-4">
+        <View className="flex-row gap-2">
+          <Text className="bg-green-900 text-white px-4 py-2 rounded-full text-xs font-semibold">
+            All Alerts
+          </Text>
+          <Text className="bg-white px-4 py-2 rounded-full text-xs border">
+            High Priority
+          </Text>
+          <Text className="bg-white px-4 py-2 rounded-full text-xs border">
+            Nearby
+          </Text>
+        </View>
+      </ScrollView>
+
+      {/* LIST */}
       <FlatList
         data={alerts.sort(
           (a, b) =>
@@ -173,57 +211,34 @@ export default function SightingAlertsScreen() {
         }
       />
 
-      {/* Modal */}
+      {/* MODAL */}
       <Modal visible={!!selected} animationType="slide">
         {selected && (
           <ScrollView className="flex-1 bg-white p-4">
-            <TouchableOpacity
-              onPress={() => setSelected(null)}
-              className="mb-4"
-            >
-              <Ionicons name="close" size={30} color="black" />
+            <TouchableOpacity onPress={() => setSelected(null)}>
+              <Ionicons name="close" size={30} />
             </TouchableOpacity>
-
-            <Text className="text-2xl font-bold mb-4">
-              Sighting Details
-            </Text>
 
             <Image
               source={{
                 uri: `${BASE_URL}/api/sightings/images/${selected.photoFilename}`,
               }}
-              className="w-full h-72 rounded-2xl"
-              resizeMode="cover"
+              className="w-full h-72 rounded-xl mt-3"
             />
 
-            <View className="mt-5 space-y-3">
-              <Text className="text-base">
-                <Text className="font-bold">Source:</Text>{" "}
-                {selected.source}
-              </Text>
+            <Text className="text-xl font-bold mt-4">
+              Sighting Details
+            </Text>
 
-              <Text className="text-base">
-                <Text className="font-bold">Verified:</Text>{" "}
-                {selected.verified ? "Yes" : "Pending"}
-              </Text>
-
-              <Text className="text-base">
-                <Text className="font-bold">Location:</Text>{" "}
-                {selected.latitude}, {selected.longitude}
-              </Text>
-
-              <Text className="text-base">
-                <Text className="font-bold">Time:</Text>{" "}
-                {new Date(selected.timestamp).toLocaleString()}
-              </Text>
-
-              {selected.source === "drone" && (
-                <Text className="text-base">
-                  <Text className="font-bold">Drone ID:</Text>{" "}
-                  {selected.droneId}
-                </Text>
-              )}
-            </View>
+            <Text className="mt-2">
+              Source: {selected.source}
+            </Text>
+            <Text>
+              Verified: {selected.verified ? "Yes" : "No"}
+            </Text>
+            <Text>
+              Location: {selected.latitude}, {selected.longitude}
+            </Text>
           </ScrollView>
         )}
       </Modal>

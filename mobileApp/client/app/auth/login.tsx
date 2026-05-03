@@ -4,34 +4,28 @@ import {
   Text,
   TextInput,
   TouchableOpacity,
-  StyleSheet,
-  Alert,
   SafeAreaView,
   StatusBar,
-  KeyboardAvoidingView,
-  Platform,
+  Image,
   ScrollView,
+  Alert,
 } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import API_BASE_URL from "@/config/app";
-import { 
-  MaterialCommunityIcons, 
-  Ionicons, 
-  AntDesign, 
-  SimpleLineIcons 
-} from "@expo/vector-icons";
+import API_BASE_URL from "@/config/app";  
+
 
 export default function LoginScreen() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [secureText, setSecureText] = useState(true);
-  const [rememberMe, setRememberMe] = useState(false);
   const [loading, setLoading] = useState(false);
 
   const login = async () => {
     try {
       setLoading(true);
+
       const res = await fetch(`${API_BASE_URL}/api/user/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -46,293 +40,170 @@ export default function LoginScreen() {
       }
 
       await AsyncStorage.setItem("authToken", data.token);
-      router.replace("/admin/overview");
+      await AsyncStorage.setItem("email", data.data.email);
+
+      router.replace("/admin/home");
     } catch (error) {
       Alert.alert("Error", "Cannot connect to server");
+      console.log(error);
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView className="flex-1 bg-[#fcf9f8]">
       <StatusBar barStyle="dark-content" />
-      <KeyboardAvoidingView 
-        behavior={Platform.OS === "ios" ? "padding" : "height"}
-        style={{ flex: 1 }}
-      >
-        <ScrollView contentContainerStyle={styles.scrollContent} bounces={false}>
-          
-          {/* Header Section */}
-          <View style={styles.header}>
-            <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
-              <Ionicons name="arrow-back" size={32} color="black" />
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.langSelector}>
-              <Text style={styles.langText}>භාෂාව</Text>
-              <MaterialCommunityIcons name="chevron-down" size={24} color="black" />
-            </TouchableOpacity>
-          </View>
 
-          <View style={styles.content}>
-            <Text style={styles.title}>Login</Text>
-            <Text style={styles.subtitle}>please provide details below to login</Text>
+      <ScrollView contentContainerStyle={{ paddingBottom: 40 }}>
+        
+        
+        {/* HEADER */}
+        <View className="flex-row justify-between items-center px-4 py-10">
 
-            {/* Email Input */}
-            <View style={styles.inputWrapper}>
-              <MaterialCommunityIcons name="email-outline" size={24} color="black" style={styles.inputIcon} />
-              <TextInput
-                placeholder="Enter your email"
-                value={email}
-                onChangeText={setEmail}
-                style={styles.input}
-                keyboardType="email-address"
-                placeholderTextColor="#999"
-                autoCapitalize="none"
-              />
+          {/* LOGO + APP NAME */}
+          <View className="flex-row items-center">
+            <View className="w-9 h-9 rounded-full bg-[#012d1d] items-center justify-center mr-2">
+              <Ionicons name="leaf" size={18} color="#fff" />
             </View>
 
-            {/* Password Input */}
-            <View style={styles.inputWrapper}>
-              <SimpleLineIcons name="lock" size={22} color="black" style={styles.inputIcon} />
+            <Text className="text-lg font-extrabold text-[#012d1d]">
+              Jumbo Watch
+            </Text>
+          </View>
+
+          {/* LANGUAGE */}
+          <TouchableOpacity className="flex-row items-center border border-gray-300 px-3 py-1 rounded-lg">
+            <Ionicons name="language" size={16} color="#012d1d" />
+            <Text className="ml-1 text-sm font-semibold text-[#012d1d]">
+              භාෂාව
+            </Text>
+            <Ionicons name="chevron-down" size={16} color="#012d1d" />
+          </TouchableOpacity>
+
+        </View>
+
+
+        {/* HERO ICON */}
+        <View className="items-center mt-8">
+          <View className="w-24 h-24 rounded-full bg-[#1b4332] items-center justify-center shadow-lg">
+            <Ionicons name="leaf" size={40} color="#fff" />
+          </View>
+        </View>
+
+        {/* TITLE */}
+        <View className="px-6 mt-8">
+          <Text className="text-3xl font-bold text-[#012d1d]">
+            Login
+          </Text>
+          <Text className="text-gray-500 mt-1">
+            please provide details below to login
+          </Text>
+        </View>
+
+        {/* FORM */}
+        <View className="px-6 mt-6 space-y-4">
+
+          {/* EMAIL */}
+          <View>
+            <Text className="text-sm text-gray-500 mb-1">Email</Text>
+            <View className="flex-row items-center border border-gray-300 rounded-xl bg-gray-100 px-3 h-14">
+              <Ionicons name="mail-outline" size={20} color="#666" />
               <TextInput
-                placeholder="Enter your password"
+                placeholder="protector@jumbowatch.org"
+                className="flex-1 ml-3 text-base"
+                value={email}
+                onChangeText={setEmail}
+                keyboardType="email-address"
+              />
+            </View>
+          </View>
+
+          {/* PASSWORD */}
+          <View>
+            <Text className="text-sm text-gray-500 mb-1">Password</Text>
+            <View className="flex-row items-center border border-gray-300 rounded-xl bg-gray-100 px-3 h-14">
+              <Ionicons name="lock-closed-outline" size={20} color="#666" />
+              <TextInput
+                placeholder="••••••••"
                 secureTextEntry={secureText}
+                className="flex-1 ml-3 text-base"
                 value={password}
                 onChangeText={setPassword}
-                style={styles.input}
-                placeholderTextColor="#999"
               />
               <TouchableOpacity onPress={() => setSecureText(!secureText)}>
-                <Ionicons 
-                  name={secureText ? "eye-off-outline" : "eye-outline"} 
-                  size={24} 
-                  color="rgba(0,0,0,0.5)" 
+                <Ionicons
+                  name={secureText ? "eye-off-outline" : "eye-outline"}
+                  size={20}
+                  color="#666"
                 />
               </TouchableOpacity>
             </View>
+          </View>
 
-            {/* Options Row */}
-            <View style={styles.optionsRow}>
-              <TouchableOpacity 
-                style={styles.rememberMe} 
-                onPress={() => setRememberMe(!rememberMe)}
-              >
-                <View style={[styles.checkbox, rememberMe && styles.checkboxActive]} />
-                <Text style={styles.optionText}>Remember Me</Text>
-              </TouchableOpacity>
-              
-              <TouchableOpacity onPress={() => router.push("/auth/forgot-password")} onPress={() => router.push("/auth/forgot-password")}>
-                <Text style={styles.optionText}>Forget your password?</Text>
-              </TouchableOpacity>
-            </View>
+          {/* OPTIONS */}
+          <View className="flex-row justify-between items-center mt-2">
+            <TouchableOpacity className="flex-row items-center">
+              <View className="w-5 h-5 border border-gray-400 rounded mr-2" />
+              <Text className="text-sm">Remember Me</Text>
+            </TouchableOpacity>
 
-            {/* Log In Button (FIXED) */}
-            <TouchableOpacity 
-              style={[styles.loginButton, loading && { opacity: 0.7 }]}
-              onPress={login}
-              disabled={loading}
-            >
-              <Text style={styles.loginButtonText}>
-                {loading ? "Logging in..." : "Log In"}
+            <TouchableOpacity>
+              <Text className="text-sm text-[#795950]">
+                Forget your password?
               </Text>
             </TouchableOpacity>
-
-            {/* Divider */}
-            <View style={styles.dividerContainer}>
-              <View style={styles.line} />
-              <Text style={styles.dividerText}>or Countinue With</Text>
-              <View style={styles.line} />
-            </View>
-
-            {/* Google Login */}
-            <TouchableOpacity style={styles.googleButton}>
-              <View style={styles.googleIconCircle}>
-                <AntDesign name="google" size={24} color="#4285F4" />
-              </View>
-              <Text style={styles.googleText}>Google</Text>
-            </TouchableOpacity>
-
-            {/* Footer */}
-            <TouchableOpacity 
-              onPress={() => router.push("/auth/register")} 
-              style={styles.footer}
-            >
-              <Text style={styles.footerText}>Don’t have a account?</Text>
-            </TouchableOpacity>
           </View>
-        </ScrollView>
-      </KeyboardAvoidingView>
+
+          {/* LOGIN BUTTON */}
+          <TouchableOpacity
+            onPress={login}
+            disabled={loading}
+            className="bg-[#012d1d] h-14 rounded-xl items-center justify-center mt-4"
+          >
+            <Text className="text-white text-lg font-semibold">
+              {loading ? "Logging in..." : "Log In"}
+            </Text>
+          </TouchableOpacity>
+
+          {/* DIVIDER */}
+          <View className="flex-row items-center my-5">
+            <View className="flex-1 h-[1px] bg-gray-300" />
+            <Text className="mx-3 text-gray-400 text-xs uppercase">or</Text>
+            <View className="flex-1 h-[1px] bg-gray-300" />
+          </View>
+
+          {/* GOOGLE BUTTON */}
+          <TouchableOpacity className="flex-row items-center justify-center border border-gray-300 rounded-xl h-14 bg-white">
+            <Text className="text-blue-500 text-xl font-bold mr-2">G</Text>
+            <Text className="text-base">Continue with Google</Text>
+          </TouchableOpacity>
+        </View>
+
+        {/* IMAGE SECTION */}
+        <View className="mt-10 px-6">
+          <Image
+            source={{
+              uri: "https://images.unsplash.com/photo-1564769625905-50e93615e769",
+            }}
+            className="w-full h-48 rounded-2xl"
+          />
+          <Text className="text-xs text-white absolute bottom-4 left-8 right-8">
+            "Protecting the giants of our earth through community vigilance."
+          </Text>
+        </View>
+
+        {/* FOOTER */}
+        <View className="items-center mt-8">
+          <TouchableOpacity onPress={() => router.push("/auth/register")}>
+            <Text className="text-gray-600">
+              Don’t have an account?
+              <Text className="text-[#012d1d] font-bold"> Sign Up</Text>
+            </Text>
+          </TouchableOpacity>
+        </View>
+
+      </ScrollView>
     </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#FFF8E7",
-  },
-  scrollContent: {
-    flexGrow: 1,
-  },
-  header: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    paddingHorizontal: 20,
-    marginTop: 30, 
-  },
-  backBtn: {
-    width: 50,
-    height: 50,
-    justifyContent: "center",
-  },
-  langSelector: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "transparent",
-    paddingRight: 10,
-  },
-  langText: {
-    fontFamily: "Poppins",
-    fontSize: 16,
-    color: "#000",
-    marginRight: 4,
-    fontWeight: "800",
-  },
-  content: {
-    flex: 1,
-    paddingHorizontal: 30,
-    alignItems: "center",
-    paddingTop: 20,
-  },
-  title: {
-    fontFamily: "Poppins",
-    fontSize: 34,
-    fontWeight: "700",
-    color: "#000",
-    marginBottom: 10,
-  },
-  subtitle: {
-    fontFamily: "Poppins",
-    fontSize: 16,
-    lineHeight: 24, 
-    color: "rgba(0,0,0,0.62)",
-    marginBottom: 40,
-  },
-  inputWrapper: {
-    flexDirection: "row",
-    alignItems: "center",
-    width: "100%",
-    height: 58,
-    borderWidth: 1,
-    borderColor: "#000",
-    borderRadius: 15,
-    paddingHorizontal: 15,
-    marginBottom: 20,
-  },
-  inputIcon: {
-    marginRight: 12,
-  },
-  input: {
-    flex: 1,
-    fontFamily: "Poppins",
-    fontSize: 16,
-    color: "#000",
-  },
-  optionsRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    width: "100%",
-    marginBottom: 35,
-  },
-  rememberMe: {
-    flexDirection: "row",
-    alignItems: "center",
-  },
-  checkbox: {
-    width: 18,
-    height: 18,
-    borderRadius: 9,
-    borderWidth: 1.5,
-    borderColor: "#000",
-    marginRight: 8,
-  },
-  checkboxActive: {
-    backgroundColor: "#000",
-  },
-  optionText: {
-    fontFamily: "Poppins",
-    fontSize: 16, 
-    color: "#000",
-  },
-  loginButton: {
-    width: "100%",
-    height: 60,
-    backgroundColor: "#FF9F1C",
-    borderRadius: 20,
-    borderWidth: 1.5,
-    borderColor: "#000",
-    justifyContent: "center",
-    alignItems: "center",
-    marginBottom: 20,
-  },
-  loginButtonText: {
-    fontFamily: "Poppins",
-    fontSize: 20,
-    fontWeight: "700",
-    color: "#000",
-  },
-  dividerContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginVertical: 20,
-    width: "100%",
-  },
-  line: {
-    flex: 1,
-    height: 1,
-    backgroundColor: "#000",
-  },
-  dividerText: {
-    fontFamily: "Poppins",
-    marginHorizontal: 10,
-    fontSize: 15,
-    color: "#000",
-  },
-  googleButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    width: 220,
-    height: 65,
-    borderWidth: 1,
-    borderColor: "#CCC",
-    borderRadius: 12,
-    backgroundColor: "#FFF",
-  },
-  googleIconCircle: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    borderWidth: 1,
-    borderColor: "#EEE",
-    justifyContent: "center",
-    alignItems: "center",
-    marginRight: 15,
-  },
-  googleText: {
-    fontFamily: "Poppins",
-    fontSize: 24,
-    color: "#000",
-  },
-  footer: {
-    marginTop: 60,
-    marginBottom: 30,
-  },
-  footerText: {
-    fontFamily: "Poppins",
-    fontSize: 16,
-    color: "#000",
-  },
-});
