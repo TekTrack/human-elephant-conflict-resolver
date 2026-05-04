@@ -4,7 +4,7 @@ import * as Location from "expo-location";
 import * as TaskManager from "expo-task-manager";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Ionicons } from "@expo/vector-icons";
-import { GEOFENCE_TASK } from "@/config/bgTask";
+import { LOCATION_TASK } from "@/config/bgTask";
 
 export default function Tracking() {
   const [isTracking, setIsTracking] = useState(false);
@@ -19,7 +19,7 @@ export default function Tracking() {
   const checkTrackingStatus = async () => {
     try {
       // 1. Check if the task is currently running
-      const isRegistered = await TaskManager.isTaskRegisteredAsync(GEOFENCE_TASK);
+      const isRegistered = await TaskManager.isTaskRegisteredAsync(LOCATION_TASK);
       setIsTracking(isRegistered);
 
       // 2. Get the last known zone from storage
@@ -42,20 +42,19 @@ export default function Tracking() {
         const { status: bg } = await Location.requestBackgroundPermissionsAsync();
         if (bg !== "granted") return Alert.alert("Background permission required");
 
-        await Location.startGeofencingAsync(GEOFENCE_TASK, [
-          {
-            identifier: "ZONE_001",
-            latitude: 5.9549,
-            longitude: 80.5469,
-            radius: 500,
-            notifyOnEnter: true,
-            notifyOnExit: true, // Need this to know when they leave!
-          },
-        ]);
+        await Location.startLocationUpdatesAsync(LOCATION_TASK, {
+            accuracy: Location.Accuracy.Balanced,
+            distanceInterval: 50, // Only check math if user moved 50 meters (saves battery!)
+            deferredUpdatesInterval: 10000, 
+            foregroundService: {
+                notificationTitle: "Live Tracking Active",
+                notificationBody: "Monitoring your zone safely in the background.",
+            },
+            });
         setIsTracking(true);
       } else {
         // TURN OFF 🔴
-        await Location.stopGeofencingAsync(GEOFENCE_TASK);
+    await Location.stopLocationUpdatesAsync(LOCATION_TASK);
         setIsTracking(false);
         setCurrentZone("Tracking Disabled");
         await AsyncStorage.removeItem("currentZoneId");

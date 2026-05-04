@@ -1,43 +1,60 @@
 import * as Location from 'expo-location';
 import * as TaskManager from 'expo-task-manager';
-import API_BASE_URL from './app';
-import { Alert } from 'react-native';
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import API_BASE_URL from './app';
 
-export const GEOFENCE_TASK = 'BACKGROUND_GEOFENCE_TASK';
+export const LOCATION_TASK = 'BACKGROUND_LOCATION_TASK';
 
-interface GeofenceData {
-  eventType: Location.GeofencingEventType;
-  region: Location.LocationRegion;
-}
-
-TaskManager.defineTask(GEOFENCE_TASK, async (body) => {
-  if (body.error) {
-    console.error("Geofence Error:", body.error.message);
+TaskManager.defineTask(LOCATION_TASK, async ({ data, error }) => {
+  if (error) {
+    console.error("Task Error:", error.message);
     return;
   }
+  
+  if (data) {
+    const { locations } = data as any;
+    const userLoc = locations[0].coords;
 
-  const { eventType, region } = body.data as unknown as GeofenceData;
+    try {
+      // 1. Load zones you saved in GeofencingScreen
+      const zonesStr = await AsyncStorage.getItem("savedZones");
+      if (!zonesStr) return;
+      const zones = JSON.parse(zonesStr);
 
-  if (eventType === Location.GeofencingEventType.Enter) {
-    console.log("Entered Zone:", region.identifier);
-    await AsyncStorage.setItem("currentZoneId", region.identifier || "");
-    
-    // 1. Get the saved JWT token
-    const token = await AsyncStorage.getItem("authToken");
+      // 2. Do the rectangle math!
+      let currentZoneId = "Outside Safe Zones";
+      for (const zone of zones) {
+        if (
+          userLoc.latitude >= zone.minLat && userLoc.latitude <= zone.maxLat &&
+          userLoc.longitude >= zone.minLon && userLoc.longitude <= zone.maxLon
+        ) {
+          currentZoneId = zone.name; // Saving the name so it looks nice on the UI!
+          break;
+        }
+      }
 
-    // 2. Send with Authorization header
-    fetch(`${API_BASE_URL}/api/users/updateZone`, {
-      method: 'PUT',
-      headers: { 
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}` 
-      },
-      body: JSON.stringify({ zoneId: region.identifier }) 
-    }).catch(err => console.log("Failed to update backend:", err));
-  }else if (eventType === Location.GeofencingEventType.Exit) {
-    // 👇 Handle leaving the zone!
-    console.log("Exited Zone:", region.identifier);
-    await AsyncStorage.setItem("currentZoneId", "Outside Safe Zones");
+      // 3. Only update if they walked into a NEW zone
+      const lastZoneId = await AsyncStorage.getItem("currentZoneId");
+      
+      if (currentZoneId !== lastZoneId) {
+        console.log(`Moved to: ${currentZoneId}`);
+        await AsyncStorage.setItem("currentZoneId", currentZoneId);
+
+        // 4. Update Spring Boot backend
+        if (currentZoneId !== "Outside Safe Zones") {
+          const token = await AsyncStorage.getItem("authToken");
+          fetch(`${API_BASE_URL}/api/users/updateZone`, {
+            method: 'PUT',
+            headers: { 
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({ zoneId: currentZoneId }) // Might need to send zone.id if backend expects Long
+          }).catch(err => console.log(err));
+        }
+      }
+    } catch (err) {
+      console.log("Tracking logic error:", err);
+    }
   }
 });

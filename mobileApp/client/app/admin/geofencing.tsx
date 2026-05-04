@@ -52,6 +52,7 @@ export default function GeofencingScreen() {
       headers: { Authorization: `Bearer ${token}` },
     });
     setZones(res.data);
+    await AsyncStorage.setItem("savedZones", JSON.stringify(res.data));
   };
 
   const fetchSightings = async () => {
