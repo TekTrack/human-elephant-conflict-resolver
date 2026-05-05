@@ -14,6 +14,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import API_BASE_URL from "@/config/app";  
+import ForgotPasswordScreen from "./forgot-password";
 
 
 export default function LoginScreen() {
@@ -148,7 +149,7 @@ export default function LoginScreen() {
               <Text className="text-sm">Remember Me</Text>
             </TouchableOpacity>
 
-            <TouchableOpacity>
+            <TouchableOpacity onPress={() => router.push("./forgot-password")}>
               <Text className="text-sm text-[#795950]">
                 Forget your password?
               </Text>

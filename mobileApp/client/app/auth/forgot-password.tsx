@@ -4,11 +4,12 @@ import {
   Text,
   TextInput,
   TouchableOpacity,
-  StyleSheet,
   Alert,
   SafeAreaView,
   StatusBar,
+  ScrollView,
 } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import API_BASE_URL from "@/config/app";
 
@@ -18,7 +19,7 @@ export default function ForgotPasswordScreen() {
 
   const sendOTP = async () => {
     if (!phoneNumber || phoneNumber.length < 9) {
-      Alert.alert("error", "Please enter a valid phone number.");
+      Alert.alert("Error", "Please enter a valid phone number.");
       return;
     }
 
@@ -33,138 +34,119 @@ export default function ForgotPasswordScreen() {
       const data = await res.json();
 
       if (!res.ok) {
-        Alert.alert("error", data.message || "Failed to send OTP.");
+        Alert.alert("Error", data.message || "Failed to send OTP.");
         return;
       }
 
-      Alert.alert("success", "OTP sent successfully. Please check your phone.");
-      
-      
+      Alert.alert("Success", "OTP sent successfully. Please check your phone.");
+
       router.push({
         pathname: "/auth/verify-otp",
-        params: { phone: phoneNumber }
+        params: { phone: phoneNumber },
       });
-
     } catch (error) {
-      Alert.alert("error", "cannot connect to server");
+      Alert.alert("Error", "Cannot connect to server.");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView className="flex-1 bg-[#fcf9f8]">
       <StatusBar barStyle="dark-content" />
 
-      {/* Header */}
-      <View style={styles.header}>
-        <TouchableOpacity style={styles.backBtn} onPress={() => router.back()}>
-          <Text style={styles.iconText}>←</Text>
-        </TouchableOpacity>
-      </View>
+      <ScrollView contentContainerStyle={{ paddingBottom: 40 }}>
 
-      <View style={styles.content}>
-        <Text style={styles.title}>OTP Login</Text>
-        <Text style={styles.subtitle}>
-          Please enter your phone number to receive an OTP for login. (e.g., 07X XXX XXXX)
-        </Text>
+        {/* HEADER */}
+        <View className="flex-row justify-between items-center px-4 py-10">
 
-        {/* Phone Number Input */}
-        <View style={styles.inputWrapper}>
-          <Text style={styles.inputIcon}>📞</Text>
-          <TextInput
-            placeholder="07X XXX XXXX"
-            value={phoneNumber}
-            onChangeText={setPhoneNumber}
-            style={styles.input}
-            keyboardType="phone-pad"
-            placeholderTextColor="#999"
-            maxLength={10}
-          />
+          {/* BACK + APP NAME */}
+          <View className="flex-row items-center">
+            <TouchableOpacity
+              onPress={() => router.back()}
+              className="w-9 h-9 rounded-full bg-[#012d1d] items-center justify-center mr-2"
+            >
+              <Ionicons name="arrow-back" size={18} color="#fff" />
+            </TouchableOpacity>
+
+            <Text className="text-lg font-extrabold text-[#012d1d]">
+              Jumbo Watch
+            </Text>
+          </View>
+
+          {/* LANGUAGE */}
+          <TouchableOpacity className="flex-row items-center border border-gray-300 px-3 py-1 rounded-lg">
+            <Ionicons name="language" size={16} color="#012d1d" />
+            <Text className="ml-1 text-sm font-semibold text-[#012d1d]">
+              භාෂාව
+            </Text>
+            <Ionicons name="chevron-down" size={16} color="#012d1d" />
+          </TouchableOpacity>
+
         </View>
 
-        {/* Action Button */}
-        <TouchableOpacity
-          style={[styles.actionButton, loading && { opacity: 0.7 }]}
-          onPress={sendOTP}
-          disabled={loading}
-        >
-          <Text style={styles.actionButtonText}>
-            {loading ? "Sending OTP..." : "Get OTP Code"}
-          </Text>
-        </TouchableOpacity>
+        {/* HERO ICON */}
+        <View className="items-center mt-4">
+          <View className="w-24 h-24 rounded-full bg-[#1b4332] items-center justify-center shadow-lg">
+            <Ionicons name="phone-portrait-outline" size={40} color="#fff" />
+          </View>
+        </View>
 
-        {/* Footer */}
-        <TouchableOpacity 
-            onPress={() => router.back()} 
-            style={styles.footer}
-        >
-          <Text style={styles.footerText}>again <Text style={{fontWeight: 'bold'}}>Login</Text> to the app</Text>
-        </TouchableOpacity>
-      </View>
+        {/* TITLE */}
+        <View className="px-6 mt-8">
+          <Text className="text-3xl font-bold text-[#012d1d]">
+            OTP Login
+          </Text>
+          <Text className="text-gray-500 mt-1">
+            Enter your phone number to receive a one-time password. (e.g., 07X XXX XXXX)
+          </Text>
+        </View>
+
+        {/* FORM */}
+        <View className="px-6 mt-6 space-y-4">
+
+          {/* PHONE NUMBER */}
+          <View>
+            <Text className="text-sm text-gray-500 mb-1">Phone Number</Text>
+            <View className="flex-row items-center border border-gray-300 rounded-xl bg-gray-100 px-3 h-14">
+              <Ionicons name="call-outline" size={20} color="#666" />
+              <TextInput
+                placeholder="07X XXX XXXX"
+                className="flex-1 ml-3 text-base"
+                value={phoneNumber}
+                onChangeText={setPhoneNumber}
+                keyboardType="phone-pad"
+                placeholderTextColor="#999"
+                maxLength={10}
+              />
+            </View>
+          </View>
+
+          {/* SEND OTP BUTTON */}
+          <TouchableOpacity
+            onPress={sendOTP}
+            disabled={loading}
+            className="bg-[#012d1d] h-14 rounded-xl items-center justify-center mt-4"
+            style={loading ? { opacity: 0.7 } : undefined}
+          >
+            <Text className="text-white text-lg font-semibold">
+              {loading ? "Sending OTP..." : "Get OTP Code"}
+            </Text>
+          </TouchableOpacity>
+
+        </View>
+
+        {/* FOOTER */}
+        <View className="items-center mt-8">
+          <TouchableOpacity onPress={() => router.back()}>
+            <Text className="text-gray-600">
+              Remember your password?
+              <Text className="text-[#012d1d] font-bold"> Login</Text>
+            </Text>
+          </TouchableOpacity>
+        </View>
+
+      </ScrollView>
     </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#FFF8E7",
-  },
-  header: {
-    paddingHorizontal: 20,
-    marginTop: 10,
-  },
-  backBtn: { padding: 10 },
-  iconText: { fontSize: 24, color: "#000" },
-  content: {
-    flex: 1,
-    paddingHorizontal: 24,
-    alignItems: "center",
-    paddingTop: 40,
-  },
-  title: {
-    fontSize: 32,
-    fontWeight: "bold",
-    color: "#000",
-    marginBottom: 10,
-  },
-  subtitle: {
-    fontSize: 16,
-    color: "rgba(0,0,0,0.6)",
-    marginBottom: 40,
-    textAlign: "center",
-    lineHeight: 22,
-  },
-  inputWrapper: {
-    flexDirection: "row",
-    alignItems: "center",
-    width: "100%",
-    height: 55,
-    borderWidth: 1,
-    borderColor: "#000",
-    borderRadius: 15,
-    paddingHorizontal: 15,
-    marginBottom: 30,
-    backgroundColor: "transparent",
-  },
-  inputIcon: { fontSize: 18, marginRight: 10 },
-  input: { flex: 1, fontSize: 16, color: "#000" },
-  actionButton: {
-    width: "100%",
-    height: 55,
-    backgroundColor: "#FF9F1C",
-    borderRadius: 20,
-    borderWidth: 2,
-    borderColor: "#000",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  actionButtonText: {
-    fontSize: 18,
-    fontWeight: "bold",
-    color: "#000",
-  },
-  footer: { marginTop: "auto", marginBottom: 30 },
-  footerText: { fontSize: 16, color: "#000" },
-});
