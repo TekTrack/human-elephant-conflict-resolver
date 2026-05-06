@@ -2094,61 +2094,6 @@ export function UserDirectoryPage() {
               </div>
             </div>
           ) : (
-<<<<<<< HEAD
-            <table className="w-full text-sm text-left">
-              <thead className={isDark ? "bg-white/5 text-white/40" : "bg-gray-50 text-gray-500"}>
-                <tr>
-                  <th className="px-6 py-4 font-bold uppercase text-[10px] tracking-widest">Member</th>
-                  <th className="px-6 py-4 font-bold uppercase text-[10px] tracking-widest">Contact</th>
-                  <th className="px-6 py-4 font-bold uppercase text-[10px] tracking-widest">Role</th>
-                  <th className="px-6 py-4 font-bold uppercase text-[10px] tracking-widest text-center">Status</th>
-                  <th className="px-6 py-4 font-bold uppercase text-[10px] tracking-widest text-right">Actions</th>
-                </tr>
-              </thead>
-              <tbody className={`divide-y ${isDark ? "divide-white/10" : "divide-gray-100"}`}>
-                {filteredUsers.length > 0 ? (
-                  filteredUsers.map((user, index) => (
-                    <tr key={`${user.role}-${user.id}`} className="hover:bg-blue-500/[0.03] transition-colors group">
-                      <td className="px-6 py-4">
-                        <div className="flex items-center gap-4">
-                          <div className="relative">
-                            <div className={`w-10 h-10 rounded-full flex items-center justify-center text-white font-bold shadow-sm ${user.role === "Admin" ? "bg-purple-600" : "bg-blue-600"}`}>
-                              {user.displayName.charAt(0).toUpperCase()}
-                            </div>
-                            <div className={`absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 bg-green-500 border-2 border-white dark:border-[#121212] rounded-full ${user.status === "Active" ? "bg-green-500" : "bg-gray-500"}`} />
-                          </div>
-                          <span className="font-semibold text-[15px]">{user.displayName}</span>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4">
-                        <div className="flex flex-col gap-1">
-                          <span className="flex items-center gap-1.5 text-xs opacity-70 lowercase">
-                            <Mail className="w-3 h-3" /> {user.displayEmail}
-                          </span>
-                          <span className="flex items-center gap-1.5 text-[11px] opacity-50">
-                            <Phone className="w-3 h-3" /> {user.displayPhone}
-                          </span>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4">
-                        <Badge variant={user.role === "Admin" ? "purple" : "neutral"}>{user.role}</Badge>
-                      </td>
-                      <td className="px-6 py-4">
-                        <div className="flex items-center justify-center gap-2">
-                          <span className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-green-500/10 text-green-600 dark:text-green-400 text-[10px] font-bold uppercase">
-                            <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
-                            {user.status}
-                          </span>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 text-right relative">
-                        <button
-                          onClick={(e) => { e.stopPropagation(); setActiveMenu(activeMenu === user.id ? null : user.id); }}
-                          className={`p-2 rounded-lg transition-colors ${isDark ? "hover:bg-white/10" : "hover:bg-gray-100"}`}
-                        >
-                          <MoreVertical className="w-4 h-4 opacity-50" />
-                        </button>
-=======
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {filteredAdmins.map((user) => (
                 <Card key={`admin-${user.id}`} className={`p-4 space-y-3 transition-all hover:border-purple-500/30 ${isDark ? "border-white/10" : "border-gray-200"}`}>
@@ -2168,7 +2113,6 @@ export function UserDirectoryPage() {
                     </div>
                     <Badge variant="purple">Admin</Badge>
                   </div>
->>>>>>> 5525ba4d147fbe9cc5f4a1487956fdfd3435c3a2
 
                   <hr className={isDark ? "border-white/10" : "border-gray-100"} />
 
