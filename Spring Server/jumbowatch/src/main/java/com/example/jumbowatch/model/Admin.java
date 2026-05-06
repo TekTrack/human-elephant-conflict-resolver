@@ -16,14 +16,14 @@ public class Admin {
     private String name;
     private String adminid;
     @Column(name = "is_logged")
-    private boolean is_logged = false;
+    private Boolean is_logged = false;
 
     
     public Admin() {
         // Default constructor for JPA
     }
 
-    public Admin(String username, String password, String email, String phone, String adminid, String name, boolean is_logged) {
+    public Admin(String username, String password, String email, String phone, String adminid, String name, Boolean is_logged) {
         this.username = username;
         this.password = password;
         this.email = email;
@@ -77,7 +77,7 @@ public class Admin {
         this.adminid = adminid;
     }
 
-    public void setIs_logged(boolean is_logged) {
+    public void setIs_logged(Boolean is_logged) {
         this.is_logged = is_logged;
     }
 

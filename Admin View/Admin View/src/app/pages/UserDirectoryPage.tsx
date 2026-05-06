@@ -2103,7 +2103,7 @@ export function UserDirectoryPage() {
                       <div className="w-10 h-10 rounded-full flex items-center justify-center text-white font-bold bg-purple-600">
                         {user.displayName.charAt(0).toUpperCase()}
                       </div>
-                      <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-green-500 border-2 border-white dark:border-[#121212] rounded-full" />
+                      <div className={user.status === "Active" ? `absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-green-500 border-2 border-white dark:border-[#121212] rounded-full` : "absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-gray-500 border-2 border-white dark:border-[#121212] rounded-full"} />
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className={`font-semibold text-sm truncate ${isDark ? "text-white" : "text-gray-900"}`}>
