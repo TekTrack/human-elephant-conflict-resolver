@@ -610,18 +610,16 @@ export function GeofencingPage() {
             {/* Geofences List */}
             <div className="space-y-3">
                 {geofences.map((geofence) => (
-                    <Card key={geofence.id} className="p-5" hoverable>
+                    <Card key={geofence.id} className="p-6" hoverable>
                         <div className="flex items-center justify-between">
                             <div className="flex-1">
                                 <div className="flex items-center gap-3 mb-2">
-                                    <h3 className="text-lg font-semibold text-black dark:text-white">{geofence.name}</h3>
+                                    <h3 className="text-lg font-semibold  dark:text-white">{geofence.name}</h3>
                                     <Badge variant={getVariant(geofence.type) as any}>{geofence.type}</Badge>
                                     <Badge variant={getVariant(geofence.status) as any}>{geofence.status}</Badge>
                                 </div>
                                 <div className="flex items-center gap-6 text-sm">
-                                    <span className="text-black dark:text-white">📍 {geofence.coordinates}</span>
-                                    <span
-                                        className="text-gray-600 dark:text-[rgba(255,255,255,0.6)]">🔔 {geofence.alerts} alerts</span>
+                                    <span className="dark:text-white">📍 {geofence.coordinates}</span>
                                 </div>
                             </div>
                             <div className="flex items-center gap-2">
@@ -639,9 +637,11 @@ export function GeofencingPage() {
                 <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
                     <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={handleCloseModal} />
 
-                    <Card className="relative w-full max-w-md p-6 shadow-2xl z-10" noPadding={false}>
-                        <div className="flex items-center justify-between mb-6">
-                            <h2 className="text-lg font-semibold text-black dark:text-white">Create New Geofence</h2>
+                    <div  className="bg-[#333] border-[#333]">
+                    <Card className="relative w-full  max-w-md p-6  z-10" noPadding={false}>
+
+                        <div className="flex items-center  justify-between mb-6">
+                            <h2 className="text-lg font-semibold dark:text-white">Create New Geofence</h2>
                             <Button variant="ghost" className="p-1.5" onClick={handleCloseModal}><X
                                 className="w-4 h-4" /></Button>
                         </div>
@@ -692,7 +692,9 @@ export function GeofencingPage() {
                             <Button variant="secondary" className="flex-1" onClick={handleCloseModal}>Cancel</Button>
                             <Button variant="primary" className="flex-1" onClick={handleSaveZone}>Save Zone</Button>
                         </div>
+
                     </Card>
+                    </div>
                 </div>
             )}
         </div>
