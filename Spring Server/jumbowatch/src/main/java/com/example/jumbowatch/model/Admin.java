@@ -1,5 +1,7 @@
 package com.example.jumbowatch.model;
+    
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 
@@ -13,19 +15,22 @@ public class Admin {
     private String phone;
     private String name;
     private String adminid;
+    @Column(name = "is_logged")
+    private boolean is_logged = false;
+
     
     public Admin() {
         // Default constructor for JPA
     }
 
-    public Admin(String username, String password, String email, String phone, String adminid, String name) {
+    public Admin(String username, String password, String email, String phone, String adminid, String name, boolean is_logged) {
         this.username = username;
         this.password = password;
         this.email = email;
         this.phone = phone;
         this.adminid = adminid;
         this.name = name;
-
+        this.is_logged = is_logged;
     }
 
     public String getUsername() {
@@ -70,6 +75,10 @@ public class Admin {
 
     public void setAdminId(String adminid) {
         this.adminid = adminid;
+    }
+
+    public void setIs_logged(boolean is_logged) {
+        this.is_logged = is_logged;
     }
 
     

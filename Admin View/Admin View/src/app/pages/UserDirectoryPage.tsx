@@ -89,7 +89,8 @@ export function UserDirectoryPage() {
         displayEmail: a.email || "No Email",
         displayPhone: a.phone || "No Phone",
         role: "Admin",
-        status: "Active",
+        status: a.is_logged ? "Active" : "Inactive",
+        //status: "Active",
       }));
 
       setAllUsers([...adminsMapped, ...usersMapped]);
@@ -596,7 +597,7 @@ console.log(payload);
                             <div className={`w-10 h-10 rounded-full flex items-center justify-center text-white font-bold shadow-sm ${user.role === "Admin" ? "bg-purple-600" : "bg-blue-600"}`}>
                               {user.displayName.charAt(0).toUpperCase()}
                             </div>
-                            <div className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 bg-green-500 border-2 border-white dark:border-[#121212] rounded-full" />
+                            <div className={`absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 bg-green-500 border-2 border-white dark:border-[#121212] rounded-full ${user.status === "Active" ? "bg-green-500" : "bg-gray-500"}`} />
                           </div>
                           <span className="font-semibold text-[15px]">{user.displayName}</span>
                         </div>

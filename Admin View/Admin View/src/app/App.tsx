@@ -494,6 +494,7 @@ function MainApp() {
 
     if (isLoggedIn) {
       const token = localStorage.getItem('authToken');
+      const username = localStorage.getItem('username');
       
       // SockJS and Stomp connection
       const socket = new SockJS('http://localhost:8080/ws-status');
@@ -501,8 +502,15 @@ function MainApp() {
 
       // stompClient.debug = () => {}; // Uncomment to hide console logs
 
+
+      console.log("Connecting to WebSocket with token:", token);
+      console.log("Connecting to WebSocket with username:", username);
+
+
       stompClient.connect(
-        { Authorization: `Bearer ${token}` },
+        { Authorization: `Bearer ${token}`,
+          username:username
+         },
         () => {
           console.log('✅ WebSocket Connected: Admin Status Active');
           stompClientRef.current = stompClient;
