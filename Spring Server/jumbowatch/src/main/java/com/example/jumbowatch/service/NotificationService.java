@@ -9,19 +9,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 public class NotificationService {
     @Autowired
     private NotificationRepository notificationRepository;
-    private Notification currentNotification = new Notification();
 
-    public void setNotification(String message, String type, Long sightingId) {
-        currentNotification.setMessage(message);
-        currentNotification.setType(type);
-        currentNotification.setSightingId(sightingId);
-    }
+    // No private Notification variable here anymore! 🚫
 
-    public Notification getNotification() {
-        return currentNotification;
-    }
-
-    public void saveNotification() {
-        notificationRepository.save(currentNotification);
+    public Notification createAndSave(String message, String type, Long sightingId) {
+        Notification n = new Notification();
+        n.setMessage(message);
+        n.setType(type);
+        n.setSightingId(sightingId);
+        return notificationRepository.save(n); // Save and return a fresh object
     }
 }

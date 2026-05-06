@@ -266,6 +266,7 @@ export function OverviewPage() {
                   mapStyle={isDark ? MAP_STYLE : MAP_STYLE_LIGHT}
                   style={{ width: "100%", height: "100%" }}
                   interactive={false}
+                  attributionControl={false}
                 >
                   {recentSightings.map((pt, i) => (
                     <Marker key={`sighting-${i}`} longitude={pt.longitude} latitude={pt.latitude} anchor="center">

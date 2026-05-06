@@ -23,29 +23,35 @@ public class JwtRequestFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
+        
         final String authorizationHeader = request.getHeader("Authorization");
 
         String username = null;
         String jwt = null;
 
+        // 👇 1. Check Header FIRST
         if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
             jwt = authorizationHeader.substring(7);
-            if (jwtUtil.validateToken(jwt)) {
-                username = jwtUtil.extractUsername(jwt);
-            }
+        } 
+        // 👇 2. If no header, check URL for SSE Stream token!
+        else if (request.getParameter("token") != null) {
+            jwt = request.getParameter("token");
         }
 
-        if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-            if (jwtUtil.validateToken(jwt)) {
-                UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
-                        username, null, new ArrayList<>());
-                authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+        // 👇 3. Validate whatever token we found
+        if (jwt != null && jwtUtil.validateToken(jwt)) {
+            username = jwtUtil.extractUsername(jwt);
+        }
 
-                SecurityContextHolder.getContext().setAuthentication(authToken);
-            }
+        // 4. Set Authentication context
+        if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+            UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
+                    username, null, new ArrayList<>());
+            authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+
+            SecurityContextHolder.getContext().setAuthentication(authToken);
         }
 
         filterChain.doFilter(request, response);
     }
-
 }

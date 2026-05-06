@@ -4,24 +4,25 @@ import {
   Text,
   TextInput,
   TouchableOpacity,
-  StyleSheet,
   Alert,
   SafeAreaView,
   StatusBar,
+  ScrollView,
 } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
 import { router, useLocalSearchParams } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import API_BASE_URL from "@/config/app";
 
 export default function VerifyOTPScreen() {
-  const { phone } = useLocalSearchParams(); 
+  const { phone } = useLocalSearchParams();
   const [otp, setOtp] = useState("");
   const [loading, setLoading] = useState(false);
   const [loadingOTP, setLoadingOTP] = useState(false);
 
   const verifyOTP = async () => {
     if (otp.length < 4) {
-      Alert.alert("error", "Please enter a valid OTP code.");
+      Alert.alert("Error", "Please enter a valid OTP code.");
       return;
     }
 
@@ -36,175 +37,144 @@ export default function VerifyOTPScreen() {
       const data = await res.json();
 
       if (!res.ok) {
-        Alert.alert("error", data.message || "Input OTP is incorrect.");
+        Alert.alert("Error", data.message || "Input OTP is incorrect.");
         return;
       }
 
       console.log("OTP verification successful:", data);
       await AsyncStorage.setItem("authToken", data.token);
-      router.replace("/admin/overview");
-
+      router.replace("/");
     } catch (error) {
-      Alert.alert("error", "Cannot connect to server.");
+      Alert.alert("Error", "Cannot connect to server.");
     } finally {
       setLoading(false);
     }
   };
 
-   const sendOTP = async () => {
-
+  const sendOTP = async () => {
     try {
       setLoadingOTP(true);
       const res = await fetch(`${API_BASE_URL}/api/sms/send-otp`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({phone}),
+        body: JSON.stringify({ phone }),
       });
 
       const data = await res.json();
 
       if (!res.ok) {
-        Alert.alert("error", data.message || "Failed to send OTP.");
+        Alert.alert("Error", data.message || "Failed to send OTP.");
         return;
       }
 
-      Alert.alert("success", "OTP sent successfully. Please check your phone.");
-      
-
+      Alert.alert("Success", "OTP sent successfully. Please check your phone.");
     } catch (error) {
-      Alert.alert("error", "cannot connect to server");
+      Alert.alert("Error", "Cannot connect to server.");
     } finally {
       setLoadingOTP(false);
     }
   };
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView className="flex-1 bg-[#fcf9f8]">
       <StatusBar barStyle="dark-content" />
 
-      <View style={styles.header}>
-        <TouchableOpacity style={styles.backBtn} onPress={() => router.back()}>
-          <Text style={styles.iconText}>←</Text>
-        </TouchableOpacity>
-      </View>
+      <ScrollView contentContainerStyle={{ paddingBottom: 40 }}>
 
-      <View style={styles.content}>
-        <Text style={styles.title}>Verification</Text>
-        <Text style={styles.subtitle}>
-          Please enter the OTP code sent to your phone number <Text style={{fontWeight: 'bold'}}>{phone}</Text>.
-        </Text>
+        {/* HEADER */}
+        <View className="flex-row justify-between items-center px-4 py-10">
 
-        {/* OTP Input */}
-        <View style={styles.inputWrapper}>
-          <Text style={styles.inputIcon}>🔑</Text>
-          <TextInput
-            placeholder="Enter OTP code"
-            value={otp}
-            onChangeText={setOtp}
-            style={styles.input}
-            keyboardType="number-pad"
-            placeholderTextColor="#999"
-            maxLength={6} 
-            textAlign="center"
-            letterSpacing={5}
-          />
+          {/* BACK + APP NAME */}
+          <View className="flex-row items-center">
+            <TouchableOpacity
+              onPress={() => router.back()}
+              className="w-9 h-9 rounded-full bg-[#012d1d] items-center justify-center mr-2"
+            >
+              <Ionicons name="arrow-back" size={18} color="#fff" />
+            </TouchableOpacity>
+
+            <Text className="text-lg font-extrabold text-[#012d1d]">
+              Jumbo Watch
+            </Text>
+          </View>
+
+          {/* LANGUAGE */}
+          <TouchableOpacity className="flex-row items-center border border-gray-300 px-3 py-1 rounded-lg">
+            <Ionicons name="language" size={16} color="#012d1d" />
+            <Text className="ml-1 text-sm font-semibold text-[#012d1d]">
+              භාෂාව
+            </Text>
+            <Ionicons name="chevron-down" size={16} color="#012d1d" />
+          </TouchableOpacity>
+
         </View>
 
-        {/* Action Button */}
-        <TouchableOpacity
-          style={[styles.verifyButton, loading && { opacity: 0.7 }]}
-          onPress={verifyOTP}
-          disabled={loading}
-        >
-          <Text style={styles.verifyButtonText}>
-            {loading ? "Verifying..." : "Verify & Login"}
-          </Text>
-        </TouchableOpacity>
+        {/* HERO ICON */}
+        <View className="items-center mt-4">
+          <View className="w-24 h-24 rounded-full bg-[#1b4332] items-center justify-center shadow-lg">
+            <Ionicons name="shield-checkmark-outline" size={40} color="#fff" />
+          </View>
+        </View>
 
-        {/* Resend Option */}
-        <View style={styles.resendContainer}>
-          <Text style={styles.resendText}>Did not receive the code?</Text>
+        {/* TITLE */}
+        <View className="px-6 mt-8">
+          <Text className="text-3xl font-bold text-[#012d1d]">
+            Verification
+          </Text>
+          <Text className="text-gray-500 mt-1">
+            Enter the OTP code sent to{" "}
+            <Text className="font-semibold text-[#012d1d]">{phone}</Text>.
+          </Text>
+        </View>
+
+        {/* FORM */}
+        <View className="px-6 mt-6 space-y-4">
+
+          {/* OTP INPUT */}
+          <View>
+            <Text className="text-sm text-gray-500 mb-1">OTP Code</Text>
+            <View className="flex-row items-center border border-gray-300 rounded-xl bg-gray-100 px-3 h-14">
+              <Ionicons name="key-outline" size={20} color="#666" />
+              <TextInput
+                placeholder="Enter OTP code"
+                className="flex-1 ml-3 text-base tracking-widest font-bold"
+                value={otp}
+                onChangeText={setOtp}
+                keyboardType="number-pad"
+                placeholderTextColor="#999"
+                maxLength={6}
+                textAlign="center"
+              />
+            </View>
+          </View>
+
+          {/* VERIFY BUTTON */}
           <TouchableOpacity
-          onPress={sendOTP}
+            onPress={verifyOTP}
+            disabled={loading}
+            className="bg-[#012d1d] h-14 rounded-xl items-center justify-center mt-4"
+            style={loading ? { opacity: 0.7 } : undefined}
           >
-            <Text style={styles.resendLink}>{loadingOTP ? "Sending..." : "Resend Code"}</Text>
+            <Text className="text-white text-lg font-semibold">
+              {loading ? "Verifying..." : "Verify & Login"}
+            </Text>
+          </TouchableOpacity>
+
+        </View>
+
+        {/* RESEND */}
+        <View className="flex-row items-center justify-center mt-8">
+          <Text className="text-gray-500 text-sm">
+            Didn't receive the code?{" "}
+          </Text>
+          <TouchableOpacity onPress={sendOTP} disabled={loadingOTP}>
+            <Text className="text-[#795950] font-bold text-sm">
+              {loadingOTP ? "Sending..." : "Resend Code"}
+            </Text>
           </TouchableOpacity>
         </View>
 
-      </View>
+      </ScrollView>
     </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#FFF8E7",
-  },
-  header: {
-    paddingHorizontal: 20,
-    marginTop: 10,
-  },
-  backBtn: { padding: 10 },
-  iconText: { fontSize: 24, color: "#000" },
-  content: {
-    flex: 1,
-    paddingHorizontal: 24,
-    alignItems: "center",
-    paddingTop: 40,
-  },
-  title: {
-    fontSize: 32,
-    fontWeight: "bold",
-    color: "#000",
-    marginBottom: 10,
-  },
-  subtitle: {
-    fontSize: 16,
-    color: "rgba(0,0,0,0.6)",
-    marginBottom: 40,
-    textAlign: "center",
-    lineHeight: 22,
-  },
-  inputWrapper: {
-    flexDirection: "row",
-    alignItems: "center",
-    width: "100%",
-    height: 60,
-    borderWidth: 1,
-    borderColor: "#000",
-    borderRadius: 15,
-    paddingHorizontal: 15,
-    marginBottom: 30,
-    backgroundColor: "transparent",
-  },
-  inputIcon: { fontSize: 18, marginRight: 10 },
-  input: { 
-    flex: 1, 
-    fontSize: 22, 
-    fontWeight: "bold",
-    color: "#000",
-  },
-  verifyButton: {
-    width: "100%",
-    height: 55,
-    backgroundColor: "#FF9F1C",
-    borderRadius: 20,
-    borderWidth: 2,
-    borderColor: "#000",
-    justifyContent: "center",
-    alignItems: "center",
-    marginBottom: 25,
-  },
-  verifyButtonText: {
-    fontSize: 18,
-    fontWeight: "bold",
-    color: "#000",
-  },
-  resendContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-  },
-  resendText: { fontSize: 14, color: "#000" },
-  resendLink: { fontSize: 14, color: "#FF9F1C", fontWeight: "bold" },
-});

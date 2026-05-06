@@ -74,6 +74,7 @@
             <scope>runtime</scope>
         </dependency>
         <dependency>
+<<<<<<< HEAD
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-websocket</artifactId>
         </dependency>
@@ -81,6 +82,11 @@
             <groupId>com.cloudinary</groupId>
             <artifactId>cloudinary-http5</artifactId>
             <version>2.0.0</version>
+=======
+            <groupId>com.cloudinary</groupId>
+            <artifactId>cloudinary-http44</artifactId>
+            <version>1.36.0</version>
+>>>>>>> 5525ba4d147fbe9cc5f4a1487956fdfd3435c3a2
         </dependency>
     </dependencies>
     

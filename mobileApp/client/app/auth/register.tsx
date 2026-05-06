@@ -4,21 +4,15 @@ import {
   Text,
   TextInput,
   TouchableOpacity,
-  StyleSheet,
   Alert,
   SafeAreaView,
-  StatusBar,
+  ScrollView,
   KeyboardAvoidingView,
   Platform,
-  ScrollView,
 } from "react-native";
+
 import { router } from "expo-router";
-import { 
-  MaterialCommunityIcons, 
-  Ionicons, 
-  AntDesign, 
-  SimpleLineIcons 
-} from "@expo/vector-icons";
+import { Ionicons } from "@expo/vector-icons";
 import API_BASE_URL from "@/config/app";
 
 export default function RegisterScreen() {
@@ -28,7 +22,7 @@ export default function RegisterScreen() {
   const [nic, setNic] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  
+
   const [secureText, setSecureText] = useState(true);
   const [secureConfirmText, setSecureConfirmText] = useState(true);
   const [agreed, setAgreed] = useState(false);
@@ -44,7 +38,7 @@ export default function RegisterScreen() {
       return;
     }
     if (!agreed) {
-      Alert.alert("Error", "You must agree to the Terms and Conditions.");
+      Alert.alert("Error", "Accept Terms & Conditions.");
       return;
     }
 
@@ -59,159 +53,183 @@ export default function RegisterScreen() {
           password,
           phoneNumber,
           NIC: nic,
-          // Sending empty strings for these as they are not in the current UI design
           adminID: "",
           userCategory: "",
         }),
       });
 
       const data = await res.json();
+
       if (!res.ok) {
         Alert.alert("Register Failed", data.message || "Try again.");
         return;
       }
 
-      Alert.alert("Success", "Account created successfully!");
+      Alert.alert("Success", "Account created!");
       router.replace("/auth/login");
     } catch (error) {
-      Alert.alert("Error", "Cannot connect to server.");
+      Alert.alert("Error", "Server error.");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="dark-content" />
-      <KeyboardAvoidingView 
+
+    
+    <SafeAreaView className="flex-1 bg-[#fcf9f8]">
+      <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : "height"}
-        style={{ flex: 1 }}
+        className="flex-1"
       >
-        <ScrollView contentContainerStyle={styles.scrollContent} bounces={false} showsVerticalScrollIndicator={false}>
+        <ScrollView
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={{ flexGrow: 1 }}
+        >
+
           
-          {/* Header */}
-          <View style={styles.header}>
-            <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
-              <Ionicons name="arrow-back" size={32} color="black" />
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.langSelector}>
-              <Text style={styles.langText}>භාෂාව</Text>
-              <MaterialCommunityIcons name="chevron-down" size={24} color="black" />
-            </TouchableOpacity>
-          </View>
+          <View className="flex-1 px-6 pt-10 pb-6">
 
-          <View style={styles.content}>
-            <Text style={styles.title}>SignUp</Text>
+            {/* 🔥 Jumbo Watch Logo */}
+            <View className="items-center mb-8">
+              <View className="w-20 h-20 rounded-full bg-[#1b4332] items-center justify-center shadow-lg">
+                <Ionicons name="leaf" size={40} color="white" />
+              </View>
+              <Text className="text-2xl font-bold text-[#012d1d] mt-3">
+                Jumbo Watch
+              </Text>
+            </View>
 
-            {/* Full Name */}
-            <View style={styles.inputWrapper}>
-              <Ionicons name="person-outline" size={22} color="black" style={styles.inputIcon} />
+            {/* Title */}
+            <Text className="text-3xl font-bold text-[#012d1d] mb-2">
+              Sign Up
+            </Text>
+            <Text className="text-gray-500 mb-6">
+              Create your account to continue
+            </Text>
+
+            {/* Inputs */}
+
+            {/* Name */}
+            <View className="flex-row items-center border border-gray-300 rounded-xl px-4 h-14 mb-4 bg-white">
+              <Ionicons name="person-outline" size={20} color="gray" />
               <TextInput
                 placeholder="Full Name"
+                className="flex-1 ml-3 text-base"
                 value={name}
                 onChangeText={setName}
-                style={styles.input}
-                placeholderTextColor="#999"
               />
             </View>
 
             {/* Email */}
-            <View style={styles.inputWrapper}>
-              <MaterialCommunityIcons name="email-outline" size={24} color="black" style={styles.inputIcon} />
+            <View className="flex-row items-center border border-gray-300 rounded-xl px-4 h-14 mb-4 bg-white">
+              <Ionicons name="mail-outline" size={20} color="gray" />
               <TextInput
-                placeholder="Enter your email"
+                placeholder="Email"
+                className="flex-1 ml-3 text-base"
                 value={email}
                 onChangeText={setEmail}
-                style={styles.input}
-                keyboardType="email-address"
-                placeholderTextColor="#999"
               />
             </View>
 
-            {/* Phone Number */}
-            <View style={styles.inputWrapper}>
-              <Ionicons name="phone-portrait-outline" size={22} color="black" style={styles.inputIcon} />
+            {/* Phone */}
+            <View className="flex-row items-center border border-gray-300 rounded-xl px-4 h-14 mb-4 bg-white">
+              <Ionicons name="call-outline" size={20} color="gray" />
               <TextInput
-                placeholder="Enter your phone number"
+                placeholder="Phone Number"
+                className="flex-1 ml-3 text-base"
                 value={phoneNumber}
                 onChangeText={setPhoneNumber}
-                style={styles.input}
-                keyboardType="phone-pad"
-                placeholderTextColor="#999"
               />
             </View>
 
             {/* NIC */}
-            <View style={styles.inputWrapper}>
-              <AntDesign name="idcard" size={24} color="black" style={styles.inputIcon} />
+            <View className="flex-row items-center border border-gray-300 rounded-xl px-4 h-14 mb-4 bg-white">
+              <Ionicons name="card-outline" size={20} color="gray" />
               <TextInput
-                placeholder="Enter your NIC"
+                placeholder="NIC"
+                className="flex-1 ml-3 text-base"
                 value={nic}
                 onChangeText={setNic}
-                style={styles.input}
-                placeholderTextColor="#999"
               />
             </View>
 
             {/* Password */}
-            <View style={styles.inputWrapper}>
-              <SimpleLineIcons name="lock" size={22} color="black" style={styles.inputIcon} />
+            <View className="flex-row items-center border border-gray-300 rounded-xl px-4 h-14 mb-4 bg-white">
+              <Ionicons name="lock-closed-outline" size={20} color="gray" />
               <TextInput
-                placeholder="Enter your password"
+                placeholder="Password"
                 secureTextEntry={secureText}
+                className="flex-1 ml-3 text-base"
                 value={password}
                 onChangeText={setPassword}
-                style={styles.input}
-                placeholderTextColor="#999"
               />
               <TouchableOpacity onPress={() => setSecureText(!secureText)}>
-                <Ionicons 
-                  name={secureText ? "eye-off-outline" : "eye-outline"} 
-                  size={24} 
-                  color="rgba(0,0,0,0.5)" 
+                <Ionicons
+                  name={secureText ? "eye-off-outline" : "eye-outline"}
+                  size={20}
+                  color="gray"
                 />
               </TouchableOpacity>
             </View>
 
             {/* Confirm Password */}
-            <View style={styles.inputWrapper}>
-              <SimpleLineIcons name="lock" size={22} color="black" style={styles.inputIcon} />
+            <View className="flex-row items-center border border-gray-300 rounded-xl px-4 h-14 mb-4 bg-white">
+              <Ionicons name="lock-closed-outline" size={20} color="gray" />
               <TextInput
-                placeholder="Confirm your password"
+                placeholder="Confirm Password"
                 secureTextEntry={secureConfirmText}
+                className="flex-1 ml-3 text-base"
                 value={confirmPassword}
                 onChangeText={setConfirmPassword}
-                style={styles.input}
-                placeholderTextColor="#999"
               />
-              <TouchableOpacity onPress={() => setSecureConfirmText(!secureConfirmText)}>
-                <Ionicons 
-                  name={secureConfirmText ? "eye-off-outline" : "eye-outline"} 
-                  size={24} 
-                  color="rgba(0,0,0,0.5)" 
+              <TouchableOpacity
+                onPress={() => setSecureConfirmText(!secureConfirmText)}
+              >
+                <Ionicons
+                  name={secureConfirmText ? "eye-off-outline" : "eye-outline"}
+                  size={20}
+                  color="gray"
                 />
               </TouchableOpacity>
             </View>
 
-            {/* Sign Up Button */}
+            {/* Terms */}
             <TouchableOpacity
-              style={[styles.signUpButton, loading && { opacity: 0.7 }]}
+              className="flex-row items-center mb-6"
+              onPress={() => setAgreed(!agreed)}
+            >
+              <View
+                className={`w-5 h-5 rounded border mr-3 ${
+                  agreed ? "bg-black" : "border-gray-400"
+                }`}
+              />
+              <Text className="text-sm text-gray-600 flex-1">
+                I agree to Terms & Conditions
+              </Text>
+            </TouchableOpacity>
+
+            {/* Button */}
+            <TouchableOpacity
+              className="h-14 bg-[#012d1d] rounded-xl items-center justify-center"
               onPress={register}
               disabled={loading}
             >
-              <Text style={styles.signUpButtonText}>
+              <Text className="text-white text-lg font-semibold">
                 {loading ? "Creating..." : "Sign Up"}
               </Text>
             </TouchableOpacity>
 
-            {/* Terms and Conditions */}
-            <TouchableOpacity 
-              style={styles.termsRow} 
-              onPress={() => setAgreed(!agreed)}
+            {/* Footer */}
+            <TouchableOpacity
+              onPress={() => router.push("/auth/login")}
+              className="mt-6 items-center"
             >
-              <View style={[styles.checkbox, agreed && styles.checkboxActive]} />
-              <Text style={styles.termsText}>
-                I Agree with the Term and Conditions and Privacy Policy of AliProject.
+              <Text className="text-gray-500">
+                Already have an account?{" "}
+                <Text className="text-[#012d1d] font-semibold">
+                  Login
+                </Text>
               </Text>
             </TouchableOpacity>
 
@@ -221,113 +239,3 @@ export default function RegisterScreen() {
     </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#FFF8E7",
-  },
-  scrollContent: {
-    flexGrow: 1,
-  },
-  header: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    paddingHorizontal: 20,
-    marginTop: 30,
-  },
-  backBtn: {
-    width: 50,
-    height: 50,
-    justifyContent: "center",
-  },
-  langSelector: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "transparent",
-    paddingRight: 10,
-  },
-  langText: {
-    fontFamily: "Poppins",
-    fontSize: 16,
-    color: "#000",
-    marginRight: 4,
-  },
-  content: {
-    flex: 1,
-    paddingHorizontal: 30,
-    alignItems: "center",
-    paddingTop: 10,
-    paddingBottom: 40,
-  },
-  title: {
-    fontFamily: "Poppins",
-    fontSize: 34,
-    fontWeight: "700",
-    color: "#000",
-    marginBottom: 35,
-  },
-  inputWrapper: {
-    flexDirection: "row",
-    alignItems: "center",
-    width: "100%",
-    height: 58,
-    borderWidth: 1,
-    borderColor: "#000",
-    borderRadius: 15,
-    paddingHorizontal: 15,
-    marginBottom: 20,
-  },
-  inputIcon: {
-    marginRight: 12,
-  },
-  input: {
-    flex: 1,
-    fontFamily: "Poppins",
-    fontSize: 16,
-    color: "#000",
-  },
-  signUpButton: {
-    width: "100%",
-    height: 60,
-    backgroundColor: "#FF9F1C",
-    borderRadius: 20,
-    borderWidth: 2,
-    borderColor: "#000",
-    justifyContent: "center",
-    alignItems: "center",
-    marginTop: 10,
-    marginBottom: 30,
-  },
-  signUpButtonText: {
-    fontFamily: "Poppins",
-    fontSize: 20,
-    fontWeight: "700",
-    color: "#000",
-  },
-  termsRow: {
-    flexDirection: "row",
-    alignItems: "flex-start",
-    width: "100%",
-    paddingRight: 15,
-  },
-  checkbox: {
-    width: 20,
-    height: 20,
-    borderRadius: 10,
-    borderWidth: 1.5,
-    borderColor: "#000",
-    marginRight: 12,
-    marginTop: 2,
-  },
-  checkboxActive: {
-    backgroundColor: "#000",
-  },
-  termsText: {
-    fontFamily: "Poppins",
-    fontSize: 14,
-    color: "rgba(0,0,0,0.7)",
-    lineHeight: 20,
-    flex: 1,
-  },
-});

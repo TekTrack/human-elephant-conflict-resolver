@@ -15,6 +15,8 @@ export default function UserReportPage() {
   const [locationMode, setLocationMode] = useState<"current" | "map">("current");
   const [mapCoords, setMapCoords] = useState<{latitude: number, longitude: number} | null>(null);
   const [showMapModal, setShowMapModal] = useState(false);
+  const [imageUrl, setImageUrl] = useState("");
+
 
   // 📷 Image Selection Options
   const handleImagePick = () => {
@@ -114,6 +116,40 @@ export default function UserReportPage() {
       setLoading(false);
     }
   };
+
+  // const cloudinaryUpload = () =>{
+  //   const [isUploading, setIsUploading] = useState(false);
+  //   const handleUpload = async()=>{
+  //     const file = image;
+  //     if (!file) return;
+
+  //     const formData = new FormData();
+
+  //     formData.append("file", {
+  //       uri: file.uri,
+  //       name: "userReport.jpg",
+  //       type: "image/jpeg",
+  //     } as any);
+  //     formData.append("upload_preset", "UserSightings");
+
+  //     setIsUploading(true);
+  //     try {
+  //       const response = await  fetch("https://api.cloudinary.com/v1_1/dh8n9y7s6/image/upload", {
+  //         method: "POST",
+  //         body: formData,
+  //       });
+  //       const data = await response.json();
+  //       if (response.ok) {
+  //         setImageUrl(data.secure_url);
+  //       }
+  //     }catch (err) {
+  //       return err;
+  //     }
+  //     setIsUploading(false);
+  //   }
+    
+  // }
+
 
   return (
     <ScrollView className="flex-1 bg-[#FFF8E7] px-5 pt-10" showsVerticalScrollIndicator={false}>
