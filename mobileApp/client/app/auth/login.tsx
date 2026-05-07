@@ -13,7 +13,7 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import API_BASE_URL from "@/config/app";  
+import API_BASE_URL from "@/config/app";
 import ForgotPasswordScreen from "./forgot-password";
 
 
@@ -57,8 +57,8 @@ export default function LoginScreen() {
       <StatusBar barStyle="dark-content" />
 
       <ScrollView contentContainerStyle={{ paddingBottom: 40 }}>
-        
-        
+
+
         {/* HEADER */}
         <View className="flex-row justify-between items-center px-4 py-10">
 

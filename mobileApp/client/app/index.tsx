@@ -12,7 +12,7 @@ export default function Index() {
       if (token) {
         router.replace("/admin/home");
       } else {
-        router.replace("/auth/login");
+        router.replace("/auth/landing");
       }
     };
 

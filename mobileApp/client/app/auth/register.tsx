@@ -76,7 +76,7 @@ export default function RegisterScreen() {
 
   return (
 
-    
+
     <SafeAreaView className="flex-1 bg-[#fcf9f8]">
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : "height"}
@@ -87,7 +87,7 @@ export default function RegisterScreen() {
           contentContainerStyle={{ flexGrow: 1 }}
         >
 
-          
+
           <View className="flex-1 px-6 pt-10 pb-6">
 
             {/* 🔥 Jumbo Watch Logo */}

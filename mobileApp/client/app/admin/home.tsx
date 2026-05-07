@@ -53,7 +53,6 @@ export default function Overview() {
         "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=1000",
     },
   ];
-
   return (
     <View style={styles.container}>
       <StatusBar barStyle="dark-content" backgroundColor="#fcf9f8" />
