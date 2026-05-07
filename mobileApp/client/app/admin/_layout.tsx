@@ -11,6 +11,8 @@ import { Ionicons } from "@expo/vector-icons";
 import API_BASE_URL from "@/config/app";
 import { useState } from "react";
 import axios from "axios";
+// Put this at the very top of _layout.tsx!
+import "@/config/bgTask";
 
 function CustomDrawerContent(props: any) {
   const router = useRouter();

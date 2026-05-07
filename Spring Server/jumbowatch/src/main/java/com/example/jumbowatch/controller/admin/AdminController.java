@@ -93,19 +93,23 @@ public class AdminController {
         try {
             Admin admin = adminRepository.findById(username)
                     .orElseThrow(() -> new RuntimeException("Admin not found"));
-
+        
             if (passwordEncoder.matches(password, admin.getPassword())) {
+
 
                 String token = jwtUtil.generateToken(username);
 
+        
                 Map<String, Object> response = new HashMap<>();
                 response.put("message", "Login successful!");
                 response.put("status", HttpStatus.OK.value());
                 response.put("token", token);
                 response.put("role","admin");
                 response.put("data", admin);
-               
+               System.out.println("Admin logged in successfully: " + username); // Debugging line
                 return new ResponseEntity<>(response, HttpStatus.OK);
+
+                
             } else {
                 Map<String, Object> errorResponse = new HashMap<>();
                 errorResponse.put("message", "Invalid credentials");

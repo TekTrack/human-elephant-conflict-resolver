@@ -14,6 +14,7 @@ const login = async (username, password) => {
     }
     const data = await res.json();
     localStorage.setItem('authToken', data.token); 
+    localStorage.setItem('username', username);
     return true; // Success!
   } catch (error) {
     console.error(error);
@@ -23,7 +24,7 @@ const login = async (username, password) => {
 
 const fetchSecureData = async () => {
   const token = localStorage.getItem('authToken'); // Grab the saved token
-
+  const username = localStorage.getItem('username'); // Grab the saved username
     const res = await fetch('http://localhost:8080/api/admin/protected-route', {
       method: 'GET',
       headers: {
@@ -38,6 +39,7 @@ const fetchSecureData = async () => {
  
 const logout = () => {
   localStorage.removeItem('authToken'); 
+  localStorage.removeItem('username');
   window.location.href = '/';
 };
 
