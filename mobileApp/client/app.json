@@ -12,7 +12,8 @@
     },
     "android": {
       "edgeToEdgeEnabled": true,
-      "predictiveBackGestureEnabled": false
+      "predictiveBackGestureEnabled": false,
+      "package": "com.sahanjaya444.mobileApp"
     },
     "web": {
       "output": "static",
@@ -25,6 +26,17 @@
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
+    },
+    "expo-location": {
+      "locationAlwaysAndWhenInUsePermission": "Allow tracking in background.",
+      "isAndroidBackgroundLocationEnabled": true,
+      "isAndroidForegroundServiceEnabled": true
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "e24415bc-bbee-4b4f-9764-733e72a700ab"
+      }
     }
   }
 }
