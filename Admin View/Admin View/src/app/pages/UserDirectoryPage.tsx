@@ -1491,6 +1491,7 @@ import { StatCard } from "../components/StatCard";
 import { Button } from "../components/Button";
 import { Card } from "../components/Card";
 import { Badge } from "../components/Badge";
+import { PopupCard } from "../components/PopupCard";
 
 interface UnifiedUser {
   adminId: string;
@@ -1779,14 +1780,15 @@ export function UserDirectoryPage() {
       ══════════════════════════════════════════════════════════ */}
       {isModalOpen && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[100] p-4 transition-all">
+        <div className="bg-[#212121] rounded-lg">
           <Card className={`w-full max-w-lg shadow-2xl border ${isDark ? "border-white/10" : "border-gray-200"}`}>
             <div className="p-6 space-y-6">
 
               {/* Header */}
               <div className="flex items-center justify-between border-b pb-4 border-white/10">
                 <div>
-                  <h2 className={`text-xl font-bold ${isDark ? "text-white" : "text-gray-900"}`}>Create Account</h2>
-                  <p className="text-xs opacity-50 uppercase tracking-tighter mt-1">Registering a new {userType} to the system</p>
+                  <h2 className={`text-xl  font-bold ${isDark ? "text-white" : "text-gray-900"}`}>Create Account</h2>
+
                 </div>
                 <div className="flex items-center gap-2">
                   <Badge variant={userType === "Admin" ? "purple" : "neutral"}>{userType}</Badge>
@@ -1908,69 +1910,66 @@ export function UserDirectoryPage() {
               </div>
             </div>
           </Card>
+          </div>
         </div>
       )}
 
       {/* ══════════════════════════════════════════════════════════
-          VIEW FULL INFO MODAL
+          VIEW FULL INFO admin/user
       ══════════════════════════════════════════════════════════ */}
-      {viewUser && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[100] p-4">
-          <Card className={`w-full max-w-md shadow-2xl border ${isDark ? "border-white/10" : "border-gray-200"}`}>
-            <div className="p-6 space-y-5">
-              <div className="flex items-center justify-between border-b pb-4 border-white/10">
-                <div>
-                  <h2 className={`text-xl font-bold ${isDark ? "text-white" : "text-gray-900"}`}>Member Details</h2>
-                  <p className="text-xs opacity-50 uppercase tracking-tighter mt-1">Full profile information</p>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Badge variant={viewUser.role === "Admin" ? "purple" : "neutral"}>{viewUser.role}</Badge>
-                  <button onClick={() => setViewUser(null)} className={`p-1.5 rounded-lg transition-colors ${isDark ? "hover:bg-white/10 text-white/50" : "hover:bg-gray-100 text-gray-400"}`}>
-                    <X className="w-4 h-4" />
-                  </button>
-                </div>
-              </div>
-
-              <div className="flex items-center gap-4">
-                <div className={`w-14 h-14 rounded-full flex items-center justify-center text-white text-xl font-bold flex-shrink-0 ${viewUser.role === "Admin" ? "bg-purple-600" : "bg-blue-600"}`}>
-                  {viewUser.displayName.charAt(0).toUpperCase()}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className={`font-semibold text-base truncate ${isDark ? "text-white" : "text-gray-900"}`}>{viewUser.displayName}</p>
-                  <p className="text-xs opacity-50 mt-0.5 truncate">
-                    {viewUser.role === "Admin" ? `System Administrator · ${viewUser.adminId || "—"}` : `User · ${viewUser.id}`}
-                  </p>
-                </div>
-                <span className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-green-500/10 text-green-400 text-[10px] font-bold uppercase flex-shrink-0">
-                  <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" /> Active
-                </span>
-              </div>
-
-              <div>
-                <p className="text-[9px] font-bold uppercase tracking-widest opacity-30 mb-2">Contact</p>
-                <div className="grid grid-cols-2 gap-3">
-                  <InfoItem label="Email" value={viewUser.displayEmail} />
-                  <InfoItem label="Phone" value={viewUser.displayPhone} />
-                </div>
-              </div>
-
-              <div>
-                <p className="text-[9px] font-bold uppercase tracking-widest opacity-30 mb-2">Account</p>
-                <div className="grid grid-cols-2 gap-3">
-                  <InfoItem label="Role" value={viewUser.role} />
-                  <InfoItem label="Admin ID" value={viewUser.adminId || "—"} />
-                  <InfoItem label={viewUser.role === "Admin" ? "Username" : "User ID"} value={String(viewUser.id)} />
-                  <InfoItem label="Status" value={viewUser.status} accent />
-                </div>
-              </div>
-
-              <div className="flex gap-3 pt-2 border-t border-white/10">
-                <Button variant="outline" className="flex-1" onClick={() => setViewUser(null)}>Close</Button>
-              </div>
-            </div>
-          </Card>
+    {viewUser && (
+      <PopupCard
+        open={!!viewUser}
+        onClose={() => setViewUser(null)}
+        title="Member Details"
+        badge={<Badge variant={viewUser.role === "Admin" ? "purple" : "neutral"}>{viewUser.role}</Badge>}
+        footer={
+          <Button variant="outline" className="w-full" onClick={() => setViewUser(null)}>
+            Close
+          </Button>
+        }
+      >
+        {/* Avatar + name */}
+        <div className="flex items-center gap-4 mb-5">
+          <div className={`w-14 h-14 rounded-full flex items-center justify-center text-white text-xl font-bold flex-shrink-0 ${viewUser.role === "Admin" ? "bg-blue-600" : "bg-blue-600"}`}>
+            {viewUser.displayName.charAt(0).toUpperCase()}
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className={`font-semibold text-base truncate ${isDark ? "text-white" : "text-gray-900"}`}>
+              {viewUser.displayName}
+            </p>
+            <p className="text-xs opacity-50 mt-0.5 truncate">
+              {viewUser.role === "Admin"
+                ? `System Administrator · ${viewUser.adminId || "—"}`
+                : `User · ${viewUser.id}`}
+            </p>
+          </div>
+          <span className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-green-500/10 text-green-400 text-[10px] font-bold uppercase flex-shrink-0">
+            <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" /> Active
+          </span>
         </div>
-      )}
+
+        {/* Contact */}
+        <div className="mb-4">
+          <p className="text-[9px] font-bold uppercase tracking-widest opacity-30 mb-2">Contact</p>
+          <div className="grid grid-cols-2 gap-3">
+            <InfoItem label="Email" value={viewUser.displayEmail} />
+            <InfoItem label="Phone" value={viewUser.displayPhone} />
+          </div>
+        </div>
+
+        {/* Account */}
+        <div>
+          <p className="text-[9px] font-bold uppercase tracking-widest opacity-30 mb-2">Account</p>
+          <div className="grid grid-cols-2 gap-3">
+            <InfoItem label="Role" value={viewUser.role} />
+            <InfoItem label="Admin ID" value={viewUser.adminId || "—"} />
+            <InfoItem label={viewUser.role === "Admin" ? "Username" : "User ID"} value={String(viewUser.id)} />
+            <InfoItem label="Status" value={viewUser.status} accent />
+          </div>
+        </div>
+      </PopupCard>
+    )}
 
       {/* ══════════════════════════════════════════════════════════
           DELETE CONFIRMATION MODAL
@@ -2096,11 +2095,11 @@ export function UserDirectoryPage() {
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {filteredAdmins.map((user) => (
-                <Card key={`admin-${user.id}`} className={`p-4 space-y-3 transition-all hover:border-purple-500/30 ${isDark ? "border-white/10" : "border-gray-200"}`}>
+                <Card key={`admin-${user.id}`} className={`p-4 space-y-3 transition-all hover:border-blue-500/30 ${isDark ? "border-white/10" : "border-gray-200"}`}>
                   {/* Card Top */}
                   <div className="flex items-center gap-3">
                     <div className="relative flex-shrink-0">
-                      <div className="w-10 h-10 rounded-full flex items-center justify-center text-white font-bold bg-purple-600">
+                      <div className="w-10 h-10 rounded-full flex items-center justify-center text-white font-bold bg-blue-600">
                         {user.displayName.charAt(0).toUpperCase()}
                       </div>
                       <div className={user.status === "Active" ? `absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-green-500 border-2 border-white dark:border-[#121212] rounded-full` : "absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-gray-500 border-2 border-white dark:border-[#121212] rounded-full"} />
