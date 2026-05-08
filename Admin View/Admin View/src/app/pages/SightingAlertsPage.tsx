@@ -116,13 +116,13 @@ export function SightingAlertsPage() {
   const getStatusIcon = (status: string) => {
     switch (status?.toLowerCase()) {
       case "verified":
-        return <XCircle className="w-5 h-5 text-red-500" />;
+        return < CheckLine className="w-5 h-5 text-green-500" />;
       case "new":
         return <ClockPlus className="w-5 h-5 text-orange-500" />;
       case "info":
         return <Clock className="w-5 h-5 text-blue-500" />;
       case "neglected":
-        return <CheckLine className="w-5 h-5 text-green-500" />;
+        return <XCircle className="w-5 h-5 text-red-500" />;
       default:
         return <ClockPlus className="w-5 h-5 text-orange-500" />;
     }
@@ -133,10 +133,10 @@ export function SightingAlertsPage() {
     const styles: Record<string, string> = {
       critical: "bg-red-100 text-red-700",
       warning: "bg-yellow-100 text-yellow-700",
-      new: "bg-orange-100 text-orange-700",
+      new: "bg-blue-100 text-blue-700",
       info: "bg-blue-100 text-blue-700",
-      neglected: "bg-green-100 text-green-700",
-      verified: "bg-red-100 text-red-700",
+      neglected: "bg-red-100 text-red-700",
+      verified: "bg-green-100 text-green-700",
     };
     return styles[normalizedStatus] || "bg-gray-100 text-gray-700";
   };
@@ -269,39 +269,50 @@ export function SightingAlertsPage() {
             {userAlerts.length > 0 ? (
               userAlerts
                 .sort((a, b) => new Date(b.rawTime).getTime() - new Date(a.rawTime).getTime())
-                .map((alert) => (
-                  <div
-                    key={alert.id}
-                    onClick={() => setSelectedAlert(alert)}
-                    className={`p-5 rounded-xl border ${isDark
-                        ? "bg-[rgba(255,255,255,0.03)] border-[rgba(255,255,255,0.1)] hover:bg-[rgba(255,255,255,0.05)]"
-                        : "bg-white border-gray-200 hover:bg-gray-50"
-                      } transition-colors cursor-pointer`}
-                  >
-                    <div className="flex items-start gap-4">
-                      {getStatusIcon(alert.status)}
-                      <div className="flex-1">
-                        <div className="flex items-start justify-between mb-2">
-                          <h3 className="font-semibold">{alert.title}</h3>
-                          <span className={`text-xs px-2 py-1 rounded ${getStatusBadge(alert.status)}`}>
-                            {alert.status.toUpperCase()}
-                          </span>
-                        </div>
-                        <p className={`text-sm mb-2 ${isDark ? "text-[rgba(255,255,255,0.6)]" : "text-gray-600"}`}>
-                          {alert.description}
-                        </p>
-                        <div className="flex items-center gap-4 text-xs">
-                          <span className={isDark ? "text-[rgba(255,255,255,0.4)]" : "text-gray-500"}>
-                            {alert.time}
-                          </span>
-                          <span className={isDark ? "text-[rgba(255,255,255,0.4)]" : "text-gray-500"}>
-                            📍 {alert.location}
-                          </span>
+                .map((alert) => {
+                  // 1. Check the status right here, INSIDE the loop
+                  const isNew = alert.status?.toLowerCase() === "new";
+
+                  return (
+                    <div
+                      key={alert.id}
+                      onClick={() => setSelectedAlert(alert)}
+                      // 2. Apply the dynamic background colors to the outermost card
+                      className={`p-5 rounded-xl border transition-colors cursor-pointer ${
+                        isNew
+                          ? isDark
+                            ? "bg-blue-500/10 border-blue-500/20" // Dark Mode: Subtle blue tint
+                            : "bg-blue-50 border-blue-200 shadow-sm" // Light Mode: Soft blue tint
+                          : isDark
+                          ? "bg-[rgba(255,255,255,0.03)] border-[rgba(255,255,255,0.1)] hover:bg-[rgba(255,255,255,0.05)]" // Dark Mode: Normal
+                          : "bg-white border-gray-200 hover:bg-gray-50" // Light Mode: Normal
+                      }`}
+                    >
+                      <div className="flex items-start gap-4">
+                        {getStatusIcon(alert.status)}
+                        <div className="flex-1">
+                          <div className="flex items-start justify-between mb-2">
+                            <h3 className="font-semibold">{alert.title}</h3>
+                            <span className={`text-xs px-2 py-1 rounded ${getStatusBadge(alert.status)}`}>
+                              {alert.status.toUpperCase()}
+                            </span>
+                          </div>
+                          <p className={`text-sm mb-2 ${isDark ? "text-[rgba(255,255,255,0.6)]" : "text-gray-600"}`}>
+                            {alert.description}
+                          </p>
+                          <div className="flex items-center gap-4 text-xs">
+                            <span className={isDark ? "text-[rgba(255,255,255,0.4)]" : "text-gray-500"}>
+                              {alert.time}
+                            </span>
+                            <span className={isDark ? "text-[rgba(255,255,255,0.4)]" : "text-gray-500"}>
+                              📍 {alert.location}
+                            </span>
+                          </div>
                         </div>
                       </div>
                     </div>
-                  </div>
-                ))
+                  );
+                })
             ) : (
               <div className={`p-8 text-center rounded-xl border border-dashed ${isDark ? "border-white/10 text-white/40" : "border-gray-200 text-gray-500"}`}>
                 No user sightings found.
@@ -324,39 +335,50 @@ export function SightingAlertsPage() {
             {droneAlerts.length > 0 ? (
               droneAlerts
                 .sort((a, b) => new Date(b.rawTime).getTime() - new Date(a.rawTime).getTime())
-                .map((alert) => (
-                  <div
-                    key={alert.id}
-                    onClick={() => setSelectedAlert(alert)}
-                    className={`p-5 rounded-xl border ${isDark
-                        ? "bg-[rgba(255,255,255,0.03)] border-[rgba(255,255,255,0.1)] hover:bg-[rgba(255,255,255,0.05)]"
-                        : "bg-white border-gray-200 hover:bg-gray-50"
-                      } transition-colors cursor-pointer`}
-                  >
-                    <div className="flex items-start gap-4">
-                      {getStatusIcon(alert.status)}
-                      <div className="flex-1">
-                        <div className="flex items-start justify-between mb-2">
-                          <h3 className="font-semibold">{alert.title}</h3>
-                          <span className={`text-xs px-2 py-1 rounded ${getStatusBadge(alert.status)}`}>
-                            {alert.status.toUpperCase()}
-                          </span>
-                        </div>
-                        <p className={`text-sm mb-2 ${isDark ? "text-[rgba(255,255,255,0.6)]" : "text-gray-600"}`}>
-                          {alert.description}
-                        </p>
-                        <div className="flex items-center gap-4 text-xs">
-                          <span className={isDark ? "text-[rgba(255,255,255,0.4)]" : "text-gray-500"}>
-                            {alert.time}
-                          </span>
-                          <span className={isDark ? "text-[rgba(255,255,255,0.4)]" : "text-gray-500"}>
-                            📍 {alert.location}
-                          </span>
+                .map((alert) => {
+                  // 1. Check the status right here, INSIDE the loop
+                  const isNew = alert.status?.toLowerCase() === "new";
+
+                  return (
+                    <div
+                      key={alert.id}
+                      onClick={() => setSelectedAlert(alert)}
+                      // 2. Apply the dynamic background colors to the outermost card
+                      className={`p-5 rounded-xl border transition-colors cursor-pointer ${
+                        isNew
+                          ? isDark
+                            ? "bg-blue-500/10 border-blue-500/20" // Dark Mode: Subtle blue tint
+                            : "bg-blue-50 border-blue-200 shadow-sm" // Light Mode: Soft blue tint
+                          : isDark
+                          ? "bg-[rgba(255,255,255,0.03)] border-[rgba(255,255,255,0.1)] hover:bg-[rgba(255,255,255,0.05)]" // Dark Mode: Normal
+                          : "bg-white border-gray-200 hover:bg-gray-50" // Light Mode: Normal
+                      }`}
+                    >
+                      <div className="flex items-start gap-4">
+                        {getStatusIcon(alert.status)}
+                        <div className="flex-1">
+                          <div className="flex items-start justify-between mb-2">
+                            <h3 className="font-semibold">{alert.title}</h3>
+                            <span className={`text-xs px-2 py-1 rounded ${getStatusBadge(alert.status)}`}>
+                              {alert.status.toUpperCase()}
+                            </span>
+                          </div>
+                          <p className={`text-sm mb-2 ${isDark ? "text-[rgba(255,255,255,0.6)]" : "text-gray-600"}`}>
+                            {alert.description}
+                          </p>
+                          <div className="flex items-center gap-4 text-xs">
+                            <span className={isDark ? "text-[rgba(255,255,255,0.4)]" : "text-gray-500"}>
+                              {alert.time}
+                            </span>
+                            <span className={isDark ? "text-[rgba(255,255,255,0.4)]" : "text-gray-500"}>
+                              📍 {alert.location}
+                            </span>
+                          </div>
                         </div>
                       </div>
                     </div>
-                  </div>
-                ))
+                  );
+                })
             ) : (
               <div className={`p-8 text-center rounded-xl border border-dashed ${isDark ? "border-white/10 text-white/40" : "border-gray-200 text-gray-500"}`}>
                 No drone sightings found.
