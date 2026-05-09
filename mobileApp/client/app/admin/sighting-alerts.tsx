@@ -29,6 +29,7 @@ export default function SightingAlertsScreen() {
   const [alerts, setAlerts] = useState<Sighting[]>([]);
   const [selected, setSelected] = useState<Sighting | null>(null);
   const [refreshing, setRefreshing] = useState(false);
+  const [filter, setFilter] = useState<"all" | "drone" | "user">("all");
 
   const BASE_URL = API_BASE_URL;
 
@@ -144,6 +145,21 @@ export default function SightingAlertsScreen() {
     </TouchableOpacity>
   );
 
+
+  const filteredAlerts = alerts
+  .slice()
+  .sort(
+    (a, b) =>
+      new Date(b.timestamp).getTime() -
+      new Date(a.timestamp).getTime()
+  )
+  .filter((item) => {
+    if (filter === "all") return true;
+    if (filter === "drone") return item.source === "drone";
+    if (filter === "user") return item.source === "user";
+    return true;
+  });
+
   return (
     <View className="flex-1 bg-gray-50 px-4 pt-4">
 
@@ -181,28 +197,73 @@ export default function SightingAlertsScreen() {
         </View>
       </View>
 
-      {/* FILTER CHIPS */}
-      <ScrollView horizontal showsHorizontalScrollIndicator={false} className="mb-4">
-        <View className="flex-row gap-2">
-          <Text className="bg-green-900 text-white px-4 py-2 rounded-full text-xs font-semibold">
-            All Alerts
-          </Text>
-          <Text className="bg-white px-4 py-2 rounded-full text-xs border">
-            High Priority
-          </Text>
-          <Text className="bg-white px-4 py-2 rounded-full text-xs border">
-            Nearby
-          </Text>
-        </View>
-      </ScrollView>
+       {/* FILTER SECTION */}
+<View className="mb-4">
+
+  <Text className="text-sm font-semibold text-gray-500 mb-2">
+    Filter Alerts
+  </Text>
+
+  <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+    <View className="flex-row gap-3">
+
+      {/* ALL */}
+      <TouchableOpacity
+        onPress={() => setFilter("all")}
+        className={`px-5 py-2 rounded-full ${
+          filter === "all" ? "bg-green-900" : "bg-white border border-gray-300"
+        }`}
+      >
+        <Text
+          className={`text-xs font-bold ${
+            filter === "all" ? "text-white" : "text-gray-700"
+          }`}
+        >
+          All Alerts
+        </Text>
+      </TouchableOpacity>
+
+      {/* DRONE */}
+      <TouchableOpacity
+        onPress={() => setFilter("drone")}
+        className={`px-5 py-2 rounded-full ${
+          filter === "drone" ? "bg-green-900" : "bg-white border border-gray-300"
+        }`}
+      >
+        <Text
+          className={`text-xs font-bold ${
+            filter === "drone" ? "text-white" : "text-gray-700"
+          }`}
+        >
+          Drone Only
+        </Text>
+      </TouchableOpacity>
+
+      {/* USER */}
+      <TouchableOpacity
+        onPress={() => setFilter("user")}
+        className={`px-5 py-2 rounded-full ${
+          filter === "user" ? "bg-green-900" : "bg-white border border-gray-300"
+        }`}
+      >
+        <Text
+          className={`text-xs font-bold ${
+            filter === "user" ? "text-white" : "text-gray-700"
+          }`}
+        >
+          User Reports
+        </Text>
+      </TouchableOpacity>
+
+    </View>
+  </ScrollView>
+
+</View>
+ 
 
       {/* LIST */}
       <FlatList
-        data={alerts.sort(
-          (a, b) =>
-            new Date(b.timestamp).getTime() -
-            new Date(a.timestamp).getTime()
-        )}
+        data={filteredAlerts}
         keyExtractor={(item) => item.id.toString()}
         renderItem={renderCard}
         showsVerticalScrollIndicator={false}

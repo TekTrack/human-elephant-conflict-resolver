@@ -22,28 +22,42 @@ export default function MyProfileScreen() {
   const [password, setPassword] = useState("");
 
   const loadProfile = async () => {
-    try {
-      const email = await AsyncStorage.getItem("email");
-      const token = await AsyncStorage.getItem("authToken");
+  try {
+    const token = await AsyncStorage.getItem("authToken");
 
-      if (!email) return;
-
-      const res = await axios.get(
-        `${API_BASE_URL}/api/user/getuser/${email}`,
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-
-      const user = res.data.data;
-
-      setName(user.name);
-      setEmail(user.email);
-      setPhoneNumber(user.phoneNumber);
-      setAdminID(user.adminID);
-      setUserCategory(user.userCategory);
-    } catch (error) {
-      console.log(error);
+    if (!token) {
+      console.log("No token found");
+      return;
     }
-  };
+
+    const res = await axios.get(
+      `${API_BASE_URL}/api/user/getuser`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+
+    console.log("USER RESPONSE:", res.data);
+
+    const user = res.data.data;
+
+    if (!user) {
+      console.log("User not found in response");
+      return;
+    }
+
+    setName(user.name || "");
+    setEmail(user.email || "");
+    setPhoneNumber(user.phoneNumber || "");
+    setAdminID(user.adminID || "");
+    setUserCategory(user.userCategory || "");
+
+  } catch (error) {
+    console.log("FETCH ERROR:", error.response?.data || error.message);
+  }
+};
 
   useEffect(() => {
     loadProfile();

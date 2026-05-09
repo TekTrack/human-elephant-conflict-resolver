@@ -32,7 +32,7 @@ export default function Overview() {
       title: "Map",
       subtitle: "Safe Zones",
       icon: "map",
-      route: "/geofencing",
+      route: "/admin/geofencing",
       image:
         "https://images.unsplash.com/photo-1526772662000-3f88f10405ff?w=1000",
     },
@@ -100,7 +100,7 @@ export default function Overview() {
         </ImageBackground>
 
         {/* STATS */}
-        <View style={styles.bigCard}>
+        {/* <View style={styles.bigCard}>
           <Text style={styles.cardTitle}>Live Alert Network</Text>
           <Text style={styles.cardSub}>
             Current activity in your area is stable.
@@ -113,10 +113,10 @@ export default function Overview() {
             <Divider />
             <StatItem number="98%" label="SAFE ZONES" green />
           </View>
-        </View>
+        </View> */}
 
         {/* COMMUNITY CARD */}
-        <View style={styles.communityCard}>
+        {/* <View style={styles.communityCard}>
           <Ionicons
             name="shield-checkmark"
             size={42}
@@ -133,7 +133,7 @@ export default function Overview() {
           <TouchableOpacity style={styles.button}>
             <Text style={styles.buttonText}>View Leaderboard</Text>
           </TouchableOpacity>
-        </View>
+        </View> */}
 
         {/* GRID */}
         <Text style={styles.sectionTitle}>Navigation Hub</Text>
@@ -175,7 +175,7 @@ export default function Overview() {
       {/* FLOAT BUTTON */}
       <TouchableOpacity
         style={styles.fab}
-        onPress={() => router.push("/upload-image")}
+        onPress={() => router.push("/admin/upload-image")}
       >
         <Ionicons name="add" size={34} color="#fff" />
       </TouchableOpacity>
