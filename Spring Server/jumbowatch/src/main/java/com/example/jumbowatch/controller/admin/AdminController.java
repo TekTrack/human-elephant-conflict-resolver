@@ -181,6 +181,7 @@ public class AdminController {
             Iterable<Admin> admins = adminRepository.findAll();
             System.out.println("--- Current Admin IDs ---");
         admins.forEach(admin -> System.out.println("Admin ID: " + admin.getAdminId()));
+        admins.forEach(admin -> System.out.println("Admin Name: " + admin.getIs_logged()));
             Map<String, Object> response = new HashMap<>();
             response.put("message", "Admins retrieved successfully!");
             response.put("status", HttpStatus.OK.value());
