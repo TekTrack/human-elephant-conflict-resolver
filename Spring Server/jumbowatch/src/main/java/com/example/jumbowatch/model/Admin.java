@@ -56,6 +56,9 @@ public class Admin {
     public String getName() {
         return name;
     }
+    public Boolean getIs_logged() {
+        return is_logged;
+    }
 
     public void setPassword(String password) {
         this.password = password;
