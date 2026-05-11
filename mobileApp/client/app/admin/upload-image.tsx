@@ -187,9 +187,8 @@ export default function UserReportPage() {
 
             <TouchableOpacity
               onPress={() => setLocationMode("current")}
-              className={`p-2 rounded-lg mb-2 ${
-                locationMode === "current" ? "bg-green-900" : "bg-gray-100"
-              }`}
+              className={`p-2 rounded-lg mb-2 ${locationMode === "current" ? "bg-green-900" : "bg-gray-100"
+                }`}
             >
               <Text className={locationMode === "current" ? "text-white" : "text-black"}>
                 Current
