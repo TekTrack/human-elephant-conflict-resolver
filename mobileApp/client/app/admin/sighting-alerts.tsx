@@ -80,7 +80,7 @@ export default function SightingAlertsScreen() {
         <View className="h-48">
           <Image
             source={{
-              uri: `${BASE_URL}/api/sightings/images/${item.photoFilename}`,
+              uri: `${item.photoFilename}`,
             }}
             className="w-full h-full"
           />
