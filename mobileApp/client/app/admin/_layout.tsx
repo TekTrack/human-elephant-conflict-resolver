@@ -9,10 +9,15 @@ import {
 } from "@react-navigation/drawer";
 import { Ionicons } from "@expo/vector-icons";
 import API_BASE_URL from "@/config/app";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import axios from "axios";
 // Put this at the very top of _layout.tsx!
 import "@/config/bgTask";
+import { requestNotificationPermissions } from '../services/notificationService';
+
+useEffect(() => {
+  requestNotificationPermissions();
+}, []);
 
 function CustomDrawerContent(props: any) {
   const router = useRouter();

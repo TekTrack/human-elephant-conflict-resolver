@@ -21,16 +21,36 @@
     },
     "plugins": [
       "expo-router",
-      "expo-web-browser"
+      "expo-web-browser",
+      [
+        "expo-build-properties",
+        {
+          "android": {
+            "usesCleartextTraffic": true
+          }
+        }
+      ],
+      [
+        "expo-location",
+        {
+          "locationAlwaysAndWhenInUsePermission": "Allow tracking in background.",
+          "isAndroidBackgroundLocationEnabled": true,
+          "isAndroidForegroundServiceEnabled": true
+        }
+      ],
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/notification-icon.png",
+          "color": "#FF0000",
+          "androidMode": "default",
+          "androidCollapsedTitle": "New notification"
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
-    },
-    "expo-location": {
-      "locationAlwaysAndWhenInUsePermission": "Allow tracking in background.",
-      "isAndroidBackgroundLocationEnabled": true,
-      "isAndroidForegroundServiceEnabled": true
     },
     "extra": {
       "router": {},

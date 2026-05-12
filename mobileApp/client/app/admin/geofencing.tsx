@@ -5,6 +5,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
 import { Ionicons } from "@expo/vector-icons";
 import API_BASE_URL from "@/config/app";
+import { fetchZonesData } from "../services/zoneService";
 
 const BASE_URL = `${API_BASE_URL}/api/admin`;
 
@@ -28,6 +29,13 @@ interface Sighting {
   timestamp: string;
 }
 
+// ✅ Map zone type → stroke and fill colors in one place
+const ZONE_COLORS: Record<GeofenceType, { stroke: string; fill: string }> = {
+  Danger:    { stroke: "red",    fill: "rgba(255,0,0,0.15)"   },
+  Caution:   { stroke: "orange", fill: "rgba(255,165,0,0.15)" },
+  Monitored: { stroke: "blue",   fill: "rgba(0,0,255,0.10)"   },
+};
+
 export default function GeofencingScreen() {
   const mapRef = useRef<MapView>(null);
 
@@ -47,23 +55,25 @@ export default function GeofencingScreen() {
   };
 
   const fetchZones = async () => {
-    const token = await getToken();
-    const res = await axios.get(`${BASE_URL}/zones`, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
-    setZones(res.data);
-    await AsyncStorage.setItem("savedZones", JSON.stringify(res.data));
+    try {
+      const data = await fetchZonesData();
+      setZones(data);
+    } catch (err) {
+      console.error("Failed to load zones:", err); // ✅ FIX: was unhandled
+    }
   };
 
   const fetchSightings = async () => {
-    const token = await getToken();
-    const res = await axios.get(
-      `${BASE_URL}/sightings/filter?timeframe=all`,
-      {
-        headers: { Authorization: `Bearer ${token}` },
-      }
-    );
-    setSightings(res.data);
+    try { // ✅ FIX: was unhandled — a failed sightings fetch would crash the screen
+      const token = await getToken();
+      const res = await axios.get(
+        `${BASE_URL}/sightings/filter?timeframe=all`,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      setSightings(res.data);
+    } catch (err) {
+      console.error("Failed to load sightings:", err);
+    }
   };
 
   return (
@@ -78,9 +88,7 @@ export default function GeofencingScreen() {
           alignItems: "center",
         }}
       >
-        <Text style={{ fontSize: 20, fontWeight: "bold" }}>
-          Live Map
-        </Text>
+        <Text style={{ fontSize: 20, fontWeight: "bold" }}>Live Map</Text>
 
         <TouchableOpacity onPress={fetchZones}>
           <Ionicons name="refresh" size={22} />
@@ -98,27 +106,23 @@ export default function GeofencingScreen() {
           longitudeDelta: 2,
         }}
       >
-
         {/* Zones (READ ONLY) */}
-        {zones.map((z) => (
-          <Polygon
-            key={z.id}
-            coordinates={[
-              { latitude: z.minLat, longitude: z.minLon },
-              { latitude: z.minLat, longitude: z.maxLon },
-              { latitude: z.maxLat, longitude: z.maxLon },
-              { latitude: z.maxLat, longitude: z.minLon },
-            ]}
-            strokeColor={
-              z.type === "Danger"
-                ? "red"
-                : z.type === "Caution"
-                ? "orange"
-                : "blue"
-            }
-            fillColor="rgba(0,0,255,0.1)"
-          />
-        ))}
+        {zones.map((z) => {
+          const colors = ZONE_COLORS[z.type] ?? ZONE_COLORS.Monitored; // ✅ safe fallback
+          return (
+            <Polygon
+              key={z.id}
+              coordinates={[
+                { latitude: z.minLat, longitude: z.minLon },
+                { latitude: z.minLat, longitude: z.maxLon },
+                { latitude: z.maxLat, longitude: z.maxLon },
+                { latitude: z.maxLat, longitude: z.minLon },
+              ]}
+              strokeColor={colors.stroke}
+              fillColor={colors.fill} // ✅ FIX: was hardcoded blue regardless of zone type
+            />
+          );
+        })}
 
         {/* Sightings */}
         {sightings.map((s) => {
@@ -128,10 +132,7 @@ export default function GeofencingScreen() {
           return (
             <Marker
               key={s.id}
-              coordinate={{
-                latitude: s.latitude,
-                longitude: s.longitude,
-              }}
+              coordinate={{ latitude: s.latitude, longitude: s.longitude }}
             >
               <Text style={{ fontSize: 18 }}>
                 {s.source === "drone" ? "🚁" : "👤"}
@@ -143,17 +144,11 @@ export default function GeofencingScreen() {
 
       {/* Bottom Controls */}
       <View style={{ padding: 10, backgroundColor: "white" }}>
-        <View
-          style={{
-            flexDirection: "row",
-            justifyContent: "space-between",
-          }}
-        >
+        <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
           <View>
             <Text>User Sightings</Text>
             <Switch value={showUsers} onValueChange={setShowUsers} />
           </View>
-
           <View>
             <Text>Drone Sightings</Text>
             <Switch value={showDrones} onValueChange={setShowDrones} />
