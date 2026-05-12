@@ -51,44 +51,56 @@ export default function UserReportPage() {
     if (!result.canceled) setImage(result.assets[0]);
   };
 
-  // LOCATION
-  const getLocation = async () => {
-    let { status } = await Location.requestForegroundPermissionsAsync();
-    if (status !== "granted") return null;
+  // 📍 Location
+    const getLocation = async () => {
+      let { status } = await Location.requestForegroundPermissionsAsync();
+  
+      if (status !== "granted") {
+        Alert.alert("Permission denied", "Location permission required");
+        return null;
+      }
+  
+      let location = await Location.getCurrentPositionAsync({});
+      return location.coords;
+    };
 
-    let loc = await Location.getCurrentPositionAsync({});
-    return loc.coords;
-  };
-
-  // UPLOAD
+  // ⬆ Upload
   const uploadReport = async () => {
-    if (!image) return Alert.alert("Select image first");
+    if (!image) {
+      Alert.alert("Error", "Please select a photo first");
+      return;
+    }
 
     setLoading(true);
 
     try {
       const token = await AsyncStorage.getItem("authToken");
 
-      let coords = mapCoords;
-      if (locationMode === "current") coords = await getLocation();
+      // Determine which coordinates to use
+      let finalCoords = mapCoords;
+      if (locationMode === "current") {
+        finalCoords = await getLocation();
+      }
 
-      if (!coords) {
+      if (!finalCoords) {
+        Alert.alert("Error", "Location is required");
         setLoading(false);
-        return Alert.alert("Location required");
+        return;
       }
 
       const formData = new FormData();
 
       formData.append("count", String(count));
-      formData.append("description", description);
-      formData.append("latitude", String(coords.latitude));
-      formData.append("longitude", String(coords.longitude));
+      formData.append("description", description); // <-- Added description
       formData.append("time", new Date().toISOString());
+      formData.append("latitude", String(finalCoords.latitude));
+      formData.append("longitude", String(finalCoords.longitude));
       formData.append("source", "user");
+      formData.append("droneId", "0");
 
       formData.append("photo", {
         uri: image.uri,
-        name: "photo.jpg",
+        name: "report.jpg",
         type: "image/jpeg",
       } as any);
 
@@ -100,12 +112,12 @@ export default function UserReportPage() {
         },
       });
 
-      Alert.alert("Success", "Report uploaded");
-
+      Alert.alert("Success", "Report uploaded!");
       setImage(null);
       setCount(1);
       setDescription("");
     } catch (err) {
+      console.log(err);
       Alert.alert("Error", "Upload failed");
     } finally {
       setLoading(false);
@@ -196,10 +208,12 @@ export default function UserReportPage() {
             </TouchableOpacity>
 
             <TouchableOpacity
-              onPress={() => setShowMapModal(true)}
-              className="p-2 rounded-lg bg-gray-100"
+              onPress={() => { setLocationMode("map"); setShowMapModal(true); }} 
+              className={`p-2 rounded-lg ${locationMode === "map" ? "bg-green-900" : "bg-gray-100"}`}
             >
-              <Text>Pick Map</Text>
+              <Text className={locationMode === "map" ? "text-white" : "text-black"}>
+                Pick Map
+              </Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -241,10 +255,23 @@ export default function UserReportPage() {
         <View className="flex-1">
 
           <MapView
-            style={{ flex: 1 }}
-            onPress={(e) => setMapCoords(e.nativeEvent.coordinate)}
-          >
-            {mapCoords && <Marker coordinate={mapCoords} />}
+                style={{ flex: 1 }}
+                showsUserLocation={true}
+                initialRegion={{
+                  latitude: mapCoords?.latitude || 6.9271, // Defaults to Colombo if null
+                  longitude: mapCoords?.longitude || 79.8612,
+                  latitudeDelta: 0.05,
+                  longitudeDelta: 0.05,
+                }}
+                onPress={(e) => setMapCoords(e.nativeEvent.coordinate)}
+              >
+                {mapCoords && (
+                  <Marker
+                    coordinate={mapCoords}
+                    title="Sighting Location"
+                    description="Elephant spotted here"
+                  />
+                )}
           </MapView>
 
           <TouchableOpacity
