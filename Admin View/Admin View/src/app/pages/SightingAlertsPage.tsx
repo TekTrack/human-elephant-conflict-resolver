@@ -116,13 +116,13 @@ export function SightingAlertsPage() {
   const getStatusIcon = (status: string) => {
     switch (status?.toLowerCase()) {
       case "verified":
-        return < CheckLine className="w-5 h-5 text-green-500" />;
+        return < XCircle className="w-5 h-5 text-red-500" />;
       case "new":
         return <ClockPlus className="w-5 h-5 text-orange-500" />;
       case "info":
         return <Clock className="w-5 h-5 text-blue-500" />;
       case "neglected":
-        return <XCircle className="w-5 h-5 text-red-500" />;
+        return < CheckLine className="w-5 h-5 text-green-500"/>;
       default:
         return <ClockPlus className="w-5 h-5 text-orange-500" />;
     }
@@ -135,8 +135,8 @@ export function SightingAlertsPage() {
       warning: "bg-yellow-100 text-yellow-700",
       new: "bg-blue-100 text-blue-700",
       info: "bg-blue-100 text-blue-700",
-      neglected: "bg-red-100 text-red-700",
-      verified: "bg-green-100 text-green-700",
+      neglected: "bg-green-100 text-green-700",
+      verified: "bg-red-100 text-red-700",
     };
     return styles[normalizedStatus] || "bg-gray-100 text-gray-700";
   };
