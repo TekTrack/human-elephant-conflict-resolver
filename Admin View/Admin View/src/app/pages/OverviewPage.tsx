@@ -6,6 +6,7 @@ import { Button } from "../components/Button";
 import { ChevronDown, Users, Map as MapIcon, Drone, ScanEye, MapPin, Clock, ArrowRight, Activity, Zap, ShieldCheck } from "lucide-react";
 import { Card } from "../components/Card";
 import { useNavigate } from "react-router";
+import API_BASE_URL from "../config/url.js";
 // @ts-ignore
 import Map, { Marker } from "react-map-gl/maplibre";
 
@@ -50,9 +51,9 @@ export function OverviewPage() {
 
       try {
         const [usersRes, zonesRes, sightingsRes] = await Promise.all([
-          fetch('http://localhost:8080/api/admin/users', { headers }),
-          fetch('http://localhost:8080/api/admin/zones', { headers }),
-          fetch('http://localhost:8080/api/admin/sightings/filter?timeframe=all', { headers })
+          fetch(`${API_BASE_URL}/api/admin/users`, { headers }),
+          fetch(`${API_BASE_URL}/api/admin/zones`, { headers }),
+          fetch(`${API_BASE_URL}/api/admin/sightings/filter?timeframe=all`, { headers })
         ]);
 
         const usersData = await usersRes.json();

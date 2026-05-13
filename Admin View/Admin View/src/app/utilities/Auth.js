@@ -1,8 +1,8 @@
-
+import API_BASE_URL from '../config/url.js';
 
 const login = async (username, password) => {
   try {
-    const res = await fetch('http://localhost:8080/api/admin/login', 
+    const res = await fetch(`${API_BASE_URL}/api/admin/login`, 
       {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -25,7 +25,7 @@ const login = async (username, password) => {
 const fetchSecureData = async () => {
   const token = localStorage.getItem('authToken'); // Grab the saved token
   const username = localStorage.getItem('username'); // Grab the saved username
-    const res = await fetch('http://localhost:8080/api/admin/protected-route', {
+    const res = await fetch(`${API_BASE_URL}/api/admin/protected-route`, {
       method: 'GET',
       headers: {
         'Authorization': `Bearer ${token}`, // 👈 The magic key!

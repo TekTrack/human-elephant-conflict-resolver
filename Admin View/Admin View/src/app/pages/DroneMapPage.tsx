@@ -339,6 +339,7 @@ import { PageHeader } from "../components/PageHeader";
 import { Card } from "../components/Card";
 import { Badge } from "../components/Badge";
 import { Button } from "../components/Button";
+import API_BASE_URL from "../config/url.js";
 
 // ── Types & Constants ─────────────────────────────────────────────────────────
 type DroneStatus = "Patrolling" | "Idle" | "Charging" | "Offline";
@@ -359,7 +360,7 @@ const INITIAL_DRONES: Drone[] = [];
 
 const fetchDrones = async (): Promise<Drone[]> => {
   try {
-    const res = await fetch("http://localhost:8080/api/admin/drones", {
+    const res = await fetch(`${API_BASE_URL}/api/admin/drones`, {
       method: "GET",
       headers: {
         Authorization: `Bearer ${localStorage.getItem("authToken")}`,

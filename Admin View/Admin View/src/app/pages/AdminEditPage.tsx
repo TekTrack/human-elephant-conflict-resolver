@@ -10,6 +10,7 @@ import {
 import { Button } from "../components/Button";
 import { Card } from "../components/Card";
 import { Badge } from "../components/Badge";
+import API_BASE_URL from "../config/url.js";
 
 export function AdminEditPage() {
   const { theme } = useTheme();
@@ -40,7 +41,7 @@ export function AdminEditPage() {
         const token = localStorage.getItem("authToken");
         const config = { headers: { Authorization: `Bearer ${token}` } };
         
-        const response = await axios.get("http://localhost:8080/api/admin/me", config);
+        const response = await axios.get(`${API_BASE_URL}/api/admin/me`, config);
         const data = response.data.data;
 
         setForm(prev => ({
@@ -54,7 +55,7 @@ export function AdminEditPage() {
 
       } catch (err) {
         console.error("Failed to load profile", err);
-        alert("සැසිය අවසන් වී ඇත. කරුණාකර නැවත ලොග් වන්න.");
+        alert("session end.please try Again..");
         navigate("/login");
       } finally {
         setLoading(false);
@@ -113,10 +114,10 @@ export function AdminEditPage() {
 
       console.log("Admin ryghshghghgdghdgh" + infoPayload);
 
-      await axios.post("http://localhost:8080/api/admin/updateadmin", infoPayload, config);
+      await axios.post(`${API_BASE_URL}/api/admin/updateadmin`, infoPayload, config);
 
       if (changePassword) {
-        await axios.post("http://localhost:8080/api/admin/changepassword", {
+        await axios.post(`${API_BASE_URL}/api/admin/changepassword`, {
           adminid: form.adminId,
           password: form.newPassword,
         }, config);

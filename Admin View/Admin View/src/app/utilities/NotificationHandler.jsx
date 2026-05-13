@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useTheme } from '../context/ThemeContext.tsx';
 import { AlertCircle, X, Search } from 'lucide-react';
+import API_BASE_URL from '../config/url.js';
 
 export default function NotificationHandler({onNewAlert}) {
   const { theme } = useTheme();
@@ -15,11 +16,11 @@ export default function NotificationHandler({onNewAlert}) {
   const overlayBg = isDark ? "bg-black/60" : "bg-black/30";
 
   const [notification, setNotification] = useState(null);
-  const BASE_URL = 'http://localhost:8080/api/admin';
+  const BASE_URL = `${API_BASE_URL}/api/admin`;
 
   // JavaScript running on the Admin Web Portal
   function verifySighting(sightingId) {
-      fetch(`http://localhost:8080/api/admin/sightings/${sightingId}/verify`, {
+      fetch(`${API_BASE_URL}/api/admin/sightings/${sightingId}/verify`, {
           method: 'PUT',
           headers: {
               'Content-Type': 'application/json',
