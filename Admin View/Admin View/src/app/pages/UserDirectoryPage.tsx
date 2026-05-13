@@ -769,7 +769,7 @@ export function UserDirectoryPage() {
                   <h3 className="text-lg font-bold">Connection Failed</h3>
                   <p className="text-sm opacity-80 max-w-xs">{error}</p>
                 </div>
-                <Button onClick={fetchAllData} variant="outline" className="mt-2 group">
+                <Button onClick={fetchAllData} variant="secondary" className="mt-2 group">
                   <RefreshCw className="w-4 h-4 mr-2 group-hover:rotate-180 transition-transform duration-500" />
                   Try Again
                 </Button>
