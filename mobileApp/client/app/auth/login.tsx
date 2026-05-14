@@ -182,7 +182,7 @@ export default function LoginScreen() {
         </View>
 
         {/* IMAGE SECTION */}
-        <View className="mt-10 px-6">
+        {/* <View className="mt-10 px-6">
           <Image
             source={{
               uri: "https://images.unsplash.com/photo-1564769625905-50e93615e769",
@@ -192,7 +192,7 @@ export default function LoginScreen() {
           <Text className="text-xs text-white absolute bottom-4 left-8 right-8">
             "Protecting the giants of our earth through community vigilance."
           </Text>
-        </View>
+        </View> */}
 
         {/* FOOTER */}
         <View className="items-center mt-8">
