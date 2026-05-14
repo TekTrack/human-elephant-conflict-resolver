@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { View, Text, TouchableOpacity, Switch } from "react-native";
-import MapView, { Marker, Polygon } from "react-native-maps";
+import MapView, { Marker, Polygon, PROVIDER_GOOGLE } from "react-native-maps";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
 import { Ionicons } from "@expo/vector-icons";
@@ -29,7 +29,6 @@ interface Sighting {
   timestamp: string;
 }
 
-// ✅ Map zone type → stroke and fill colors in one place
 const ZONE_COLORS: Record<GeofenceType, { stroke: string; fill: string }> = {
   Danger:    { stroke: "red",    fill: "rgba(255,0,0,0.15)"   },
   Caution:   { stroke: "orange", fill: "rgba(255,165,0,0.15)" },
@@ -59,12 +58,12 @@ export default function GeofencingScreen() {
       const data = await fetchZonesData();
       setZones(data);
     } catch (err) {
-      console.error("Failed to load zones:", err); // ✅ FIX: was unhandled
+      console.error("Failed to load zones:", err);
     }
   };
 
   const fetchSightings = async () => {
-    try { // ✅ FIX: was unhandled — a failed sightings fetch would crash the screen
+    try {
       const token = await getToken();
       const res = await axios.get(
         `${BASE_URL}/sightings/filter?timeframe=all`,
@@ -90,7 +89,7 @@ export default function GeofencingScreen() {
       >
         <Text style={{ fontSize: 20, fontWeight: "bold" }}>Live Map</Text>
 
-        <TouchableOpacity onPress={fetchZones}>
+        <TouchableOpacity onPress={() => { fetchZones(); fetchSightings(); }}>
           <Ionicons name="refresh" size={22} />
         </TouchableOpacity>
       </View>
@@ -99,6 +98,7 @@ export default function GeofencingScreen() {
       <MapView
         ref={mapRef}
         style={{ flex: 1 }}
+        provider={PROVIDER_GOOGLE} // 🚀 Forces Google Maps
         initialRegion={{
           latitude: 7.8731,
           longitude: 80.7718,
@@ -106,9 +106,9 @@ export default function GeofencingScreen() {
           longitudeDelta: 2,
         }}
       >
-        {/* Zones (READ ONLY) */}
+        {/* Zones */}
         {zones.map((z) => {
-          const colors = ZONE_COLORS[z.type] ?? ZONE_COLORS.Monitored; // ✅ safe fallback
+          const colors = ZONE_COLORS[z.type] ?? ZONE_COLORS.Monitored;
           return (
             <Polygon
               key={z.id}
@@ -119,7 +119,7 @@ export default function GeofencingScreen() {
                 { latitude: z.maxLat, longitude: z.minLon },
               ]}
               strokeColor={colors.stroke}
-              fillColor={colors.fill} // ✅ FIX: was hardcoded blue regardless of zone type
+              fillColor={colors.fill}
             />
           );
         })}
@@ -143,14 +143,14 @@ export default function GeofencingScreen() {
       </MapView>
 
       {/* Bottom Controls */}
-      <View style={{ padding: 10, backgroundColor: "white" }}>
-        <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
-          <View>
-            <Text>User Sightings</Text>
+      <View style={{ padding: 10, backgroundColor: "white", elevation: 5, shadowColor: '#000', shadowOffset: { width: 0, height: -2 }, shadowOpacity: 0.1, shadowRadius: 4 }}>
+        <View style={{ flexDirection: "row", justifyContent: "space-around" }}>
+          <View style={{ alignItems: 'center' }}>
+            <Text style={{ marginBottom: 5 }}>User Sightings</Text>
             <Switch value={showUsers} onValueChange={setShowUsers} />
           </View>
-          <View>
-            <Text>Drone Sightings</Text>
+          <View style={{ alignItems: 'center' }}>
+            <Text style={{ marginBottom: 5 }}>Drone Sightings</Text>
             <Switch value={showDrones} onValueChange={setShowDrones} />
           </View>
         </View>

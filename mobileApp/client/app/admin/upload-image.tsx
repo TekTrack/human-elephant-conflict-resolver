@@ -15,7 +15,7 @@ import * as Location from "expo-location";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import API_BASE_URL from "@/config/app";
 import { Ionicons } from "@expo/vector-icons";
-import MapView, { Marker } from "react-native-maps";
+import MapView, { Marker, PROVIDER_GOOGLE } from "react-native-maps";
 
 export default function UserReportPage() {
   const [image, setImage] = useState<any>(null);
@@ -52,17 +52,17 @@ export default function UserReportPage() {
   };
 
   // 📍 Location
-    const getLocation = async () => {
-      let { status } = await Location.requestForegroundPermissionsAsync();
-  
-      if (status !== "granted") {
-        Alert.alert("Permission denied", "Location permission required");
-        return null;
-      }
-  
-      let location = await Location.getCurrentPositionAsync({});
-      return location.coords;
-    };
+  const getLocation = async () => {
+    let { status } = await Location.requestForegroundPermissionsAsync();
+
+    if (status !== "granted") {
+      Alert.alert("Permission denied", "Location permission required");
+      return null;
+    }
+
+    let location = await Location.getCurrentPositionAsync({});
+    return location.coords;
+  };
 
   // ⬆ Upload
   const uploadReport = async () => {
@@ -208,7 +208,7 @@ export default function UserReportPage() {
             </TouchableOpacity>
 
             <TouchableOpacity
-              onPress={() => { setLocationMode("map"); setShowMapModal(true); }} 
+              onPress={() => { setLocationMode("map"); setShowMapModal(true); }}
               className={`p-2 rounded-lg ${locationMode === "map" ? "bg-green-900" : "bg-gray-100"}`}
             >
               <Text className={locationMode === "map" ? "text-white" : "text-black"}>
@@ -250,39 +250,83 @@ export default function UserReportPage() {
 
       </ScrollView>
 
-      {/* MAP MODAL */}
-      <Modal visible={showMapModal} animationType="slide">
-        <View className="flex-1">
+      {/* 🗺️ FULL SCREEN LOCATION PICKER MODAL */}
+      <Modal
+        visible={showMapModal}
+        animationType="slide"
+        transparent={false}
+        onRequestClose={() => setShowMapModal(false)}
+      >
+        <View style={{ flex: 1, backgroundColor: 'white' }}>
 
-          <MapView
-                style={{ flex: 1 }}
-                showsUserLocation={true}
-                initialRegion={{
-                  latitude: mapCoords?.latitude || 6.9271, // Defaults to Colombo if null
-                  longitude: mapCoords?.longitude || 79.8612,
-                  latitudeDelta: 0.05,
-                  longitudeDelta: 0.05,
-                }}
-                onPress={(e) => setMapCoords(e.nativeEvent.coordinate)}
-              >
-                {mapCoords && (
-                  <Marker
-                    coordinate={mapCoords}
-                    title="Sighting Location"
-                    description="Elephant spotted here"
-                  />
-                )}
-          </MapView>
+          {/* Header for Full Screen Modal */}
+          <View style={{
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            paddingTop: 60, // Adjust for status bar
+            paddingHorizontal: 20,
+            paddingBottom: 15,
+            borderBottomWidth: 1,
+            borderBottomColor: '#eee'
+          }}>
+            <TouchableOpacity onPress={() => setShowMapModal(false)}>
+              <Ionicons name="close" size={28} color="black" />
+            </TouchableOpacity>
+            <Text style={{ fontSize: 18, fontWeight: 'bold' }}>Select Location</Text>
+            <TouchableOpacity
+              onPress={() => {
+                if (!mapCoords) {
+                  Alert.alert("No Location", "Please tap the map to drop a pin first.");
+                  return;
+                }
+                setShowMapModal(false);
+                console.log("Selected Coords:", mapCoords);
+              }}
+            >
+              <Text style={{ color: '#007AFF', fontWeight: 'bold', fontSize: 16 }}>Save</Text>
+            </TouchableOpacity>
+          </View>
 
-          <TouchableOpacity
-            onPress={() => setShowMapModal(false)}
-            className="bg-black p-4"
-          >
-            <Text className="text-white text-center font-bold">
-              Confirm Location
-            </Text>
-          </TouchableOpacity>
+          {/* Map Container */}
+          <View style={{ flex: 1 }}>
+            <MapView
+              style={{ flex: 1 }}
+              provider={PROVIDER_GOOGLE} // 🚀 Forces Google Maps
+              initialRegion={{
+                latitude: 7.8731,
+                longitude: 80.7718,
+                latitudeDelta: 2,
+                longitudeDelta: 2,
+              }}
+              onPress={(e) => setMapCoords(e.nativeEvent.coordinate)}
+            >
+              {mapCoords && (
+                <Marker coordinate={mapCoords} title="Selected Pin" />
+              )}
+            </MapView>
 
+            {/* Helper Text Overlay */}
+            <View style={{
+              position: 'absolute',
+              top: 20,
+              left: 20,
+              right: 20,
+              backgroundColor: 'rgba(255,255,255,0.9)',
+              padding: 10,
+              borderRadius: 10,
+              alignItems: 'center',
+              shadowColor: '#000',
+              shadowOffset: { width: 0, height: 2 },
+              shadowOpacity: 0.1,
+              shadowRadius: 4,
+            }}>
+              <Text style={{ fontSize: 12, color: '#333' }}>
+                Tap the map to set the elephant sighting location 📍
+              </Text>
+            </View>
+
+          </View>
         </View>
       </Modal>
 
