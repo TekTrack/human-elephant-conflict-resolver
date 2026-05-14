@@ -1,19 +1,46 @@
 {
   "expo": {
-    "name": "mobileApp",
+    "name": "JumboWatch",
     "slug": "mobileApp",
     "version": "1.0.0",
     "orientation": "portrait",
     "scheme": "mobileapp",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
+    "icon": "./assets/icon.png",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "cover",
+      "backgroundColor": "#012d1d"
+    },
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "icon": "./assets/icon.png",
+      "bundleIdentifier": "com.sahan444.mobileApp",
+      "config": {
+        "googleMapsApiKey": "AIzaSyA72rhNB4QbUvM7Yrv8CxzrZDi1NL_QYvM"
+      }
     },
     "android": {
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
-      "package": "com.sahanjaya444.mobileApp"
+      "package": "com.sahan444.mobileApp",
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#012d1d"
+      },
+      "config": {
+        "googleMaps": {
+          "apiKey": "AIzaSyA72rhNB4QbUvM7Yrv8CxzrZDi1NL_QYvM"
+        }
+      },
+      "permissions": [
+        "android.permission.ACCESS_COARSE_LOCATION",
+        "android.permission.ACCESS_FINE_LOCATION",
+        "android.permission.ACCESS_BACKGROUND_LOCATION",
+        "android.permission.FOREGROUND_SERVICE",
+        "android.permission.FOREGROUND_SERVICE_LOCATION"
+      ]
     },
     "web": {
       "output": "static",
@@ -55,9 +82,9 @@
     "extra": {
       "router": {},
       "eas": {
-        "projectId": "e24415bc-bbee-4b4f-9764-733e72a700ab"
+        "projectId": "c8ce8064-1493-458e-9ad3-5c42b2ce2087"
       }
     },
-    "owner": "sahanjaya444"
+    "owner": "sahan444"
   }
 }
