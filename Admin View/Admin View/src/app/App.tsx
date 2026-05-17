@@ -4,11 +4,11 @@ import { router } from './routes';
 import { ThemeProvider, useTheme } from './context/ThemeContext.tsx';
 import { MapTriggerProvider } from './context/MapTriggerContext.tsx';
 import Auth from './utilities/Auth.js';
-import NotificationHandler from './utilities/NotificationHandler.jsx';
+import NotificationHandler from './utilities/NotificationHandler.tsx';
 import { Sun, Moon, Loader2 } from "lucide-react";
 import SockJS from 'sockjs-client';
 import Stomp from 'stompjs';
-import API_BASE_URL from './config/url.js';
+import API_BASE_URL from './config/url';
 
 const { login } = Auth;
 

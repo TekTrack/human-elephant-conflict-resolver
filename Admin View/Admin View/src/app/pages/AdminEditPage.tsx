@@ -4,13 +4,13 @@ import axios from "axios";
 import { useTheme } from "../context/ThemeContext.tsx";
 import { useNavigate } from "react-router";
 import {
-  ArrowLeft, Save, Loader2, Eye, EyeOff, Shield,
+  ArrowLeft, Save, Loader2, Eye, EyeOff,
   Mail, Phone, User, Hash, Key, CheckCircle2, AlertCircle
 } from "lucide-react";
 import { Button } from "../components/Button";
 import { Card } from "../components/Card";
 import { Badge } from "../components/Badge";
-import API_BASE_URL from "../config/url.js";
+import API_BASE_URL from "../config/url";
 
 export function AdminEditPage() {
   const { theme } = useTheme();
@@ -112,7 +112,7 @@ export function AdminEditPage() {
       };
 
 
-      console.log("Admin ryghshghghgdghdgh" + infoPayload);
+      console.log("Admin --" + infoPayload);
 
       await axios.post(`${API_BASE_URL}/api/admin/updateadmin`, infoPayload, config);
 
@@ -205,7 +205,7 @@ export function AdminEditPage() {
                <Key className="w-4 h-4 opacity-40" />
                <h2 className="text-sm font-bold uppercase opacity-50">Security</h2>
             </div>
-            <Button variant="outline" size="sm" onClick={() => {
+            <Button variant="primary"  onClick={() => {
               setChangePassword(!changePassword);
               setErrors({}); // reset errors when toggling
             }}>

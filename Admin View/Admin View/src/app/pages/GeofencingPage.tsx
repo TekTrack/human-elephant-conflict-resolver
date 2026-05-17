@@ -158,7 +158,7 @@ export function GeofencingPage() {
             // Optional: If you want to automatically open a popup or filter, 
             // you can use the sightingIdStr here once sightings are fetched.
             if (sightingIdStr && sightings) {
-                 const id = Number(sightingIdStr);
+                 //const id = Number(sightingIdStr);
                  // We could potentially set a specific state here to HIGHLIGHT just this sighting
                  // For now, zooming to it is sufficient.
             }

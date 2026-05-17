@@ -1,10 +1,9 @@
 import { Outlet, Link, useLocation } from 'react-router';
 import { Sun, Moon,LayoutDashboard, LogOut ,  Drone ,Menu ,User  , Map, AlertTriangle, Activity, Bell , Users} from "lucide-react";
 import { useTheme } from "../context/ThemeContext.tsx";
-import React, { useEffect, useState } from "react";
+import  { useEffect, useState } from "react";
 import { useMapTrigger } from '../context/MapTriggerContext.tsx';
 import Auth from '../utilities/Auth.js';
-import type { router } from '../routes.ts';
 import { useNavigate } from 'react-router';
 //import { Button } from "../components/Button";
 
@@ -13,7 +12,7 @@ interface Notification {
   message : string;
   type : string;
   unread: boolean;
-  time: string | number; // You can adjust this type based on your timestamp format
+  time: string | number;
 }
 
 const menuItems = [
@@ -73,10 +72,10 @@ export function FigmaAdminLayout() {
       const data = await response.json();
       const result: Notification[] = data.map((item: any) => ({
         id: item.id,
-        title: item.type, 
+        title: item.type,
         message: item.message,
         unread: true, // You can adjust this based on your data structure
-        time: formatSmartTime(item.time ||Date.now()), 
+        time: formatSmartTime(item.time ||Date.now()),
       }));
       setNotifications(result);
     }catch (error) {
@@ -107,7 +106,7 @@ useEffect(() => {
 
   const deleteAll= async()=>{
     try{
-      const res= await fetch(`${BASE_URL}/allnotifications`,{
+      await fetch(`${BASE_URL}/allnotifications`,{
         method: "DELETE",
         headers: {
           'Content-Type':'application/json',
@@ -128,18 +127,6 @@ useEffect(() => {
         {/* Header Section (Contains Profile and Toggle Button) */}
         <div className={`flex items-center justify-between h-[72px] px-4 border-b ${borderColor} overflow-hidden`}>
 
-          {/* Admin Profile (Fades out and hides when collapsed) */}
-
-          {/*<div className={`flex items-center transition-all duration-300 ${isCollapsed ? "w-0 opacity-0 hidden" : "w-auto opacity-100"}`}>*/}
-          {/*  <button*/}
-          {/*    onClick={() => { router.navigate("/AdminEditPage") }}*/}
-          {/*  >*/}
-          {/*  <div className={`shrink-0 w-8 h-8 rounded-full ${isDark ? "bg-white" : "bg-black"} flex items-center justify-center`}>*/}
-          {/*    <span className={`text-sm font-bold ${isDark ? "text-black" : "text-white"}`}>A</span>*/}
-          {/*  </div>*/}
-          {/*  </button>*/}
-          {/*  <span className="font-medium ml-3 whitespace-nowrap">Admin</span>*/}
-          {/*</div>*/}
 
           {/* Admin Profile Container */}
 
@@ -157,22 +144,6 @@ useEffect(() => {
               <User className="shrink-0 mr-3" size={20} />
               <span className="font-medium">Admin</span>
             </button>
-
-
-
-{/*  <button*/}
-{/*    onClick={() => navigate("/admin-edit")}*/}
-{/*    className="focus:outline-none hover:opacity-80 transition-opacity cursor-pointer"*/}
-{/*  >*/}
-{/*    <div className={`shrink-0 w-8 h-8 rounded-full flex items-center justify-center ${isDark ? "bg-white" : "bg-black"}`}>*/}
-{/*      <span className={`text-sm font-bold ${isDark ? "text-black" : "text-white"}`}>A</span>*/}
-{/*    </div>*/}
-{/*  </button>*/}
-
-  {/* Text Label - Wraps to prevent layout shifts during collapse */}
-  {/*<div className="ml-3 overflow-hidden">*/}
-  {/*  <span className="font-medium whitespace-nowrap">Admin</span>*/}
-  {/*</div>*/}
             </div>
 
           {/* Toggle Button (Hamburger when closed, Chevron when open) */}

@@ -6,6 +6,7 @@ interface CardProps {
     className?: string;
     noPadding?: boolean;
     hoverable?: boolean;
+    style?: React.CSSProperties;
 }
 
 export function Card({ children, className = "", noPadding = false, hoverable = false }: CardProps) {

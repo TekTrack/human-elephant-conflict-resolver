@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useTheme } from '../context/ThemeContext.tsx';
 import { AlertCircle, X, Search } from 'lucide-react';
-import API_BASE_URL from '../config/url.js';
+import API_BASE_URL from '../config/url';
 
 export default function NotificationHandler({onNewAlert}) {
   const { theme } = useTheme();

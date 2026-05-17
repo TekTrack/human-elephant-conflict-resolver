@@ -1,12 +1,10 @@
 import { useState, useEffect } from "react";
 import { useTheme } from "../context/ThemeContext.tsx";
-import { PageHeader } from "../components/PageHeader";
-import { StatCard } from "../components/StatCard";
 import { Button } from "../components/Button";
-import { ChevronDown, Users, Map as MapIcon, Drone, ScanEye, MapPin, Clock, ArrowRight, Activity, Zap, ShieldCheck } from "lucide-react";
+import { Users, Map as MapIcon, Drone, ScanEye, MapPin, Clock, ArrowRight, Activity, Zap, ShieldCheck } from "lucide-react";
 import { Card } from "../components/Card";
 import { useNavigate } from "react-router";
-import API_BASE_URL from "../config/url.js";
+import API_BASE_URL from "../config/url";
 // @ts-ignore
 import Map, { Marker } from "react-map-gl/maplibre";
 

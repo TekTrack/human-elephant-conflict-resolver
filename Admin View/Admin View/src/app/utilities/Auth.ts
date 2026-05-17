@@ -1,6 +1,6 @@
-import API_BASE_URL from '../config/url.js';
+import API_BASE_URL from '../config/url';
 
-const login = async (username, password) => {
+const login = async ( username: string, password: string) => {
   try {
     const res = await fetch(`${API_BASE_URL}/api/admin/login`, 
       {
@@ -24,7 +24,7 @@ const login = async (username, password) => {
 
 const fetchSecureData = async () => {
   const token = localStorage.getItem('authToken'); // Grab the saved token
-  const username = localStorage.getItem('username'); // Grab the saved username
+  //const username = localStorage.getItem('username'); // Grab the saved username
     const res = await fetch(`${API_BASE_URL}/api/admin/protected-route`, {
       method: 'GET',
       headers: {

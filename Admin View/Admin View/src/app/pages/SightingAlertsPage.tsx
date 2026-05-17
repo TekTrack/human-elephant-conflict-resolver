@@ -1,8 +1,6 @@
 import { useEffect, useState } from "react";
 import { useTheme } from "../context/ThemeContext.tsx";
 import {
-  AlertTriangle,
-  CheckCircle,
   XCircle,
   Clock,
   X,
@@ -48,7 +46,7 @@ export function SightingAlertsPage() {
   const { theme } = useTheme();
   const isDark = theme === "dark";
   const [sightings, setSightings] = useState<Sighting[]>();
-  const [filter, setFilter] = useState("all");
+  const [filter] = useState("all");
   const [processingId, setProcessingId] = useState<number | null>(null);
   
   const [activeTab, setActiveTab] = useState<"user" | "drone">("user");
@@ -62,6 +60,7 @@ export function SightingAlertsPage() {
   const { sightingId } = useParams<{ sightingId: string }>();
 
   const fetchSightings = async (filter: FilterValue) => {
+    console.log(sightings);
     const token = localStorage.getItem('authToken');
     const res = await fetch(`${BASE_URL}/sightings/filter?timeframe=${filter}`, {
       method: 'GET',
@@ -110,6 +109,7 @@ export function SightingAlertsPage() {
       rawTime: sighting.timestamp,
       sighting: sighting
     }));
+    console.log(sightings);
     setAlerts(alertSet);
   };
 
@@ -224,6 +224,7 @@ export function SightingAlertsPage() {
   const droneAlerts = alerts.filter(a => a.sighting.source === "drone");
 
   return (
+
     <div className="p-8 space-y-6">
 
       <PageHeader
