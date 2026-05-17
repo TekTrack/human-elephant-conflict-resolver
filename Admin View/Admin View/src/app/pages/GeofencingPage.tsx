@@ -1,7 +1,7 @@
 import { useState, useRef, useCallback, useEffect } from "react";
 import { useTheme } from "../context/ThemeContext";
 import { useMapTrigger } from "../context/MapTriggerContext";
-import { MapPin, Plus, Edit, Trash2, X, RefreshCw, Check } from "lucide-react";
+import { MapPin, Plus, Edit, Trash2, X, RefreshCw, Check,Maximize, Minimize } from "lucide-react";
 // @ts-ignore
 import Map, { Source, Layer, Marker, Popup, NavigationControl } from "react-map-gl/maplibre";
 import type { MapRef, MapLayerMouseEvent, MapMouseEvent } from "react-map-gl/maplibre";
@@ -397,6 +397,7 @@ export function GeofencingPage() {
         // Resetting viewstate so it looks normal again
         setViewState({ longitude: 80.7718, latitude: 7.8731, zoom: 8 });
     }
+    const [isFullscreen, setIsFullscreen] = useState(false);
 
     return (
         <div className="p-8 space-y-6">
@@ -524,7 +525,20 @@ export function GeofencingPage() {
                 )}
 
                 {/* Map Container */}
-                <div style={{ height: "600px", width: "100%" }}>
+                <div className="relative w-full" style={{ height: isFullscreen ? "calc(100vh - 120px)" : "600px", flexGrow: isFullscreen ? 1 : 0 }}>
+
+                                    {/* NEW BUTTON */}
+                                    <button
+                                        onClick={() => setIsFullscreen(!isFullscreen)}
+                                        className={`absolute top-4 left-4 z-10 p-2 rounded-lg shadow-md transition-all ${
+                                            isDark
+                                                ? "bg-[#29323c] text-white hover:bg-[#3a4552] border border-[rgba(255,255,255,0.1)]"
+                                                : "bg-white text-gray-700 hover:bg-gray-100 border border-gray-200"
+                                        }`}
+                                        title={isFullscreen ? "Exit Fullscreen" : "Enter Fullscreen"}
+                                    >
+                                        {isFullscreen ? <Minimize className="w-5 h-5" /> : <Maximize className="w-5 h-5" />}
+                                    </button>
                     <Map
                         ref={mapRef}
                         // 👇 CHANGED: using viewState state object to allow dynamic changes
@@ -623,9 +637,24 @@ export function GeofencingPage() {
                                 </div>
                             </div>
                             <div className="flex items-center gap-2">
-                                <Button variant="ghost" className="p-2"><Edit className="w-4 h-4" /></Button>
-                                <Button variant="dangerIcon" className="p-2"
-                                    onClick={() => handleDelete(geofence.id)}><Trash2 className="w-4 h-4" /></Button>
+                                <button
+                                                                    className="flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg
+                                                                        bg-[#155DFC] border border-[#3b5bdb] text-white-500
+                                                                        hover:bg-[#243044] transition-colors"
+                                                                    onClick={() => handleEdit(geofence.id)}
+                                                                >
+                                                                    <Edit className="w-4 h-4 text-[#4a7dfc]" />
+                                                                    Edit Zone Settings
+                                                                </button>
+                                                                <button
+                                                                    className="flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg
+                                                                        bg-[#3b1a1a] border border-[#c0392b] text-[#e57373]
+                                                                        hover:bg-[#4a2020] transition-colors"
+                                                                    onClick={() => handleDelete(geofence.id)}
+                                                                >
+                                                                    <Trash2 className="w-4 h-4 text-[#e57373]" />
+                                                                    Delete Zone
+                                                                </button>
                             </div>
                         </div>
                     </Card>
