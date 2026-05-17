@@ -1,7 +1,7 @@
 import { useState, useRef, useCallback, useEffect } from "react";
 import { useTheme } from "../context/ThemeContext";
 import { useMapTrigger } from "../context/MapTriggerContext";
-import { MapPin, Plus, Edit, Trash2, X, RefreshCw, Check,Maximize, Minimize } from "lucide-react";
+import { MapPin, Plus, Edit, Trash2, X, RefreshCw, Check,Maximize, Minimize,User,Drone } from "lucide-react";
 // @ts-ignore
 import Map, { Source, Layer, Marker, Popup, NavigationControl } from "react-map-gl/maplibre";
 import type { MapRef, MapLayerMouseEvent, MapMouseEvent } from "react-map-gl/maplibre";
@@ -603,13 +603,28 @@ export function GeofencingPage() {
                                 return true;
                             })
                             .map((s, i) => (
-                                <Marker key={i} longitude={s.longitude} latitude={s.latitude} anchor="bottom" onClick={()=>{s.source === 'drone'? navigate(`/live-monitor/${s.droneId}`): navigate(`/sighting-alerts/${s.id}`)}}>
-                                    <div 
-                                        title={`${s.source === 'drone' ? '🚁' : '👤'} Sighting at ${new Date(s.timestamp).toLocaleString()}`}
-                                        className={`w-6 h-6 rounded-full border-2 border-white flex items-center justify-center text-xs shadow-md cursor-default ${s.source === 'drone' ? 'bg-red-500' : 'bg-blue-500'
-                                            }`}
+                                <Marker
+                                    key={i}
+                                    longitude={s.longitude}
+                                    latitude={s.latitude}
+                                    anchor="center"
+                                    onClick={() => {
+                                        s.source === 'drone'
+                                            ? navigate(`/live-monitor/${s.droneId}`)
+                                            : navigate(`/sighting-alerts/${s.id}`)
+                                    }}
+                                >
+                                    <div
+                                        title={`${s.source === 'drone' ? 'Drone' : 'User'} Sighting at ${new Date(s.timestamp).toLocaleString()}`}
+                                        className={`w-8 h-8 rounded-full flex items-center justify-center text-white shadow-md cursor-pointer ${
+                                            s.source === 'drone' ? 'bg-green-700' : 'bg-blue-500'
+                                        }`}
                                     >
-                                        {s.source === 'drone' ? '🚁' : '👤'}
+                                        {s.source === 'drone' ? (
+                                            <Drone className="w-5 h-5" />
+                                        ) : (
+                                            <User className="w-5 h-5" />
+                                        )}
                                     </div>
                                 </Marker>
                             ))
