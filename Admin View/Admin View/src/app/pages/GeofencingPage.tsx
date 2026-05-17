@@ -114,6 +114,8 @@ export function GeofencingPage() {
     const [searchParams] = useSearchParams();
 
     // ── State ───────────────────────────────────────────────────────────────────
+    const [editingZoneId, setEditingZoneId] = useState<number | null>(null);
+
     const [geofences, setGeofences] = useState<Geofence[]>([]);
     const [showModal, setShowModal] = useState(false);
     const [newZone, setNewZone] = useState<NewZoneForm>(defaultForm);
@@ -214,6 +216,31 @@ export function GeofencingPage() {
         checkZoneBreached(formattedZones);
         return formattedZones;
     };
+
+
+    const handleEdit = (id: number) => {
+            // Find the specific zone you clicked
+            const zoneToEdit = geofences.find((z) => z.id === id);
+
+            console.log(editingZoneId);
+            if (zoneToEdit) {
+                // Populate the modal form with the existing data
+                setNewZone({
+                    name: zoneToEdit.name,
+                    type: zoneToEdit.type,
+                    minLat: zoneToEdit.minLat,
+                    maxLat: zoneToEdit.maxLat,
+                    minLon: zoneToEdit.minLon,
+                    maxLon: zoneToEdit.maxLon
+                });
+
+                // Set the ID so we know we are editing, not creating
+                setEditingZoneId(id);
+
+                // Open the modal
+                setShowModal(true);
+            }
+        };
 
     const fetchZones = async () => {
         try {
@@ -699,21 +726,39 @@ export function GeofencingPage() {
                             </Select>
 
                             <div className="grid grid-cols-2 gap-3">
-                                <Input type="number" label="Min Latitude *" placeholder="e.g. 40.71"
+                                <Input
+                                    type="number"
+                                    label="Min Latitude *"
+                                    placeholder="e.g. 40.71"
                                     value={newZone.minLat || ""}
-                                    onChange={(e) => setNewZone({ ...newZone, minLat: parseFloat(e.target.value) })} />
-                                <Input type="number" label="Max Latitude *" placeholder="e.g. 40.72"
-                                    value={newZone.maxLat || ""} error={errors.maxLat}
-                                    onChange={(e) => setNewZone({ ...newZone, maxLat: parseFloat(e.target.value) })} />
+                                    disabled
+                                />
+                                <Input
+                                    type="number"
+                                    label="Max Latitude *"
+                                    placeholder="e.g. 40.72"
+                                    value={newZone.maxLat || ""}
+                                    error={errors.maxLat}
+                                    disabled
+                                />
                             </div>
 
                             <div className="grid grid-cols-2 gap-3">
-                                <Input type="number" label="Min Longitude *" placeholder="e.g. -74.01"
+                                <Input
+                                    type="number"
+                                    label="Min Longitude *"
+                                    placeholder="e.g. -74.01"
                                     value={newZone.minLon || ""}
-                                    onChange={(e) => setNewZone({ ...newZone, minLon: parseFloat(e.target.value) })} />
-                                <Input type="number" label="Max Longitude *" placeholder="e.g. -74.00"
-                                    value={newZone.maxLon || ""} error={errors.maxLon}
-                                    onChange={(e) => setNewZone({ ...newZone, maxLon: parseFloat(e.target.value) })} />
+                                    disabled
+                                />
+                                <Input
+                                    type="number"
+                                    label="Max Longitude *"
+                                    placeholder="e.g. -74.00"
+                                    value={newZone.maxLon || ""}
+                                    error={errors.maxLon}
+                                    disabled
+                                />
                             </div>
                         </div>
 

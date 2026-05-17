@@ -3,7 +3,12 @@ import { useTheme } from '../context/ThemeContext.tsx';
 import { AlertCircle, X, Search } from 'lucide-react';
 import API_BASE_URL from '../config/url';
 
-export default function NotificationHandler({onNewAlert}) {
+interface NotificationHandlerProps {
+  onNewAlert: (alert: Notification) => void;
+}
+
+export default function NotificationHandler({ onNewAlert }: NotificationHandlerProps) {
+
   const { theme } = useTheme();
 
   const isDark = theme === "dark";
@@ -15,26 +20,26 @@ export default function NotificationHandler({onNewAlert}) {
   const secondaryButtonBg = isDark ? "bg-[#333] text-white hover:bg-[#444]" : "bg-gray-100 text-black hover:bg-gray-200";
   const overlayBg = isDark ? "bg-black/60" : "bg-black/30";
 
-  const [notification, setNotification] = useState(null);
-  const BASE_URL = `${API_BASE_URL}/api/admin`;
+  const [notification, setNotification] = useState<[string, string, string | number] | null>(null);  const BASE_URL = `${API_BASE_URL}/api/admin`;
 
+  type NotificationTuple = [string, string, string | number];
   // JavaScript running on the Admin Web Portal
-  function verifySighting(sightingId) {
-      fetch(`${API_BASE_URL}/api/admin/sightings/${sightingId}/verify`, {
-          method: 'PUT',
-          headers: {
-              'Content-Type': 'application/json',
-              'Authorization': `Bearer ${localStorage.getItem('authToken')}`
-          }
-      })
-      .then(response => response.text())
-      .then(data => {
-          alert("Success: " + data); // Shows "Sighting 1 verified!"
-      })
-      .catch(error => console.error('Error:', error));
-  };
+//   function verifySighting(sightingId) {
+//       fetch(`${API_BASE_URL}/api/admin/sightings/${sightingId}/verify`, {
+//           method: 'PUT',
+//           headers: {
+//               'Content-Type': 'application/json',
+//               'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+//           }
+//       })
+//       .then(response => response.text())
+//       .then(data => {
+//           alert("Success: " + data); // Shows "Sighting 1 verified!"
+//       })
+//       .catch(error => console.error('Error:', error));
+//   };
 
-  const viewNotification = async (notification) => {
+const viewNotification = async (notification: NotificationTuple) => {
     fetch(`${BASE_URL}/sightings/${notification[2]}`, {
           method: 'GET',
           headers: {
@@ -70,12 +75,12 @@ export default function NotificationHandler({onNewAlert}) {
       const data = JSON.parse(event.data);
       if (data && data.message) {
         setNotification([data.message, data.type, data.sightingId]); 
-        onNewAlert();
+        onNewAlert(data);
       }
     };
 
     eventSource.onerror = (error) => {
-      console.error("SSE connection lost. Reconnecting...");
+        console.error("SSE Connection Error:", error);
     };
 
     return () => {
