@@ -15,6 +15,7 @@ public class Zone {
     private String name;
     private double minLat, maxLat, minLon, maxLon;
     private LocalDateTime lastSightingDate = null;
+    private String adminid;
 
     public Zone() {
         // Default constructor for JPA
@@ -41,4 +42,6 @@ public class Zone {
     public double getMaxLat() { return maxLat; }
     public double getMinLon() { return minLon; }
     public double getMaxLon() { return maxLon; }
+    public String getAdminid() { return adminid; }
+    public void setAdminid(String adminid) { this.adminid = adminid; }
 }
