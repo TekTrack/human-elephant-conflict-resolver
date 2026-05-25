@@ -28,19 +28,19 @@ public class SecurityConfig {
         http.cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
-                    .requestMatchers("/ws-status/**").permitAll()
-                .requestMatchers("/api/admin/login").permitAll()
-                .requestMatchers("/api/user/login").permitAll()
-                .requestMatchers("/api/user/register").permitAll()
-                .requestMatchers("/api/admin/newadmin").authenticated()
-                .requestMatchers("/api/sms/send-otp").permitAll()
-                .requestMatchers("/api/sms/verify-otp").permitAll()
-                .requestMatchers("/alert").permitAll()
-                .requestMatchers("/api/admin/**").authenticated()
-                .requestMatchers("/error").permitAll()
-                .anyRequest().authenticated())
+                        .requestMatchers("/ws-status/**").permitAll()
+                        .requestMatchers("/api/admin/login").permitAll()
+                        .requestMatchers("/api/user/login").permitAll()
+                        .requestMatchers("/api/user/register").permitAll()
+                        .requestMatchers("/api/admin/newadmin").authenticated()
+                        .requestMatchers("/api/sms/send-otp").permitAll()
+                        .requestMatchers("/api/sms/verify-otp").permitAll()
+                        .requestMatchers("/alert").permitAll()
+                        .requestMatchers("/api/admin/**").authenticated()
+                        .requestMatchers("/error").permitAll()
+                        .anyRequest().authenticated())
                 .sessionManagement(session -> session
-                .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .formLogin(form -> form.disable())
                 .httpBasic(httpBasic -> httpBasic.disable());
 
@@ -55,7 +55,7 @@ public class SecurityConfig {
         CorsConfiguration configuration = new CorsConfiguration();
 
         // 🚨 CHANGE THIS LINE: Add your Vite port (5173)
-        configuration.setAllowedOrigins(Arrays.asList("http://localhost:5173", "http://localhost:3000","http://localhost:8081","https://human-elphant-conflict.netlify.app/"));
+        configuration.setAllowedOrigins(Arrays.asList("http://localhost:5173", "http://localhost:3000", "http://localhost:8081", "https://human-elphant-conflict.netlify.app/"));
 
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type", "Accept"));

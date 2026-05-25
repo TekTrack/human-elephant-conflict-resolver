@@ -331,7 +331,7 @@ export function DroneMapPage() {
                       id="saved-paths-line"
                       type="line"
                       paint={{
-                        "line-color": ["get", "color"],
+                        "line-color": "white",
                         "line-width": 4,
                         "line-opacity": 0.6,
                       }}
@@ -349,7 +349,7 @@ export function DroneMapPage() {
                           id="draft-path-line"
                           type="line"
                           paint={{
-                            "line-color": selectedDrone?.color || "#fff",
+                            "line-color":  "#fff",
                             "line-width": 4,
                             "line-dasharray": [2, 2],
                           }}
