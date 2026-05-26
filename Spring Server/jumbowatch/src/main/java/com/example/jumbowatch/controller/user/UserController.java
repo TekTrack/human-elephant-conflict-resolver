@@ -18,7 +18,6 @@ import com.example.jumbowatch.model.JwtUtil;
 import com.example.jumbowatch.model.User;
 import com.example.jumbowatch.repository.UserRepository;
 
-
 import tools.jackson.databind.ObjectMapper;
 
 @RestController
@@ -36,6 +35,16 @@ public class UserController {
     public ResponseEntity<Object> register(@RequestBody Map<String, String> payload) {
         try {
             // Spring Boot now grabs the data directly from your JSON body!
+
+            //get the adminID from the given ZoneID
+            if (payload.get("zoneId") != null) {
+                String adminID = userRepository.findAdminIDByZoneId(Long.valueOf(payload.get("zoneId")));
+                payload.put("adminID", adminID);
+            } else {
+                payload.put("adminID", null); // Set to null if no zoneId provided
+            }
+
+
             User user = new User(
                 payload.get("email"), 
                 payload.get("password"), 

@@ -39,5 +39,9 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     @Query("SELECT u FROM User u WHERE u.email = :email")
     Optional<User> userFindbyEmail(@Param("email") String email);
-    
+
+    //get the adminID from the given ZoneID
+    @Query("SELECT z.adminid FROM Zone z WHERE z.id = :zoneId")
+    String findAdminIDByZoneId(@Param("zoneId") Long zoneId);
+
 }

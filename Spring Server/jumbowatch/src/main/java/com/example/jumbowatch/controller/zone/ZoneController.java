@@ -40,9 +40,11 @@ public class ZoneController {
 
     //get admin username form token
     private String getAdminIdfromprincipal(Principal principal) {
+       if (principal == null) {
+            throw new RuntimeException("Unauthorized: No security principal found");
+        }
         String username = principal.getName();
-        String adminId = adminRepo.findAdminIdByUsername(username);
-        return adminId;
+        return adminRepo.findAdminIdByUsername(username);
     }
 
 
@@ -50,9 +52,9 @@ public class ZoneController {
 
   
     // ✏️ Save a newly drawn zone from the web portal
-    @PostMapping
-    public Zone notcreatedZoneSaving(@RequestBody Zone zone) {
-        String adminId = getAdminIdfromprincipal(null);
+   @PostMapping
+    public Zone notcreatedZoneSaving(@RequestBody Zone zone, Principal principal) {
+        String adminId = getAdminIdfromprincipal(principal);
         zone.setAdminid(adminId);
         return zoneRepo.save(zone);
     }
