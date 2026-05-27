@@ -35,7 +35,13 @@ public class UserController {
     @PostMapping("/register")
     public ResponseEntity<Object> register(@RequestBody Map<String, String> payload) {
         try {
-            // Spring Boot now grabs the data directly from your JSON body!
+            Long zoneIdVal = payload.get("zoneId") != null && !payload.get("zoneId").toString().trim().isEmpty()
+                ? Long.valueOf(payload.get("zoneId").toString())
+                : null;
+            Long primaryZoneVal = payload.get("primaryZone") != null && !payload.get("primaryZone").toString().trim().isEmpty()
+                ? Long.valueOf(payload.get("primaryZone").toString())
+                : null;
+
             User user = new User(
                 payload.get("email"), 
                 payload.get("password"), 
@@ -44,8 +50,9 @@ public class UserController {
                 payload.get("NIC"), 
                 payload.get("adminID"), // Matches your JSON exactly
                 payload.get("userCategory"),
-                payload.get("zoneId") != null ? Long.valueOf(payload.get("zoneId").toString()) : null
+                zoneIdVal != null ? zoneIdVal : primaryZoneVal
             );
+            user.setPrimaryZone(primaryZoneVal);
             
             System.out.println("Received user registration request: " + user.toString()); 
 

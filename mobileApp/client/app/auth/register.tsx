@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -14,6 +14,7 @@ import {
 import { router } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import API_BASE_URL from "@/config/app";
+import * as Location from "expo-location";
 
 export default function RegisterScreen() {
   const [name, setName] = useState("");
@@ -23,10 +24,86 @@ export default function RegisterScreen() {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
 
+  const [zones, setZones] = useState<any[]>([]);
+  const [selectedZoneId, setSelectedZoneId] = useState<number | null>(null);
+  const [selectedZoneName, setSelectedZoneName] = useState<string>("No Primary Zone");
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [locating, setLocating] = useState(false);
+
   const [secureText, setSecureText] = useState(true);
   const [secureConfirmText, setSecureConfirmText] = useState(true);
   const [agreed, setAgreed] = useState(false);
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    const fetchZones = async () => {
+      try {
+        const res = await fetch(`${API_BASE_URL}/api/admin/zones`);
+        if (res.ok) {
+          const data = await res.json();
+          if (Array.isArray(data)) {
+            setZones(data);
+          }
+        }
+      } catch (err) {
+        console.log("Failed to fetch zones:", err);
+      }
+    };
+    fetchZones();
+  }, []);
+
+  const trackAutomatically = async () => {
+    try {
+      setLocating(true);
+      const { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== "granted") {
+        Alert.alert("Permission Denied", "Location permission is required to track automatically.");
+        return;
+      }
+
+      const location = await Location.getCurrentPositionAsync({
+        accuracy: Location.Accuracy.Balanced,
+      });
+      const coords = location.coords;
+
+      let matchedZone = null;
+      for (const zone of zones) {
+        const trueMinLat = Math.min(zone.minLat, zone.maxLat);
+        const trueMaxLat = Math.max(zone.minLat, zone.maxLat);
+        const trueMinLon = Math.min(zone.minLon, zone.maxLon);
+        const trueMaxLon = Math.max(zone.minLon, zone.maxLon);
+
+        if (
+          coords.latitude >= trueMinLat && coords.latitude <= trueMaxLat &&
+          coords.longitude >= trueMinLon && coords.longitude <= trueMaxLon
+        ) {
+          matchedZone = zone;
+          break;
+        }
+      }
+
+      if (matchedZone) {
+        setSelectedZoneId(matchedZone.id);
+        setSelectedZoneName(matchedZone.name);
+        Alert.alert(
+          "Location Matched 🐘",
+          `Your primary zone was successfully set to "${matchedZone.name}".`
+        );
+      } else {
+        setSelectedZoneId(null);
+        setSelectedZoneName("No Primary Zone");
+        Alert.alert(
+          "No Matching Zone Found",
+          "You are currently outside all registered geofenced zones. Setting primary zone to None."
+        );
+      }
+    } catch (error) {
+      console.log("Error locating user:", error);
+      Alert.alert("GPS Error", "Failed to retrieve your current location.");
+    } finally {
+      setLocating(false);
+    }
+  };
 
   const register = async () => {
     if (!name || !email || !password || !confirmPassword) {
@@ -55,6 +132,7 @@ export default function RegisterScreen() {
           NIC: nic,
           adminID: "",
           userCategory: "",
+          primaryZone: selectedZoneId,
         }),
       });
 
@@ -192,6 +270,97 @@ export default function RegisterScreen() {
                   color="gray"
                 />
               </TouchableOpacity>
+            </View>
+
+            {/* Primary Zone Selector */}
+            <View className="mb-4">
+              <View className="flex-row justify-between items-center mb-2">
+                <Text className="text-sm font-semibold text-[#012d1d]">
+                  Primary Zone (Optional)
+                </Text>
+                <TouchableOpacity
+                  onPress={trackAutomatically}
+                  disabled={locating || zones.length === 0}
+                  className="flex-row items-center px-3 py-1.5 rounded-lg border border-emerald-500/20 active:opacity-70"
+                  style={{ backgroundColor: 'rgba(16,185,129,0.08)' }}
+                >
+                  <Ionicons
+                    name="locate-outline"
+                    size={15}
+                    color={locating ? "gray" : "#0f766e"}
+                  />
+                  <Text className="text-xs font-semibold text-[#0f766e] ml-1">
+                    {locating ? "Locating..." : "Track automatically"}
+                  </Text>
+                </TouchableOpacity>
+              </View>
+
+              <TouchableOpacity
+                onPress={() => setDropdownOpen(!dropdownOpen)}
+                className="flex-row items-center justify-between border border-gray-300 rounded-xl px-4 h-14 bg-white"
+              >
+                <View className="flex-row items-center">
+                  <Ionicons name="map-outline" size={20} color="gray" />
+                  <Text className="ml-3 text-base text-gray-800">
+                    {selectedZoneName}
+                  </Text>
+                </View>
+                <Ionicons
+                  name={dropdownOpen ? "chevron-up-outline" : "chevron-down-outline"}
+                  size={20}
+                  color="gray"
+                />
+              </TouchableOpacity>
+
+              {dropdownOpen && (
+                <View className="border border-gray-200 rounded-xl mt-2 bg-white shadow-md overflow-hidden max-h-48" style={{ elevation: 3 }}>
+                  <ScrollView nestedScrollEnabled={true}>
+                    {/* Option to go without a primary zone */}
+                    <TouchableOpacity
+                      onPress={() => {
+                        setSelectedZoneId(null);
+                        setSelectedZoneName("No Primary Zone");
+                        setDropdownOpen(false);
+                      }}
+                      className="flex-row justify-between items-center px-4 py-3 border-b border-gray-100 bg-gray-50"
+                    >
+                      <Text className="text-base text-red-700 font-semibold">
+                        None / Go without a primary zone
+                      </Text>
+                      {selectedZoneId === null && (
+                        <Ionicons name="checkmark" size={18} color="#b91c1c" />
+                      )}
+                    </TouchableOpacity>
+
+                    {zones.length === 0 ? (
+                      <View className="px-4 py-3">
+                        <Text className="text-sm text-gray-400 text-center">
+                          No zones registered on server.
+                        </Text>
+                      </View>
+                    ) : (
+                      zones.map((zone) => (
+                        <TouchableOpacity
+                          key={zone.id}
+                          onPress={() => {
+                            setSelectedZoneId(zone.id);
+                            setSelectedZoneName(zone.name);
+                            setDropdownOpen(false);
+                          }}
+                          className="flex-row justify-between items-center px-4 py-3 border-b border-gray-100"
+                        >
+                          <Text className="text-base text-gray-800">
+                            {zone.name}
+                          </Text>
+                          {selectedZoneId === zone.id && (
+                            <Ionicons name="checkmark" size={18} color="#012d1d" />
+                          )}
+                        </TouchableOpacity>
+                      ))
+                    )}
+                  </ScrollView>
+                </View>
+              )}
             </View>
 
             {/* Terms */}

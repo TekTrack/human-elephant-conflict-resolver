@@ -19,6 +19,9 @@
       "bundleIdentifier": "com.sahan444.mobileApp",
       "config": {
         "googleMapsApiKey": "AIzaSyA72rhNB4QbUvM7Yrv8CxzrZDi1NL_QYvM"
+      },
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
       }
     },
     "android": {

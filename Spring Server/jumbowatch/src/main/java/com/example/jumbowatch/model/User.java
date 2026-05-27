@@ -41,12 +41,23 @@ public class User {
     @Column
     private Long zoneId; // New field to link user to a zone)
 
+    @Column
+    private Long primaryZone; // Primary zone of the user
+
     public Long getZoneId() {
         return zoneId;
     }
 
     public void setZoneId(Long zoneId) {
         this.zoneId = zoneId;
+    }
+
+    public Long getPrimaryZone() {
+        return primaryZone;
+    }
+
+    public void setPrimaryZone(Long primaryZone) {
+        this.primaryZone = primaryZone;
     }
 
     // Default Constructor

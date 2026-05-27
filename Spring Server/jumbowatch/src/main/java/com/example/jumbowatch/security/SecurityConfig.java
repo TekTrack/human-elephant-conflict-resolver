@@ -32,6 +32,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/admin/login").permitAll()
                         .requestMatchers("/api/user/login").permitAll()
                         .requestMatchers("/api/user/register").permitAll()
+                        .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/admin/zones").permitAll()
                         .requestMatchers("/api/admin/newadmin").authenticated()
                         .requestMatchers("/api/sms/send-otp").permitAll()
                         .requestMatchers("/api/sms/verify-otp").permitAll()
